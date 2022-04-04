@@ -1,3 +1,6 @@
+<!--- Top of README Badges (automated) --->
+[![CircleCI](https://img.shields.io/circleci/build/github/WIPACrepo/user-management)](https://app.circleci.com/pipelines/github/WIPACrepo/user-management?branch=main&filter=all) [![PyPI](https://img.shields.io/pypi/v/wipac-user-management)](https://pypi.org/project/wipac-user-management/) [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/WIPACrepo/user-management?include_prereleases)](https://github.com/WIPACrepo/user-management/) [![PyPI - License](https://img.shields.io/pypi/l/wipac-user-management)](https://github.com/WIPACrepo/user-management/blob/main/LICENSE) [![Lines of code](https://img.shields.io/tokei/lines/github/WIPACrepo/user-management)](https://github.com/WIPACrepo/user-management/) [![GitHub issues](https://img.shields.io/github/issues/WIPACrepo/user-management)](https://github.com/WIPACrepo/user-management/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aopen) [![GitHub pull requests](https://img.shields.io/github/issues-pr/WIPACrepo/user-management)](https://github.com/WIPACrepo/user-management/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aopen) 
+<!--- End of README Badges (automated) --->
 # keycloak-rest-services
 Services surrounding Keycloak, that use the REST API to read/update state.
 
