@@ -134,6 +134,7 @@ class InstitutionMultiUsers(MyHandler):
 
         self.write(ret)
 
+
 class InstitutionUser(MyHandler):
     @authenticated
     @catch_error

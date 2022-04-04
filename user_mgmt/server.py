@@ -20,9 +20,11 @@ from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
 
+
 class Error(RequestHandler):
     def prepare(self):
         raise HTTPError(404, 'invalid api route')
+
 
 class Main(RequestHandler):
     def initialize(self, keycloak_url='', keycloak_realm=''):
@@ -32,6 +34,7 @@ class Main(RequestHandler):
     def get(self, *args):
         self.render('index.html', keycloak_url=self.keycloak_url,
                     keycloak_realm=self.keycloak_realm)
+
 
 def create_server():
     static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -64,7 +67,9 @@ def create_server():
     kwargs['db'] = db[db_name]
 
     logging.info(f'Keycloak client: {config["KEYCLOAK_CLIENT_ID"]}')
-    token_func = partial(krs.token.get_token, config["KEYCLOAK_URL"],
+    token_func = partial(
+        krs.token.get_token,
+        config["KEYCLOAK_URL"],
         client_id=config['KEYCLOAK_CLIENT_ID'],
         client_secret=config['KEYCLOAK_CLIENT_SECRET'],
     )

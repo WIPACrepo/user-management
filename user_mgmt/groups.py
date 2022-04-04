@@ -21,6 +21,7 @@ def is_authorized_group(group, auth_groups):
     # sub-groups of auth_groups are authorized as well
     return any(len(group) > len(g) and group[len(g)] == '/' and group.startswith(g) for g in auth_groups)
 
+
 def get_administered_groups(ret):
     groups = {}
     for group in ret:
