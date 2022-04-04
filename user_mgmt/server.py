@@ -8,7 +8,8 @@ from functools import partial
 
 from tornado.web import RequestHandler, HTTPError
 from rest_tools.client import RestClient
-from rest_tools.server import RestServer, RestHandlerSetup, from_environment
+from rest_tools.server import RestServer, RestHandlerSetup
+from wipac_dev_tools import from_environment
 import motor.motor_asyncio
 
 import krs.token

@@ -47,7 +47,7 @@ jobs:
           pip install .
 
   py-tests:
-    needs: [py-versions, pip-install]
+    needs: [py-versions]
     runs-on: ubuntu-latest
     services:
       keycloak:

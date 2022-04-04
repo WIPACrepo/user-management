@@ -4,8 +4,9 @@ import socket
 import os
 
 import pytest
-from rest_tools.server import Auth, from_environment
+from rest_tools.server import Auth
 from rest_tools.client import RestClient
+from wipac_dev_tools import from_environment
 import motor.motor_asyncio
 
 from user_mgmt.server import create_server
