@@ -1,8 +1,29 @@
 // debug flag
 var krs_debug = false;
 
+const insertScript = (path) =>
+  new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = path;
+    s.onload = () => resolve(s);  // resolve with script, not event
+    s.onerror = reject;
+    document.body.appendChild(s);
+  });
+
 // global Keycloak object
 var keycloak;
+
+var load_keycloak = async function(keycloak_url, keycloak_realm) {
+  await insertScript(keycloak_url+'/auth/js/keycloak.js')
+  keycloak = new Keycloak({
+    url: keycloak_url+'/auth',
+    realm: keycloak_realm,
+    clientId: 'user_mgmt'
+  });
+}
+var set_keycloak = function(obj) {
+  keycloak = obj
+}
 
 
 /** helper functions **/
@@ -1355,11 +1376,6 @@ Vue.component('account', {
       }
     }
   },
-  methods: {
-    logout: async function() {
-      await keycloak.logout({redirectUri:window.location.origin})
-    }
-  },
   template: `
 <div class="account">
   <login v-if="!keycloak.authenticated" caps="true"></login>
@@ -1384,6 +1400,7 @@ Vue.component('login', {
   },
   methods: {
     login: async function() {
+      console.log('login')
       await keycloak.login({redirectUri:window.location})
     }
   },
@@ -1407,6 +1424,7 @@ Vue.component('logout', {
   },
   methods: {
     logout: async function() {
+      console.log('logout')
       await keycloak.logout({redirectUri:window.location.origin})
     }
   },
@@ -1485,11 +1503,6 @@ var routes = [
 ];
 
 async function vue_startup(keycloak_url, keycloak_realm){
-  keycloak = new Keycloak({
-    url: keycloak_url+'/auth',
-    realm: keycloak_realm,
-    clientId: 'user_mgmt'
-  });
   try {
     await keycloak.init({
       onLoad: 'check-sso',

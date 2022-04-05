@@ -36,11 +36,15 @@
 <script src="https://unpkg.com/vue-router@3.1.6/dist/vue-router.js"></script>
 <script src="https://unpkg.com/vue-async-computed@3.8.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="{{ keycloak_url }}/auth/js/keycloak.js"></script>
 <script src="/static/boilerplate.js"></script>
 <script src="/static/main.js"></script>
 <script type="text/javascript">
-vue_startup("{{ keycloak_url }}", "{{ keycloak_realm }}")
+let keycloak_url = "{{ keycloak_url }}"
+let keycloak_realm = "{{ keycloak_realm }}"
+if (keycloak_url != 'testing') {
+  load_keycloak(keycloak_url, keycloak_realm)
+  vue_startup()
+}
 </script>
 </body>
 </html>
