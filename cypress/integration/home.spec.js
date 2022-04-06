@@ -1,70 +1,54 @@
 
+import keycloak from '../support/keycloak'
+
 context('Home Page', () => {
   it('no login', () => {
     cy.visit('/')
+    keycloak({authenticated: false})
 
-    cy.intercept({
-      method: 'GET',
-      url: '/api/all-experiments',
-    }, {
-      statusCode: 200,
-      body: ['test-exp'],
-      headers: { 'access-control-allow-origin': '*' },
-    }).as('allExps')
-
-    // setup keycloak token and load vue.js
-    const obj = {
-      authenticated: false,
-      login: ()=>{},
-      token: 'thetoken',
-      tokenParsed: {
-        username: 'user',
-        groups: []
-      },
-      updateToken: ()=>{}
-    }
-    cy.window().then((win) => {
-      win.set_keycloak(obj)
-      win.vue_startup()
-    })
+    cy.get('#nav .active').contains('home', {matchCase: false})
+    cy.get('#nav li').should('have.length', 1)
 
     cy.get('.account .login-link').should('contain', 'Sign in')
 
     cy.get('article.home').should('include.text', 'Existing users should sign in')
-    
-    cy.spy(obj, 'login').as('login')
+
     cy.get('.account .login-link').click()
     cy.get('@login').should('have.been.called')
   })
 
   it('with login', () => {
     cy.visit('/')
+    keycloak()
 
-    const obj = {
-      authenticated: true,
-      loadUserInfo: async function(){
-        return {given_name: "Foo Bar"}
-      },
-      logout: ()=>{},
-      token: 'thetoken',
-      tokenParsed: {
-        username: 'user',
-        groups: []
-      },
-      updateToken: ()=>{}
-    }
-    cy.window().then((win) => {
-      win.set_keycloak(obj)
-      win.vue_startup()
-    })
+    cy.get('#nav .active').contains('home', {matchCase: false})
+    cy.get('#nav li').should('have.length', 1)
 
     cy.get('.account').should('include.text', 'Foo Bar')
     cy.get('.account .login-link').should('contain', 'Sign out')
 
     cy.get('article.home .join button').should('exist')
 
-    cy.spy(obj, 'logout').as('logout')
     cy.get('.account .login-link').click()
     cy.get('@logout').should('have.been.called')
+  })
+
+  it('inst group member', () => {
+    cy.visit('/')
+    keycloak({insts: ['instA'], groups: ['groupB']})
+
+    cy.get('#nav li').should('have.length', 1)
+
+    cy.get('.institution').should('include.text', 'instA')
+    cy.get('.group').should('include.text', 'groupB')
+  })
+
+  it('inst admin', () => {
+    cy.visit('/')
+    keycloak({admin_insts: ['instA'], admin_groups: ['groupB']})
+
+    cy.get('#nav li').should('have.length', 3)
+
+    cy.get('.account').should('exist')
   })
 })
