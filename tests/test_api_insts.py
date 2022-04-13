@@ -427,6 +427,45 @@ async def test_inst_approvals_get(server, mongo_client, email_patch):
     assert ret[0]['username'] == 'test'
 
 @pytest.mark.asyncio
+async def test_inst_approvals_get_inst(server, mongo_client, email_patch):
+    rest, krs_client, *_ = server
+
+    await krs.groups.create_group('/institutions', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube/Empty', rest_client=krs_client)
+
+    client = await rest('test')
+    client2 = await rest('test2', groups=['/institutions/IceCube/UW-Madison/_admin'])
+    client2 = await rest('test2', groups=['/institutions/IceCube/Empty/_admin'])
+
+    data = {
+        'experiment': 'IceCube',
+        'institution': 'UW-Madison',
+    }
+    ret = await client.request('POST', '/api/inst_approvals', data)
+    approval_id = ret['id']
+
+    email_patch.assert_called()
+
+    # no auth
+    with pytest.raises(Exception):
+        await client.request('GET', '/api/experiments/IceCube/UW-Madison/approvals')
+
+    # empty
+    ret = await client2.request('GET', '/api/experiments/IceCube/Empty/approvals')
+    assert not ret
+
+    # success
+    ret = await client2.request('GET', '/api/experiments/IceCube/UW-Madison/approvals')
+
+    assert len(ret) == 1
+    assert ret[0]['id'] == approval_id
+    assert ret[0]['experiment'] == data['experiment']
+    assert ret[0]['institution'] == data['institution']
+    assert ret[0]['username'] == 'test'
+
+@pytest.mark.asyncio
 async def test_inst_approvals_actions_approve(server, mongo_client, email_patch):
     rest, krs_client, *_ = server
 
