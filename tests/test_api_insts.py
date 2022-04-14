@@ -450,14 +450,14 @@ async def test_inst_approvals_get_inst(server, mongo_client, email_patch):
 
     # no auth
     with pytest.raises(Exception):
-        await client.request('GET', '/api/experiments/IceCube/UW-Madison/approvals')
+        await client.request('GET', '/api/experiments/IceCube/institutions/UW-Madison/approvals')
 
     # empty
-    ret = await client2.request('GET', '/api/experiments/IceCube/Empty/approvals')
+    ret = await client2.request('GET', '/api/experiments/IceCube/institutions/Empty/approvals')
     assert not ret
 
     # success
-    ret = await client2.request('GET', '/api/experiments/IceCube/UW-Madison/approvals')
+    ret = await client2.request('GET', '/api/experiments/IceCube/institutions/UW-Madison/approvals')
 
     assert len(ret) == 1
     assert ret[0]['id'] == approval_id
