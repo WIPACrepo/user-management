@@ -17,7 +17,8 @@ import krs.token
 from .cache import KeycloakGroupCache
 from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstitutionMultiUsers, InstitutionUser,
-                    InstApprovals, InstApprovalsActionApprove, InstApprovalsActionDeny)
+                    InstApprovals, InstitutionMultiApprovals,
+                    InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
 

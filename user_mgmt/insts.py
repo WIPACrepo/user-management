@@ -363,6 +363,7 @@ class InstitutionMultiApprovals(MyHandler):
             ret.append(row)
         self.write(ret)
 
+
 class InstApprovalsActionApprove(MyHandler):
     @authenticated
     @catch_error
