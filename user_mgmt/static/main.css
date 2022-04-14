@@ -154,6 +154,32 @@ article.institutions .inst .author {
     margin-right: .5em;
     font-weight: bold;
 }
+article.institutions .inst .inst-members {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+article.institutions .inst .inst-members thead {
+    text-transform: capitalize;
+    border-bottom: 1px solid black;
+}
+article.institutions .inst .inst-members th, article.institutions .inst .inst-members td {
+    padding: .1em .3em;
+}
+article.institutions .inst .inst-members tr>:not(:first-child) {
+    text-align: center;
+    border-left: 1px solid black;
+    vertical-align: bottom;
+}
+article.institutions .inst .inst-members tbody tr:nth-child(odd) {
+    background-color: #fff;
+}
+article.institutions .inst .inst-members tbody tr:nth-child(even) {
+    background-color: #eee;
+}
+article.institutions .inst .inst-members tbody .delete {
+    cursor: pointer;
+    vertical-align: bottom;
+}
 article.institutions .newuser, article.groups .newuser {
     color: #c66;
     font-weight: bold;

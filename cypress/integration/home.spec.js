@@ -45,7 +45,7 @@ context('Home Page', () => {
 
   it('inst admin', () => {
     cy.visit('/')
-    keycloak({admin_insts: ['instA'], admin_groups: ['groupB']})
+    keycloak({admin_insts: {instA:['user']}, admin_groups: {groupB:['user']}})
 
     cy.get('#nav li').should('have.length', 3)
 

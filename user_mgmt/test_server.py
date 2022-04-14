@@ -5,7 +5,7 @@ import os
 from rest_tools.server import RestServer
 from wipac_dev_tools import from_environment
 
-from .server import Main
+from .server import Main, Error
 
 
 def test_server():
@@ -25,6 +25,7 @@ def test_server():
         'keycloak_url': 'testing'
     }
     server = RestServer(static_path=static_path, template_path=static_path, debug=config['DEBUG'])
+    server.add_route(r'/api/(.*)', Error)
     server.add_route(r'/(.*)', Main, args)
     server.startup(address=config['HOST'], port=config['PORT'])
 

@@ -858,7 +858,7 @@ Insts = {
             // convert from membership lists to user-based attributes
             for (const key in ret.data) {
               if (key != 'users') {
-                entry.groups[key] = key.replace(/_/g, ' ')
+                entry.groups[key] = key.replace(/-/g, ' - ')
               }
               for (const username of ret.data[key]) {
                 if (!(username in entry.members)) {
@@ -1032,19 +1032,23 @@ Insts = {
     <div class="inst" v-for="inst in institutions">
       <h4>{{ inst.experiment }} - {{ inst.institution }}</h4>
       <div class="indent">
-        <table>
-          <tr>
-            <th>Member</th>
-            <th v-for="(title, name) in inst.groups">{{ title }}</th>
-            <th></th>
-          </tr>
-          <tr v-for="(groups, username) in inst.members">
-            <td>{{ username }}</td>
-            <td v-for="(title, name) in inst.groups"><input type="checkbox" v-model="groups[name]" /></td>
-            <td></td>
-          </tr>
+        <table class="inst-members">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th v-for="(title, name) in inst.groups">{{ title }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(groups, username) in inst.members">
+              <td>{{ username }} <span class="delete material-icons" @click="remove(inst, 'users', username)">delete_forever</span></td>
+              <td v-for="(title, name) in inst.groups"><input type="checkbox" v-model="groups[name]" /></td>
+              <td><button>Update</button></td>
+            </tr>
+          </tbody>
         </table>
-        <div class="double_indent add">
+        <div class="indent add">
           <addinstuser :addFunc="add" :inst="inst" :name="name"></addinstuser>
         </div>
       </div>
