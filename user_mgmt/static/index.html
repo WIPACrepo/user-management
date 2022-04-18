@@ -40,17 +40,19 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@0.26.1/dist/axios.min.js"></script>
 <script src="/static/boilerplate.js"></script>
 <script type="module">
-import keycloak from '/static/keycloak.js';
 import vue_startup from '/static/main.js';
-let keycloak_url = "{{ keycloak_url }}"
-let keycloak_realm = "{{ keycloak_realm }}"
-if (keycloak_url == 'testing') {
+import keycloak from '/static/keycloak.js';
+const keycloak_url = "{{ keycloak_url }}"
+const keycloak_realm = "{{ keycloak_realm }}"
+if (keycloak_url.startsWith('http')) {
+  (async function() {
+    kc = keycloak(keycloak_url, keycloak_realm)
+    await kc.init()
+    vue_startup(kc)
+  })()
+} else {
   // make startup function global so Cypress can access it
   self.vue_startup = vue_startup
-} else {
-  kc = keycloak(keycloak_url, keycloak_realm)
-  await kc.init()
-  vue_startup(kc)
 }
 </script>
 </body>

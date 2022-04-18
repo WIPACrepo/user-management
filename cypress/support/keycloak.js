@@ -38,16 +38,16 @@ export default (params) => {
   }
   for (const g of params.groups) {
     const group_path = '/tokens/'+g
-    api_groups[g] = {id: g+'-id', users: [params.username]}
+    api_groups[group_path] = {id: g+'-id', users: [params.username]}
     raw_groups.push(group_path)
   }
   for (const g in params.admin_groups) {
     const group_path = '/tokens/'+g
     if (!(g in api_groups)) {
-      api_groups[g] = {id: g+'-id', users: []}
+      api_groups[group_path] = {id: g+'-id', users: []}
     }
-    for (const v of params.admin_grouos[g]) {
-      api_groups[g].users.push(v)
+    for (const v of params.admin_groups[g]) {
+      api_groups[group_path].users.push(v)
     }
     raw_groups.push(group_path+'/_admin')
   }
@@ -184,7 +184,6 @@ export default (params) => {
       return {given_name: params.given_name}
     }
   }
-  console.log('keycloak obj:', obj)
   cy.spy(obj, 'login').as('login')
   cy.spy(obj, 'logout').as('logout')
   cy.window().then((win) => {

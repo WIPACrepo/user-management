@@ -1,4 +1,3 @@
-
 /** helper functions **/
 
 export async function get_username(keycloak) {
@@ -183,6 +182,7 @@ export async function get_all_groups(keycloak) {
     const resp = await axios.get('/api/groups', {
       headers: {'Authorization': 'bearer '+token}
     })
+    console.log('/api/groups ret:', resp.data)
     return resp.data
   } catch(error) {
     console.log(error)
