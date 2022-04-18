@@ -29,9 +29,6 @@ export default function(keycloak_url, keycloak_realm){
         console.log("error loading keycloak", error)
       }
     },
-    set_keycloak: function(obj) {
-      _keycloak = obj
-    },
     authenticated: function() {
       return _keycloak.authenticated
     },
