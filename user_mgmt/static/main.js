@@ -1,54 +1,29 @@
 // debug flag
 var krs_debug = false;
 
-const insertScript = (path) =>
-  new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = path;
-    s.onload = () => resolve(s);  // resolve with script, not event
-    s.onerror = reject;
-    document.body.appendChild(s);
-  });
-
-// global Keycloak object
-var keycloak;
-
-var load_keycloak = async function(keycloak_url, keycloak_realm) {
-  await insertScript(keycloak_url+'/auth/js/keycloak.js')
-  keycloak = new Keycloak({
-    url: keycloak_url+'/auth',
-    realm: keycloak_realm,
-    clientId: 'user_mgmt'
-  });
-}
-var set_keycloak = function(obj) {
-  keycloak = obj
-}
-
-
 /** helper functions **/
 
-var get_username = async function() {
-  if (!keycloak.authenticated)
+var get_username = async function(keycloak) {
+  if (!keycloak.authenticated())
     return ''
   try {
-    await keycloak.updateToken(5)
-    console.log(keycloak.tokenParsed)
-    return keycloak.tokenParsed['username']
+    const tokenParsed = await keycloak.get_tokenParsed()
+    console.log(tokenParsed)
+    return tokenParsed['username']
   } catch (error) {
     console.log("error getting username from token")
     return ''
   }
 };
 
-var get_my_experiments = async function() {
-  if (!keycloak.authenticated)
+var get_my_experiments = async function(keycloak) {
+  if (!keycloak.authenticated())
     return []
   try {
-    await keycloak.updateToken(5)
     let experiments = []
-    console.log(keycloak.tokenParsed)
-    for (const group of keycloak.tokenParsed.groups) {
+    const tokenParsed = await keycloak.get_tokenParsed()
+    console.log(tokenParsed)
+    for (const group of tokenParsed.groups) {
       if (group.startsWith('/institutions')) {
         const parts = group.split('/')
         if (parts.length != 4)
@@ -66,13 +41,14 @@ var get_my_experiments = async function() {
   }
 };
 
-var get_my_institutions = async function(experiment) {
-  if (!keycloak.authenticated)
+var get_my_institutions = async function(keycloak, experiment) {
+  if (!keycloak.authenticated())
     return []
   try {
-    await keycloak.updateToken(5)
+    const tokenParsed = await keycloak.get_tokenParsed()
+    console.log(tokenParsed)
     let institutions = {}
-    for (const group of keycloak.tokenParsed.groups) {
+    for (const group of tokenParsed.groups) {
       if (group.startsWith('/institutions')) {
         const parts = group.split('/')
         if (parts.length >= 4 && parts[2] == experiment) {
@@ -95,14 +71,14 @@ var get_my_institutions = async function(experiment) {
   }
 };
 
-var get_my_groups = async function() {
-  if (!keycloak.authenticated)
+var get_my_groups = async function(keycloak) {
+  if (!keycloak.authenticated())
     return []
   try {
-    await keycloak.updateToken(5)
+    const tokenParsed = await keycloak.get_tokenParsed()
+    console.log(tokenParsed)
     let groups = []
-    console.log(keycloak.tokenParsed)
-    for (const group of keycloak.tokenParsed.groups) {
+    for (const group of tokenParsed.groups) {
       if (!group.startsWith('/institutions')) {
         const parts = group.split('/')
         if (parts[parts.length-1].startsWith('_'))
@@ -119,13 +95,14 @@ var get_my_groups = async function() {
   }
 };
 
-var get_my_inst_admins = async function() {
-  if (!keycloak.authenticated)
+var get_my_inst_admins = async function(keycloak) {
+  if (!keycloak.authenticated())
     return []
   try {
-    await keycloak.updateToken(5)
+    const tokenParsed = await keycloak.get_tokenParsed()
+    console.log(tokenParsed)
     let institutions = []
-    for (const group of keycloak.tokenParsed.groups) {
+    for (const group of tokenParsed.groups) {
       if (group == '/admin') {
         console.log("super admin - all insts")
         institutions = [];
@@ -155,13 +132,14 @@ var get_my_inst_admins = async function() {
   }
 };
 
-var get_my_group_admins = async function() {
-  if (!keycloak.authenticated)
+var get_my_group_admins = async function(keycloak) {
+  if (!keycloak.authenticated())
     return []
   try {
-    await keycloak.updateToken(5)
+    const tokenParsed = await keycloak.get_tokenParsed()
+    console.log(tokenParsed)
     let groups = [];
-    for (const group of keycloak.tokenParsed.groups) {
+    for (const group of tokenParsed.groups) {
       if (group == '/admin') {
         console.log("super admin - all groups")
         groups = [];
@@ -199,13 +177,13 @@ var get_all_inst_subgroups = async function() {
   }
 };
 
-var get_all_groups = async function() {
-  if (!keycloak.authenticated)
+var get_all_groups = async function(keycloak) {
+  if (!keycloak.authenticated())
     return {}
   try {
-    await keycloak.updateToken(5);
+    const token = await keycloak.get_token()
     const resp = await axios.get('/api/groups', {
-      headers: {'Authorization': 'bearer '+keycloak.token}
+      headers: {'Authorization': 'bearer '+token}
     })
     return resp.data
   } catch(error) {
@@ -217,7 +195,7 @@ var get_all_groups = async function() {
 
 /** Routes **/
 
-Home = {
+const Home = {
   data: function(){
     return {
       join_inst: false,
@@ -234,17 +212,14 @@ Home = {
       refresh: 0
     }
   },
+  props: ['keycloak'],
   asyncComputed: {
     my_experiments: {
       get: async function(){
-        if (this.refresh > 0) {
-          // refresh token
-          await keycloak.updateToken(-1)
-        }
-        let exps = await get_my_experiments()
+        let exps = await get_my_experiments(this.keycloak)
         let ret = {}
         for (const exp of exps) {
-          ret[exp] = await get_my_institutions(exp)
+          ret[exp] = await get_my_institutions(this.keycloak, exp)
         }
         return ret
       },
@@ -252,11 +227,7 @@ Home = {
     },
     my_groups: {
       get: async function(){
-        if (this.refresh > 0) {
-          // refresh token
-          await keycloak.updateToken(-1)
-        }
-        let groups = await get_my_groups()
+        let groups = await get_my_groups(this.keycloak)
         let ret = {}
         if (this.groups !== null) {
           for (const name in this.groups) {
@@ -299,14 +270,13 @@ Home = {
           }
           return insts.sort()
         } catch (error) {
-          console.log('error')
-          console.log(error)
+          console.log('error', error)
         }
       }
       return []
     },
     groups: async function() {
-        return await get_all_groups();
+        return await get_all_groups(this.keycloak);
     },
     validGroup: function() {
       try {
@@ -356,9 +326,9 @@ Home = {
 
         this.errMessage = 'Submission processing';
         try {
-          await keycloak.updateToken(5);
+          const token = await this.keycloak.get_token()
           const resp = await axios.post('/api/inst_approvals', data, {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           });
           console.log('Response:')
           console.log(resp)
@@ -392,12 +362,12 @@ Home = {
 
         this.errMessage = 'Submission processing';
         try {
-          await keycloak.updateToken(5);
+          const token = await this.keycloak.get_token()
           let data = {
             group: this.group
           }
           const resp = await axios.post('/api/group_approvals', data, {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           });
           console.log('Response:')
           console.log(resp)
@@ -429,10 +399,10 @@ Home = {
       }
 
       try {
-        await keycloak.updateToken(5);
+        const token = await this.keycloak.get_token()
         const username = await get_username();
         const resp = await axios.delete('/api/experiments/'+exp+'/institutions/'+inst+'/users/'+username, {
-          headers: {'Authorization': 'bearer '+keycloak.token}
+          headers: {'Authorization': 'bearer '+token}
         });
         console.log('Response:')
         console.log(resp)
@@ -471,7 +441,7 @@ Home = {
       }
 
       try {
-        await keycloak.updateToken(5);
+        const token = await this.keycloak.get_token()
         const username = await get_username();
         let data = {}
         data[sub] = false
@@ -480,7 +450,7 @@ Home = {
             data[subgroup] = true
         }
         const resp = await axios.put('/api/experiments/'+exp+'/institutions/'+inst+'/users/'+username, data, {
-          headers: {'Authorization': 'bearer '+keycloak.token}
+          headers: {'Authorization': 'bearer '+token}
         });
         console.log('Response:')
         console.log(resp)
@@ -508,10 +478,10 @@ Home = {
       }
 
       try {
-        await keycloak.updateToken(5);
+        const token = await this.keycloak.get_token()
         const username = await get_username();
         const resp = await axios.delete('/api/groups/'+group_id+'/'+username, {
-          headers: {'Authorization': 'bearer '+keycloak.token}
+          headers: {'Authorization': 'bearer '+token}
         });
         console.log('Response:')
         console.log(resp)
@@ -535,7 +505,7 @@ Home = {
   },
   template: `
 <article class="home">
-  <div v-if="keycloak.authenticated">
+  <div v-if="keycloak.authenticated()">
     <h2 style="margin-bottom: 1em">My profile:</h2>
     <div class="error_box" v-if="error" v-html="error"></div>
     <h3>Experiments / Institutions</h3>
@@ -635,18 +605,19 @@ Home = {
 </article>`
 }
 
-UserInfo = {
+const UserInfo = {
   data: function(){
     return {
       title: ''
     }
   },
+  props: ['keycloak'],
   asyncComputed: {
     userinfo: async function() {
-      if (!keycloak.authenticated)
+      if (!this.keycloak.authenticated())
         return {}
       try {
-        var ret = await keycloak.loadUserInfo();
+        var ret = await this.keycloak.get_userInfo();
         return ret
       } catch (error) {
         return {"error": JSON.stringify(error)}
@@ -660,7 +631,7 @@ UserInfo = {
 </article>`
 }
 
-Register = {
+const Register = {
   data: function(){
     return {
       experiment: '',
@@ -795,20 +766,21 @@ Register = {
 </article>`
 }
 
-Insts = {
+const Insts = {
   data: function(){
     return {
       refresh: 0,
       error: ''
     }
   },
+  props: ['keycloak'],
   asyncComputed: {
     approvals: {
       get: async function() {
         try {
-          await keycloak.updateToken(5);
+          const token = await this.keycloak.get_token();
           var ret = await axios.get('/api/inst_approvals', {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           })
           let institutions = {}
           for (const entry of ret['data']) {
@@ -834,14 +806,14 @@ Insts = {
     institutions: {
       get: async function() {
         try {
-          const inst_admins = await get_my_inst_admins();
+          const inst_admins = await get_my_inst_admins(this.keycloak);
           let institutions = []
-          await keycloak.updateToken(30);
+          const token = await this.keycloak.get_token();
           let promises = [];
           for (const inst of inst_admins) {
             let parts = inst.split('/')
             promises.push(axios.get('/api/experiments/'+parts[2]+'/institutions/'+parts[3]+'/users', {
-              headers: {'Authorization': 'bearer '+keycloak.token}
+              headers: {'Authorization': 'bearer '+token}
             }));
           }
           let rets = await Promise.all(promises);
@@ -900,8 +872,7 @@ Insts = {
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         await axios.post('/api/inst_approvals/'+approval['id']+'/actions/approve', {}, {
           headers: {'Authorization': 'bearer '+token}
         });
@@ -923,8 +894,7 @@ Insts = {
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         await axios.post('/api/inst_approvals/'+approval['id']+'/actions/deny', {}, {
           headers: {'Authorization': 'bearer '+token}
         });
@@ -946,8 +916,7 @@ Insts = {
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         let data = {}
         for (const key in inst.members) {
           if (key == 'users')
@@ -959,13 +928,15 @@ Insts = {
           }
         }
         await axios.put('/api/experiments/'+inst.experiment+'/institutions/'+inst.institution+'/users/'+username, data, {
-          headers: {'Authorization': 'bearer '+keycloak.token}
+          headers: {'Authorization': 'bearer '+token}
         })
         this.error = ""
         this.refresh = this.refresh+1
       } catch (error) {
         this.error = "Error adding user: "+error['message']
       }
+    },
+    update: async function(inst, username) {
     },
     remove: async function(inst, name, username) {
       if (username == '') {
@@ -975,15 +946,14 @@ Insts = {
 
       let confirm_msg = 'Are you sure you want to remove the user '+username+' from '+inst.institution+'?';
       if (!window.confirm(confirm_msg)) {
-        return;
+        return
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         if (name == 'users') {
           await axios.delete('/api/experiments/'+inst.experiment+'/institutions/'+inst.institution+'/users/'+username, {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           })
         } else {
           let data = {}
@@ -997,7 +967,7 @@ Insts = {
             }
           }
           await axios.put('/api/experiments/'+inst.experiment+'/institutions/'+inst.institution+'/users/'+username, data, {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           })
         }
         this.error = ""
@@ -1032,45 +1002,28 @@ Insts = {
     <div class="inst" v-for="inst in institutions">
       <h4>{{ inst.experiment }} - {{ inst.institution }}</h4>
       <div class="indent">
-        <table class="inst-members">
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th v-for="(title, name) in inst.groups">{{ title }}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(groups, username) in inst.members">
-              <td>{{ username }} <span class="delete material-icons" @click="remove(inst, 'users', username)">delete_forever</span></td>
-              <td v-for="(title, name) in inst.groups"><input type="checkbox" v-model="groups[name]" /></td>
-              <td><button>Update</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="indent add">
-          <addinstuser :addFunc="add" :inst="inst" :name="name"></addinstuser>
-        </div>
+        <insttable :inst="inst" :addFunc="add" :updateFunc="update"></insttable>
       </div>
     </div>
   </div>
 </article>`
 }
 
-Groups = {
+const Groups = {
   data: function(){
     return {
       refresh: 0,
       error: ''
     }
   },
+  props: ['keycloak'],
   asyncComputed: {
     approvals: {
       get: async function() {
         try {
-          await keycloak.updateToken(5);
+          const token = await this.keycloak.get_token();
           var ret = await axios.get('/api/group_approvals', {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           })
           let groups = {}
           for (const entry of ret['data']) {
@@ -1095,18 +1048,19 @@ Groups = {
     groups: {
       get: async function() {
         try {
-          const group_admins = await get_my_group_admins();
+          const token = await this.keycloak.get_token();
+          const group_admins = await get_my_group_admins(this.keycloak);
           let ret = await axios.get('/api/groups', {
-            headers: {'Authorization': 'bearer '+keycloak.token}
+            headers: {'Authorization': 'bearer '+token}
           })
           const all_groups = ret.data;
           let groups = []
           let promises = [];
           for (const group of group_admins) {
             if (group in all_groups) {
-              await keycloak.updateToken(5);
+              const token2 = await this.keycloak.get_token();
               promises.push(await axios.get('/api/groups/'+all_groups[group], {
-                headers: {'Authorization': 'bearer '+keycloak.token}
+                headers: {'Authorization': 'bearer '+token2}
               }));
             }
           }
@@ -1147,8 +1101,7 @@ Groups = {
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         await axios.post('/api/group_approvals/'+approval['id']+'/actions/approve', {}, {
           headers: {'Authorization': 'bearer '+token}
         });
@@ -1170,8 +1123,7 @@ Groups = {
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         await axios.post('/api/group_approvals/'+approval['id']+'/actions/deny', {}, {
           headers: {'Authorization': 'bearer '+token}
         });
@@ -1192,10 +1144,9 @@ Groups = {
           this.error = "Error adding user: did not enter user name"
           return
         }
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         await axios.put('/api/groups/'+group['id']+'/'+username, {}, {
-          headers: {'Authorization': 'bearer '+keycloak.token}
+          headers: {'Authorization': 'bearer '+token}
         })
         this.error = ""
         this.refresh = this.refresh+1
@@ -1210,10 +1161,9 @@ Groups = {
       }
 
       try {
-        await keycloak.updateToken(5);
-        var token = keycloak.token;
+        const token = await this.keycloak.get_token();
         await axios.delete('/api/groups/'+group['id']+'/'+username, {
-          headers: {'Authorization': 'bearer '+keycloak.token}
+          headers: {'Authorization': 'bearer '+token}
         })
         this.error = ""
         this.refresh = this.refresh+1
@@ -1260,7 +1210,7 @@ Groups = {
 }
 
 
-Error404 = {
+const Error404 = {
     data: function(){
         return {
         }
@@ -1294,6 +1244,55 @@ Vue.component('textinput', {
   <p>{{ name }}: <span v-if="required" class="red">*</span></p>
   <input :name="inputName" :value="value" @input="$emit('input', $event.target.value)">
   <span class="red" v-if="!allValid && !valid && (required || value)">invalid entry</span>
+</div>`
+})
+
+Vue.component('insttable', {
+  data: function(){
+    return {
+      addFunc: null,
+      updateFunc: null,
+      deleteFunc: null,
+      inst: null,
+      name: ''
+    }
+  },
+  props: ['addFunc', 'updateFunc', 'deleteFunc', 'inst', 'name'],
+  computed: {
+    users: function(){
+      ret = {}
+      return ret
+    }
+  },
+  methods: {
+    add: function() {
+      this.addFunc(this.inst, this.name, this.username)
+    },
+    update: function(username) {
+      this.updateFunc(this.inst, this.name, this.username)
+    }
+  },
+  template: `
+<div class="insttable">
+  <table class="inst-members">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th v-for="(title, name) in inst.groups">{{ title }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(groups, username) in inst.members">
+        <td>{{ username }} <span class="delete material-icons" @click="remove(inst, 'users', username)">delete_forever</span></td>
+        <td v-for="(title, name) in inst.groups"><input type="checkbox" v-model="groups[name]" /></td>
+        <td><button @click="update(username)">Update</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="indent add">
+    <addinstuser :addFunc="add" :inst="inst" :name="name"></addinstuser>
+  </div>
 </div>`
 })
 
@@ -1368,12 +1367,13 @@ Vue.component('account', {
     return {
     }
   },
+  props: ['keycloak'],
   asyncComputed: {
     name: async function() {
-      if (!keycloak.authenticated)
+      if (!this.keycloak.authenticated())
         return ""
       try {
-        var ret = await keycloak.loadUserInfo();
+        var ret = await this.keycloak.get_userInfo();
         return ret['given_name']
       } catch (error) {
         return ""
@@ -1382,8 +1382,8 @@ Vue.component('account', {
   },
   template: `
 <div class="account">
-  <login v-if="!keycloak.authenticated" caps="true"></login>
-  <div v-else>Signed in as <span class="username">{{ name }}</span><br><logout caps="true"></logout></div>
+  <login v-if="!keycloak.authenticated()" :keycloak="keycloak" caps="true"></login>
+  <div v-else>Signed in as <span class="username">{{ name }}</span><br><logout :keycloak="keycloak" caps="true"></logout></div>
 </div>`
 });
 
@@ -1393,7 +1393,7 @@ Vue.component('login', {
       caps: "true",
     }
   },
-  props: ['caps'],
+  props: ['keycloak', 'caps'],
   computed: {
     name: function() {
       if (this.caps == "true")
@@ -1405,7 +1405,7 @@ Vue.component('login', {
   methods: {
     login: async function() {
       console.log('login')
-      await keycloak.login({redirectUri:window.location})
+      await this.keycloak.login({redirectUri:window.location})
     }
   },
   template: `<span class="login-link" @click="login">{{ name }}</span>`
@@ -1417,7 +1417,7 @@ Vue.component('logout', {
       caps: false,
     }
   },
-  props: ['caps'],
+  props: ['keycloak', 'caps'],
   computed: {
     name: function() {
       if (this.caps)
@@ -1429,7 +1429,7 @@ Vue.component('logout', {
   methods: {
     logout: async function() {
       console.log('logout')
-      await keycloak.logout({redirectUri:window.location.origin})
+      await this.keycloak.logout(window.location.origin)
     }
   },
   template: `<span class="login-link" @click="logout">{{ name }}</span>`
@@ -1486,35 +1486,29 @@ const scrollBehavior = function (to, from, savedPosition) {
 }
 
 
-var routes = [
-  { path: '/', name: 'home', component: Home },
-  { path: '/userinfo', name: 'userinfo', component: UserInfo,
-    meta: { requiresAuth: true, testing: true }
-  },
-  { path: '/register', name: 'register', component: Register,
-    props: (route) => ({
-      experiment: route.query.experiment,
-      institution: route.query.institution
-    })
-  },
-  { path: '/institutions', name: 'Institutions', component: Insts,
-    meta: { requiresAuth: true, requiresInstAdmin: true }
-  },
-  { path: '/groups', name: 'Groups', component: Groups,
-    meta: { requiresAuth: true, requiresGroupAdmin: true }
-  },
-  { path: '*', name: '404', component: Error404, props: true }
-];
 
-async function vue_startup(keycloak_url, keycloak_realm){
-  try {
-    await keycloak.init({
-      onLoad: 'check-sso',
-      checkLoginIframe: false
-    });
-  } catch (error) {
-    console.log("error initializing keycloak")
-  }
+export default async function vue_startup(keycloak){
+  const routes = [
+    { path: '/', name: 'home', component: Home,
+      props: {keycloak: keycloak}
+    },
+    { path: '/userinfo', name: 'userinfo', component: UserInfo,
+      props: {keycloak: keycloak}, meta: { requiresAuth: true, testing: true }
+    },
+    { path: '/register', name: 'register', component: Register,
+      props: (route) => ({
+        experiment: route.query.experiment,
+        institution: route.query.institution
+      })
+    },
+    { path: '/institutions', name: 'Institutions', component: Insts,
+      props: {keycloak: keycloak}, meta: { requiresAuth: true, requiresInstAdmin: true }
+    },
+    { path: '/groups', name: 'Groups', component: Groups,
+      props: {keycloak: keycloak}, meta: { requiresAuth: true, requiresGroupAdmin: true }
+    },
+    { path: '*', name: '404', component: Error404, props: true }
+  ];
 
   var router = new VueRouter({
     mode: 'history',
@@ -1524,10 +1518,10 @@ async function vue_startup(keycloak_url, keycloak_realm){
   router.beforeEach(async function(to, from, next){
     console.log('baseurl: '+window.location.origin)
 
-    if (to.meta && to.meta.requiresAuth && !keycloak.authenticated) {
+    if (to.meta && to.meta.requiresAuth && !keycloak.authenticated()) {
       // do login process
       console.log("keycloak needs login")
-      await keycloak.login({redirectUri:window.location.origin+to.path})
+      await keycloak.login(window.location.origin+to.path)
     }
     else next()
   })
@@ -1536,6 +1530,7 @@ async function vue_startup(keycloak_url, keycloak_realm){
     el: '#page-container',
     data: {
       routes: routes,
+      keycloak: keycloak,
       current: 'home'
     },
     router: router,
@@ -1548,16 +1543,25 @@ async function vue_startup(keycloak_url, keycloak_realm){
             continue
           if (r.path.startsWith('/register') && current != 'register')
             continue
-          if (krs_debug !== true && r.meta && r.meta.testing)
+          if (krs_debug !== true && r.meta && r.meta.testing) {
+            console.log('skipping route because this is only for testing')
             continue
-          if (r.meta && r.meta.requiresAuth && !keycloak.authenticated)
+          }
+          if (r.meta && r.meta.requiresAuth && !keycloak.authenticated()) {
+            console.log('skipping route because we are not authenticated')
             continue
-          if (r.meta && r.meta.requiresInstAdmin && (await get_my_inst_admins()).length <= 0)
+          }
+          if (r.meta && r.meta.requiresInstAdmin && (await get_my_inst_admins(keycloak)).length <= 0) {
+            console.log('skipping route because we are not an inst admin')
             continue
-          if (r.meta && r.meta.requiresGroupAdmin && (await get_my_group_admins()).length <= 0)
+          }
+          if (r.meta && r.meta.requiresGroupAdmin && (await get_my_group_admins(keycloak)).length <= 0) {
+            console.log('skipping route because we are not a group admin')
             continue
+          }
           ret.push(r)
         }
+        console.log('routes',ret)
         return ret
       }
     },

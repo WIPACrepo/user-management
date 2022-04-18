@@ -172,25 +172,23 @@ export default (params) => {
   }).as('api-groups')
 
   const obj = {
-    authenticated: params.authenticated,
-    loadUserInfo: async function(){
-      return {given_name: params.given_name}
-    },
-    login: ()=>{},
-    logout: ()=>{},
-    token: 'thetoken',
-    tokenParsed: {
+    authenticated: () => params.authenticated,
+    login: async function(){},
+    logout: async function(){},
+    get_token: async function(){ return 'thetoken' },
+    get_tokenParsed: async function(){ return {
       username: params.username,
       groups: raw_groups
-    },
-    updateToken: ()=>{}
+    }},
+    get_userInfo: async function(){
+      return {given_name: params.given_name}
+    }
   }
   console.log('keycloak obj:', obj)
   cy.spy(obj, 'login').as('login')
   cy.spy(obj, 'logout').as('logout')
   cy.window().then((win) => {
-    win.set_keycloak(obj)
-    win.vue_startup()
+    win.vue_startup(obj)
   })
 
   console.log('keycloak obj: ', obj)
