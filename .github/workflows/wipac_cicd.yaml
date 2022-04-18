@@ -126,7 +126,7 @@ jobs:
       - name: Run Tests
         run: |
           python -m user_mgmt.test_server &
-          docker run --network=host -v $PWD:/e2e -w /e2e cypress/included:9.5.3
+          docker run --network=host -v $PWD:/e2e -w /e2e cypress/included:9.5.4
 
   release:
     if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
