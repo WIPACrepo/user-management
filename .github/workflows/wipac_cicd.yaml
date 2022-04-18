@@ -4,38 +4,8 @@ on: [push]
 
 jobs:
 
-  check:
-    name: Check files
-    outputs:
-      run_py: ${{ steps.check_files.outputs.run_py }}
-      run_js: ${{ steps.check_files.outputs.run_js }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-      - name: check modified files
-        id: check_files
-        run: |
-          echo "=============== list modified files ==============="
-          git diff --name-only HEAD^ HEAD
-          
-          echo "========== check paths of modified files =========="
-          git diff --name-only HEAD^ HEAD > files.txt
-          if grep -qe '.*\.py$' files.txt; then
-            echo "::set-output name=run_py::true"
-          else
-            echo "::set-output name=run_py::false"
-          fi
-          if grep -qe '.*\.js$' files.txt; then
-            echo "::set-output name=run_js::true"
-          else
-            echo "::set-output name=run_js::false"
-          fi
-
   flake8:
-    needs: [check]
-    if: needs.check.outputs.run_py == 'true'
+    needs: []
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -78,8 +48,7 @@ jobs:
           pip install .
 
   py-tests:
-    needs: [check, py-versions]
-    if: needs.check.outputs.run_py == 'true'
+    needs: [py-versions]
     runs-on: ubuntu-latest
     services:
       keycloak:
@@ -111,8 +80,7 @@ jobs:
           python -m pytest tests --tb=short --log-level=INFO
 
   web-tests:
-    needs: [check, py-versions]
-    if: needs.check.outputs.run_js == 'true'
+    needs: [py-versions]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
