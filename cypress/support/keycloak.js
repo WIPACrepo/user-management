@@ -9,7 +9,8 @@ export default (params) => {
     admin_insts: {},        // insts user is admin of = {instname: {users, authorlist, ...}}
     inst_approvals: {},     // inst approvals = {instname: [users]}
     groups: [],             // groups user belongs to
-    admin_groups: {},       // groups user is admin for = {instname: [users]}
+    admin_groups: {},       // groups user is admin for = {groupname: [users]}
+    group_approvals: {},    // group approvals = {groupname: [users]}
     authenticated: true,    // is user logged in?
     username: 'user',
     given_name: 'Foo Bar'
@@ -18,6 +19,7 @@ export default (params) => {
   let raw_groups = []
   let api_insts = {}
   let api_groups = {}
+  let api_group_details = {}
   for (const i of params.insts) {
     raw_groups.push('/institutions/'+params.exp+'/'+i)
     api_insts[i] = {'users': [params.username]}
@@ -38,16 +40,20 @@ export default (params) => {
   }
   for (const g of params.groups) {
     const group_path = '/tokens/'+g
-    api_groups[group_path] = {id: g+'-id', users: [params.username]}
+    const group_id = g+'-id'
+    api_groups[group_path] = group_id
+    api_group_details[group_id] = {name: g, users: [params.username]}
     raw_groups.push(group_path)
   }
   for (const g in params.admin_groups) {
     const group_path = '/tokens/'+g
+    const group_id = g+'-id'
     if (!(g in api_groups)) {
-      api_groups[group_path] = {id: g+'-id', users: []}
+      api_groups[group_path] = group_id
+      api_group_details[group_id] = {name: g, users: []}
     }
     for (const v of params.admin_groups[g]) {
-      api_groups[group_path].users.push(v)
+      api_group_details[group_id].users.push(v)
     }
     raw_groups.push(group_path+'/_admin')
   }
@@ -70,6 +76,18 @@ export default (params) => {
       inst_approvals.push({
         experiment: params.exp,
         institution: i,
+        username: u
+      })
+    }
+  }
+
+  let group_approvals = []
+  for (const g in params.group_approvals) {
+    for (const u of params.group_approvals[g]) {
+      group_approvals.push({
+        group: g,
+        group_id: g+'-id',
+        id: g+u+'-id',
         username: u
       })
     }
@@ -171,6 +189,76 @@ export default (params) => {
     headers: { 'access-control-allow-origin': '*' },
   }).as('api-groups')
 
+  cy.intercept({
+    method: 'GET',
+    url: '/api/groups/*',
+  }, (req) => {
+    console.log('api-group')
+    const parts = req.url.split('/')
+    const group_id = parts[parts.length-1]
+    console.log('api-group: '+group_id)
+    try {
+      if (!group_id in api_group_details) {
+        req.reply({statusCode: 404, body: {}})
+      } else if (!api_group_details[group_id].name in params.admin_groups) {
+        req.reply({statusCode: 403, body: {}})
+      } else {
+        req.reply({
+          statusCode: 200,
+          body: api_group_details[group_id].users,
+        })
+      }
+    } catch (error) {
+      console.log('error', error)
+      req.reply({statusCode: 500})
+    }
+  }).as('api-group')
+
+  cy.intercept({
+    method: 'DELETE',
+    url: '/api/groups/*/*',
+  }, {
+    statusCode: 200,
+    body: {},
+    headers: { 'access-control-allow-origin': '*' },
+  }).as('api-group-user-delete')
+
+  cy.intercept({
+    method: 'PUT',
+    url: '/api/groups/*/*',
+  }, {
+    statusCode: 200,
+    body: {},
+    headers: { 'access-control-allow-origin': '*' },
+  }).as('api-group-user-put')
+
+  cy.intercept({
+    method: 'GET',
+    url: '/api/group_approvals',
+  }, {
+    statusCode: 200,
+    body: group_approvals,
+    headers: { 'access-control-allow-origin': '*' },
+  }).as('api-group-approvals')
+
+  cy.intercept({
+    method: 'POST',
+    url: '/api/group_approvals/*/actions/approve',
+  }, {
+    statusCode: 200,
+    body: {},
+    headers: { 'access-control-allow-origin': '*' },
+  }).as('api-group-approvals-approve')
+
+  cy.intercept({
+    method: 'POST',
+    url: '/api/group_approvals/*/actions/deny',
+  }, {
+    statusCode: 200,
+    body: {},
+    headers: { 'access-control-allow-origin': '*' },
+  }).as('api-group-approvals-deny')
+
   const obj = {
     authenticated: () => params.authenticated,
     login: async function(){},
@@ -193,6 +281,7 @@ export default (params) => {
   console.log('keycloak obj: ', obj)
   console.log('exp info: ', api_all_exps)
   console.log('inst info: ', api_insts)
-  console.log('group info: ', api_groups)
+  console.log('group list: ', api_groups)
+  console.log('group info: ', api_group_details)
   return obj
 }
