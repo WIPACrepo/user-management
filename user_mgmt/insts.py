@@ -140,12 +140,12 @@ class InstitutionUser(MyHandler):
     @catch_error
     async def put(self, experiment, institution, username):
         """
-        Add user to institution.
+        Add/update a user for an institution.
 
         Must be admin.
 
         Body json:
-            authorlist (bool): add user to author list
+            subgroup_name (bool): user is/is not a sub-group member
 
         Args:
             experiment (str): experiment name
@@ -326,6 +326,33 @@ Documentation is located at:
             raise HTTPError(403, 'invalid authorization')
 
         search = {'$or': [{'experiment': exp, 'institution': inst} for exp in insts for inst in insts[exp]]}
+        ret = []
+        async for row in self.db.inst_approvals.find(search, projection={'_id': False}):
+            if 'newuser' in row:
+                ret2 = await self.db.user_registrations.find_one({'id': row['newuser']}, projection={'_id': False})
+                for key in ret2:
+                    if key not in row:
+                        row[key] = ret2[key]
+            ret.append(row)
+        self.write(ret)
+
+
+class InstitutionMultiApprovals(MyHandler):
+    @authenticated
+    @catch_error
+    async def get(self, experiment, institution):
+        """
+        Get approvals for institution.
+
+        Args:
+            experiment (str): experiment name
+            institution (str): institution name
+        """
+        insts = await self.get_admin_institutions()
+        if experiment not in insts or institution not in insts[experiment]:
+            raise HTTPError(403, 'invalid authorization')
+
+        search = {'experiment': experiment, 'institution': institution}
         ret = []
         async for row in self.db.inst_approvals.find(search, projection={'_id': False}):
             if 'newuser' in row:

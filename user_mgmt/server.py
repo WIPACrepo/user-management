@@ -17,7 +17,8 @@ import krs.token
 from .cache import KeycloakGroupCache
 from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstitutionMultiUsers, InstitutionUser,
-                    InstApprovals, InstApprovalsActionApprove, InstApprovalsActionDeny)
+                    InstApprovals, InstitutionMultiApprovals,
+                    InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
 
@@ -98,6 +99,7 @@ def create_server():
     server.add_route('/api/inst_approvals', InstApprovals, kwargs)
     server.add_route(r'/api/inst_approvals/(?P<approval_id>\w+)/actions/approve', InstApprovalsActionApprove, kwargs)
     server.add_route(r'/api/inst_approvals/(?P<approval_id>\w+)/actions/deny', InstApprovalsActionDeny, kwargs)
+    server.add_route(r'/api/experiments/(?P<experiment>[\w\-]+)/institutions/(?P<institution>[\w\-]+)/approvals', InstitutionMultiApprovals, kwargs)
 
     server.add_route('/api/groups', MultiGroups, kwargs)
     server.add_route(r'/api/groups/(?P<group_id>[\w\-]+)', Group, kwargs)
