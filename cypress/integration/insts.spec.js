@@ -12,18 +12,22 @@ context('Institutions Page', () => {
     cy.get('#nav .active').contains('institutions', {matchCase: false})
     cy.get('#nav li').should('have.length', 2)
 
-    cy.get('.approvals [data-test="userC"]').should('exist')
-    cy.get('[data-test="approve"]').click()
-    cy.get('@api-inst-approvals-approve').its('request.url').should('include', 'userC')
-    cy.get('[data-test="deny"]').click()
-    cy.get('@api-inst-approvals-deny').its('request.url').should('include', 'userC')
+    cy.get('.approvals').within(() => {
+      cy.get('[data-test="userC"]').should('exist')
+      cy.get('[data-test="approve"]').click()
+      cy.get('@api-inst-approvals-approve').its('request.url').should('include', 'userC')
+    })
+
+    cy.get('.approvals').within(() => {
+      cy.get('[data-test="deny"]').click()
+      cy.get('@api-inst-approvals-deny').its('request.url').should('include', 'userC')
+    })
   })
 
   it('inst table', () => {
     cy.visit('/institutions')
     keycloak({
-      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
-      inst_approvals: {instA: ['userC']}
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
     })
 
     cy.get('[data-test="userA"]').within(() => {
@@ -62,8 +66,7 @@ context('Institutions Page', () => {
   it('inst add user', () => {
     cy.visit('/institutions')
     keycloak({
-      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
-      inst_approvals: {instA: ['userC']}
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
     })
 
     cy.get('[data-test="userB"] .delete').click()
