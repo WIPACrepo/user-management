@@ -18,13 +18,13 @@ context('Groups Page', () => {
       cy.get('[data-test="/tokens/groupA"]').contains('userB', {matchCase: false})
 
       cy.get('[data-test="/tokens/groupA"] [data-test="userB"] button').click()
-      cy.get('@api-group-user-delete').its('request.url').should('include', 'userB')
+      cy.wait('@api-group-user-delete').its('request.url').should('include', 'userB')
     })
 
     cy.get('[data-test="administered-groups"] [data-test="/tokens/groupA"] .add').within(() => {
       cy.get('input').type('userC')
       cy.get('button').click()
-      cy.get('@api-group-user-put').its('request.url').should('include', 'userC')
+      cy.wait('@api-group-user-put').its('request.url').should('include', 'userC')
     })
   })
 
@@ -42,12 +42,12 @@ context('Groups Page', () => {
     cy.get('[data-test="approvals"]').within(() => {
       cy.get('[data-test="userB"]').should('exist')
       cy.get('[data-test="userB"] [data-test="approve"]').click()
-      cy.get('@api-group-approvals-approve').its('request.url').should('include', 'userB')
+      cy.wait('@api-group-approvals-approve').its('request.url').should('include', 'userB')
     })
 
     cy.get('[data-test="approvals"]').within(() => {
       cy.get('[data-test="userB"] [data-test="deny"]').click()
-      cy.get('@api-group-approvals-deny').its('request.url').should('include', 'userB')
+      cy.wait('@api-group-approvals-deny').its('request.url').should('include', 'userB')
     })
   })
 })
