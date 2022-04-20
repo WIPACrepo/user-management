@@ -176,9 +176,15 @@ article.institutions .inst .inst-members tbody tr:nth-child(odd) {
 article.institutions .inst .inst-members tbody tr:nth-child(even) {
     background-color: #eee;
 }
+article.institutions .inst .inst-members tbody td:last-child {
+    min-width: 6em;
+}
 article.institutions .inst .inst-members tbody .delete {
     cursor: pointer;
     vertical-align: bottom;
+}
+article.institutions .inst h4 {
+    margin: 1em 0 .3em;
 }
 article.institutions .newuser, article.groups .newuser {
     color: #c66;

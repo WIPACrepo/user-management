@@ -5,33 +5,67 @@ import {get_my_inst_admins} from '../helpers.js'
 export default {
   data: function(){
     return {
-      refresh: 0,
-      error: ''
+      keycloak: null
     }
   },
   props: ['keycloak'],
+  asyncComputed: {
+    institutions: {
+      get: async function() {
+        try {
+          const inst_admins = await get_my_inst_admins(this.keycloak);
+          return inst_admins
+        } catch (error) {
+          this.error = "Error getting institutions: "+error['message']
+          return []
+        }
+      },
+      default: []
+    }
+  },
+  template: `
+<article class="institutions">
+  <div v-if="$asyncComputed.institutions.success">
+    <h3>Administered institutions:</h3>
+    <inst :keycloak="keycloak" :group_path="inst" v-for="inst in institutions"></inst>
+  </div>
+</article>`
+}
+
+Vue.component('inst', {
+  data: function(){
+    return {
+      keycloak: null,
+      error: '',
+      group_path: '',
+      refresh: 0
+    }
+  },
+  props: ['keycloak', 'group_path'],
+  computed: {
+    experiment: function() {
+      const parts = this.group_path.split('/')
+      return parts[2]
+    },
+    institution: function() {
+      const parts = this.group_path.split('/')
+      return parts[3]
+    },
+    ready: function() {
+      return this.$asyncComputed.approvals.success && this.$asyncComputed.members.success
+    }
+  },
   asyncComputed: {
     approvals: {
       get: async function() {
         try {
           const token = await this.keycloak.get_token();
-          var ret = await axios.get('/api/inst_approvals', {
+          const ret = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution+'/approvals', {
             headers: {'Authorization': 'bearer '+token}
           })
-          let institutions = {}
-          for (const entry of ret['data']) {
-            let inst = entry['experiment']+entry['institution']
-            if (!(inst in institutions)) {
-              institutions[inst] = {
-                experiment: entry['experiment'],
-                institution: entry['institution'],
-                users: []
-              }
-            }
-            institutions[inst]['users'].push(entry)
-          }
-          return Object.values(institutions)
+          return ret.data
         } catch (error) {
+          console.log('error getting approvals', error)
           this.error = "Error getting approvals: "+error['message']
           return []
         }
@@ -39,59 +73,43 @@ export default {
       default: [],
       watch: ['refresh']
     },
-    institutions: {
+    members: {
       get: async function() {
         try {
-          const inst_admins = await get_my_inst_admins(this.keycloak);
-          let institutions = []
           const token = await this.keycloak.get_token();
-          let promises = [];
-          for (const inst of inst_admins) {
-            let parts = inst.split('/')
-            promises.push(axios.get('/api/experiments/'+parts[2]+'/institutions/'+parts[3]+'/users', {
-              headers: {'Authorization': 'bearer '+token}
-            }));
+          const ret = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution+'/users', {
+            headers: {'Authorization': 'bearer '+token}
+          })
+          // convert from membership lists to user-based attributes
+          console.log('users raw', ret.data)
+          let entry = {groups: {}, members: {}}
+          for (const key in ret.data) {
+            if (key != 'users') {
+              entry.groups[key] = key.replace(/-/g, ' - ')
+            }
+            for (const username of ret.data[key]) {
+              if (!(username in entry.members)) {
+                entry.members[username] = {}
+              }
+              entry.members[username][key] = true
+            }
           }
-          let rets = await Promise.all(promises);
-          for (let i=0;i<inst_admins.length;i++) {
-            let inst = inst_admins[i];
-            let ret = rets[i];
-            let parts = inst.split('/')
-            let entry = {
-              experiment: parts[2],
-              institution: parts[3],
-              groups: {},
-              members: {}
-            }
-            // convert from membership lists to user-based attributes
-            for (const key in ret.data) {
-              if (key != 'users') {
-                entry.groups[key] = key.replace(/-/g, ' - ')
-              }
-              for (const username of ret.data[key]) {
-                if (!(username in entry.members)) {
-                  entry.members[username] = {}
-                }
-                entry.members[username][key] = true
+          for (let username in entry.members) {
+            for (const name in entry.groups) {
+              if (!(name in entry.members[username])) {
+                entry.members[username][name] = false
               }
             }
-            for (let username in entry.members) {
-              for (const name in entry.groups) {
-                if (!(name in entry.members[username])) {
-                  entry.members[username][name] = false
-                }
-              }
-            }
-            institutions.push(entry)
           }
-
-          return institutions
+          console.log('members', entry)
+          return entry
         } catch (error) {
-          this.error = "Error getting institutions: "+error['message']
-          return []
+          console.log('error getting inst members', error)
+          this.error = "Error getting inst members: "+error['message']
+          return {groups: {}, members: {}}
         }
       },
-      default: [],
+      default: {groups: {}, members: {}},
       watch: ['refresh']
     }
   },
@@ -140,30 +158,20 @@ export default {
         this.error = "Error denying: "+error['message']
       }
     },
-    add: async function(inst, name, username) {
+    addMember: async function(username) {
       if (username == '') {
         this.error = "Error adding user: did not enter user name"
         return
       }
 
-      let confirm_msg = 'Are you sure you want to add the user '+username+' to '+inst.institution+'?';
+      let confirm_msg = 'Are you sure you want to add the user '+username+' to '+this.institution+'?';
       if (!window.confirm(confirm_msg)) {
         return;
       }
 
       try {
         const token = await this.keycloak.get_token();
-        let data = {}
-        for (const key in inst.members) {
-          if (key == 'users')
-            continue
-          if (name == key) {
-            data[key] = true
-          } else if (inst.members[key].includes(username)) {
-            data[key] = true
-          }
-        }
-        await axios.put('/api/experiments/'+inst.experiment+'/institutions/'+inst.institution+'/users/'+username, data, {
+        await axios.put('/api/experiments/'+this.experiment+'/institutions/'+this.institution+'/users/'+username, {}, {
           headers: {'Authorization': 'bearer '+token}
         })
         this.error = ""
@@ -172,40 +180,44 @@ export default {
         this.error = "Error adding user: "+error['message']
       }
     },
-    update: async function(inst, username) {
-    },
-    remove: async function(inst, name, username) {
+    updateMember: async function(username, groups={}) {
       if (username == '') {
-        this.error = "Error removing user: did not enter user name"
+        this.error = "Error updating user: did not enter user name"
         return
       }
 
-      let confirm_msg = 'Are you sure you want to remove the user '+username+' from '+inst.institution+'?';
+      let confirm_msg = 'Are you sure you want to updating the user '+username+' from '+this.institution+'?';
       if (!window.confirm(confirm_msg)) {
         return
       }
 
       try {
         const token = await this.keycloak.get_token();
-        if (name == 'users') {
-          await axios.delete('/api/experiments/'+inst.experiment+'/institutions/'+inst.institution+'/users/'+username, {
-            headers: {'Authorization': 'bearer '+token}
-          })
-        } else {
-          let data = {}
-          for (const key in inst.members) {
-            if (key == 'users')
-              continue
-            if (name == key) {
-              data[key] = false
-            } else if (inst.members[key].includes(username)) {
-              data[key] = true
-            }
-          }
-          await axios.put('/api/experiments/'+inst.experiment+'/institutions/'+inst.institution+'/users/'+username, data, {
-            headers: {'Authorization': 'bearer '+token}
-          })
-        }
+        await axios.put('/api/experiments/'+this.experiment+'/institutions/'+this.institution+'/users/'+username, groups, {
+          headers: {'Authorization': 'bearer '+token}
+        })
+        this.error = ""
+        this.refresh = this.refresh+1
+      } catch (error) {
+        this.error = "Error removing user: "+error['message']
+      }
+    },
+    removeMember: async function(username) {
+      if (username == '') {
+        this.error = "Error removing user: did not enter user name"
+        return
+      }
+
+      let confirm_msg = 'Are you sure you want to remove the user '+username+' from '+this.institution+'?';
+      if (!window.confirm(confirm_msg)) {
+        return
+      }
+
+      try {
+        const token = await this.keycloak.get_token();
+        await axios.delete('/api/experiments/'+this.experiment+'/institutions/'+this.institution+'/users/'+username, {
+          headers: {'Authorization': 'bearer '+token}
+        })
         this.error = ""
         this.refresh = this.refresh+1
       } catch (error) {
@@ -214,106 +226,92 @@ export default {
     }
   },
   template: `
-<article class="institutions">
+<div class="inst">
+  <h3>{{ experiment }} - {{ institution }}</h3>
   <div class="error_box red" v-if="error">{{ error }}</div>
-  <div v-if="$asyncComputed.approvals.success">
-    <h3>Users needing approval:</h3>
-    <div v-if="approvals.length > 0" class="indent">
-      <div class="inst" v-for="inst in approvals">
-        <h4>{{ inst["experiment"] }} - {{ inst["institution"] }}</h4>
-        <div class="user indent" v-for="approval in inst['users']">
-          <span class="newuser" v-if="'newuser' in approval">New</span>
-          <span class="username">{{ approval['username'] }}</span>
-          <span class="name" v-if="'first_name' in approval">{{ approval['first_name'] }} {{ approval['last_name'] }}</span>
-          <span class="author" v-if="'authorlist' in approval">Author</span>
-          <button @click="approve(approval)">Approve</button>
-          <button @click="deny(approval)">Deny</button>
-        </div>
+  <div class="indent" v-if="ready">
+    <h4>Users needing approval:</h4>
+    <div v-if="approvals.length > 0" class="indent approvals">
+      <div class="user" v-for="approval in approvals" :data-test="approval.username">
+        <span class="newuser" v-if="'newuser' in approval">New</span>
+        <span class="username">{{ approval['username'] }}</span>
+        <span class="name" v-if="'first_name' in approval">{{ approval['first_name'] }} {{ approval['last_name'] }}</span>
+        <span class="author" v-if="'authorlist' in approval">Author</span>
+        <button @click="approve(approval)" data-test="approve">Approve</button>
+        <button @click="deny(approval)" data-test="deny">Deny</button>
       </div>
     </div>
     <div v-else class="indent">No approvals waiting</div>
-  </div>
-  <div v-if="$asyncComputed.institutions.success">
-    <h3>Administered institutions:</h3>
-    <div class="inst" v-for="inst in institutions">
-      <h4>{{ inst.experiment }} - {{ inst.institution }}</h4>
-      <div class="indent">
-        <insttable :inst="inst" :addFunc="add" :updateFunc="update"></insttable>
-      </div>
+    <h4>Existing users:</h4>
+    <div class="insttable indent">
+      <table class="inst-members">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th v-for="(title, name) in members.groups">{{ title }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <instmember :username="username" :groups="groups" :group_names="members.groups"
+              :remove="removeMember" :update="updateMember"
+              v-for="(groups, username) in members.members">
+          </instmember>
+        </tbody>
+      </table>
+    </div>
+    <h4>Add user:</h4>
+    <div class="indent add">
+      <addinstuser :submit="addMember"></addinstuser>
     </div>
   </div>
-</article>`
-}
-
-
-Vue.component('insttable', {
-  data: function(){
-    return {
-      addFunc: null,
-      updateFunc: null,
-      deleteFunc: null,
-      inst: null,
-      name: ''
-    }
-  },
-  props: ['addFunc', 'updateFunc', 'deleteFunc', 'inst', 'name'],
-  computed: {
-    users: function(){
-      ret = {}
-      return ret
-    }
-  },
-  methods: {
-    add: function() {
-      this.addFunc(this.inst, this.name, this.username)
-    },
-    update: function(username) {
-      this.updateFunc(this.inst, this.name, this.username)
-    }
-  },
-  template: `
-<div class="insttable">
-  <table class="inst-members">
-    <thead>
-      <tr>
-        <th>Member</th>
-        <th v-for="(title, name) in inst.groups">{{ title }}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(groups, username) in inst.members">
-        <td>{{ username }} <span class="delete material-icons" @click="remove(inst, 'users', username)">delete_forever</span></td>
-        <td v-for="(title, name) in inst.groups"><input type="checkbox" v-model="groups[name]" /></td>
-        <td><button @click="update(username)">Update</button></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="indent add">
-    <addinstuser :addFunc="add" :inst="inst" :name="name"></addinstuser>
-  </div>
+  <div class="indent loading" v-else>Loading...</div>
 </div>`
 })
 
+Vue.component('instmember', {
+  data: function(){
+    return {
+      'username': '',
+      'groups': null,
+      'user_groups': {},
+      'remove': null,
+      'update': null
+    }
+  },
+  props: ['username', 'groups', 'group_names', 'remove', 'update'],
+  created: function() {
+    this.user_groups = Object.assign({}, this.groups)
+    console.log('user_groups:', this.user_groups)
+  },
+  computed: {
+    changed: function() {
+      let ret = false
+      for (const g in this.group_names) {
+        ret |= (this.groups[g] != this.user_groups[g])
+      }
+      return ret
+    }
+  },
+  template: `
+<tr :data-test="username">
+  <td><span class="username">{{ username }}</span> <span class="delete material-icons" @click="remove(username)">delete_forever</span></td>
+  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" /></td>
+  <td><button class="update" @click="update(username, user_groups)" v-if="changed">Update</button></td>
+</tr>`
+})
 
 Vue.component('addinstuser', {
   data: function(){
     return {
-      addFunc: null,
-      inst: null,
-      name: '',
+      submit: null,
       username: ''
     }
   },
-  props: ['addFunc', 'inst', 'name'],
-  methods: {
-    submit: function() {
-      this.addFunc(this.inst, this.name, this.username)
-    }
-  },
+  props: ['submit'],
   template: `
 <div>
-  Add user: <input v-model.trim="username" placeholder="username" @input="$emit('input', $event.target.value)" @keyup.enter="submit">
-  <button @click="submit">Add</button>
+  Username: <input name="username" v-model.trim="username" placeholder="username" @input="$emit('input', $event.target.value)" @keyup.enter="submit">
+  <button @click="submit(username)">Add</button>
 </div>`
 })

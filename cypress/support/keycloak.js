@@ -71,13 +71,18 @@ export default (params) => {
   }
 
   let inst_approvals = []
+  let inst_approvals_by_inst = {}
   for (const i in params.inst_approvals) {
+    inst_approvals_by_inst[i] = []
     for (const u of params.inst_approvals[i]) {
-      inst_approvals.push({
+      const approval = {
+        id: i+u+'-id',
         experiment: params.exp,
         institution: i,
         username: u
-      })
+      }
+      inst_approvals.push(approval)
+      inst_approvals_by_inst[i].push(approval)
     }
   }
 
@@ -99,7 +104,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: api_all_exps,
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-all-experiments')
 
   cy.intercept({
@@ -108,7 +112,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: [params.exp],
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-experiments')
 
   cy.intercept({
@@ -117,7 +120,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: Object.keys(api_insts).sort(),
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-institutions')
 
   cy.intercept({
@@ -159,7 +161,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: {},
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-institution-users-update')
 
   cy.intercept({
@@ -168,7 +169,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: {},
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-institution-users-delete')
 
   cy.intercept({
@@ -177,7 +177,31 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: inst_approvals,
-    headers: { 'access-control-allow-origin': '*' },
+  }).as('api-inst-approvals')
+
+  cy.intercept({
+    method: 'POST',
+    url: '/api/inst_approvals/*/actions/approve',
+  }, {
+    statusCode: 200,
+    body: {},
+  }).as('api-inst-approvals-approve')
+
+  cy.intercept({
+    method: 'POST',
+    url: '/api/inst_approvals/*/actions/deny',
+  }, {
+    statusCode: 200,
+    body: {},
+  }).as('api-inst-approvals-deny')
+
+  cy.intercept({
+    method: 'GET',
+    url: '/api/experiments/*/institutions/*/approvals',
+  }, (req) => {
+    const parts = req.url.split('/')
+    const inst = parts[parts.length-2]
+    req.reply({statusCode: 200, body: inst_approvals_by_inst[inst]})
   }).as('api-inst-approvals')
 
   cy.intercept({
@@ -186,7 +210,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: api_groups,
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-groups')
 
   cy.intercept({
@@ -220,7 +243,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: {},
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-group-user-delete')
 
   cy.intercept({
@@ -229,7 +251,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: {},
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-group-user-put')
 
   cy.intercept({
@@ -238,7 +259,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: group_approvals,
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-group-approvals')
 
   cy.intercept({
@@ -247,7 +267,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: {},
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-group-approvals-approve')
 
   cy.intercept({
@@ -256,7 +275,6 @@ export default (params) => {
   }, {
     statusCode: 200,
     body: {},
-    headers: { 'access-control-allow-origin': '*' },
   }).as('api-group-approvals-deny')
 
   const obj = {
