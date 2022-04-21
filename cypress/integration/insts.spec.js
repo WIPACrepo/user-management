@@ -13,10 +13,10 @@ context('Institutions Page', () => {
     cy.get('#nav li').should('have.length', 2)
 
     cy.get('.approvals [data-test="userC"]').should('exist')
-    cy.get('.approvals [data-test="approve"]').click()
+    cy.get('.approvals [data-test="approve"]').should('exist').click()
     cy.wait('@api-inst-approvals-approve').its('request.url').should('include', 'userC')
 
-    cy.get('.approvals [data-test="deny"]').click()
+    cy.get('.approvals [data-test="deny"]').should('exist').click()
     cy.wait('@api-inst-approvals-deny').its('request.url').should('include', 'userC')
   })
 
