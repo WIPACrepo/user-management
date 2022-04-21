@@ -41,12 +41,12 @@ context('Groups Page', () => {
     cy.get('[data-test="approvals"]').contains('groupA', {matchCase: false})
     cy.get('[data-test="approvals"]').within(() => {
       cy.get('[data-test="userB"]').should('exist')
-      cy.get('[data-test="userB"] [data-test="approve"]').click()
+      cy.get('[data-test="userB"] [data-test="approve"]').should('exist').click()
       cy.wait('@api-group-approvals-approve').its('request.url').should('include', 'userB')
     })
 
     cy.get('[data-test="approvals"]').within(() => {
-      cy.get('[data-test="userB"] [data-test="deny"]').click()
+      cy.get('[data-test="userB"] [data-test="deny"]').should('exist').click()
       cy.wait('@api-group-approvals-deny').its('request.url').should('include', 'userB')
     })
   })
