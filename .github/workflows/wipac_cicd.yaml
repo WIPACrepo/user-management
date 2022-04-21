@@ -1,6 +1,9 @@
 name: wipac ci/cd
 
-on: [push]
+on:
+  push:
+    tags-ignore:
+      - '**'
 
 jobs:
 
