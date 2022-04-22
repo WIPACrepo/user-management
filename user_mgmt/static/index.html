@@ -46,7 +46,7 @@ const keycloak_url = "{{ keycloak_url }}"
 const keycloak_realm = "{{ keycloak_realm }}"
 if (keycloak_url.startsWith('http')) {
   (async function() {
-    kc = keycloak(keycloak_url, keycloak_realm)
+    let kc = keycloak(keycloak_url, keycloak_realm)
     await kc.init()
     vue_startup(kc)
   })()
