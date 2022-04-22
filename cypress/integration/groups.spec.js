@@ -28,21 +28,26 @@ context('Groups Page', () => {
     })
   })
 
-  it('group approvals', () => {
+  it('group approvals approve', () => {
     cy.visit('/groups')
     keycloak({
       admin_groups: {'groupA': ['userA']},
       group_approvals: {'groupA': ['userB']}
     })
 
-    cy.get('#nav .active').contains('groups', {matchCase: false})
-    cy.get('#nav li').should('have.length', 2)
-
     cy.get('[data-test="approvals"]').contains('groupA', {matchCase: false})
     cy.get('[data-test="approvals"]').within(() => {
       cy.get('[data-test="userB"]').should('exist')
       cy.get('[data-test="userB"] [data-test="approve"]').should('exist').click()
       cy.wait('@api-group-approvals-approve').its('request.url').should('include', 'userB')
+    })
+  })
+
+  it('group approvals deny', () => {
+    cy.visit('/groups')
+    keycloak({
+      admin_groups: {'groupA': ['userA']},
+      group_approvals: {'groupA': ['userB']}
     })
 
     cy.get('[data-test="approvals"]').within(() => {
