@@ -34,14 +34,29 @@ context('Institutions Page', () => {
       cy.get('button.update').should('exist').click()
       cy.wait('@api-institution-users-update').should(({ request, response }) => {
         expect(request.url).to.include('userA')
-        expect(request.body).to.include({
+        expect(request.body).to.deep.eq({
           "authorlist-physics": true,
           "authorlist-astro": true
         })
       })
     })
+  })
+
+  it('inst delete user', () => {
+    cy.visit('/institutions')
+    keycloak({
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
+    })
+
     cy.get('[data-test="userA"] .delete').click()
     cy.wait('@api-institution-users-delete').its('request.url').should('include', 'userA')
+  })
+
+  it('inst add user group', () => {
+    cy.visit('/institutions')
+    keycloak({
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
+    })
 
     cy.get('[data-test="userB"]').within(() => {
       cy.get('.username').contains('userB', {matchCase: false})
@@ -51,9 +66,29 @@ context('Institutions Page', () => {
       cy.get('button.update').should('exist').click()
       cy.wait('@api-institution-users-update').should(({ request, response }) => {
         expect(request.url).to.include('userB')
-        expect(request.body).to.include({
+        expect(request.body).to.deep.eq({
           "authorlist-physics": false,
           "authorlist-astro": true
+        })
+      })
+    })
+  })
+
+  it('inst add user group', () => {
+    cy.visit('/institutions')
+    keycloak({
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist":['userA']}}
+    })
+
+    cy.get('[data-test="userA"]').within(() => {
+      cy.get('.username').contains('userA', {matchCase: false})
+      cy.get('button.update').should('not.exist')
+      cy.get('input[name=authorlist]').should('be.checked').uncheck()
+      cy.get('button.update').should('exist').click()
+      cy.wait('@api-institution-users-update').should(({ request, response }) => {
+        expect(request.url).to.include('userA')
+        expect(request.body).to.deep.eq({
+          "authorlist": false
         })
       })
     })
