@@ -84,14 +84,20 @@ Vue.component('inst', {
           console.log('users raw', ret.data)
           let entry = {groups: {}, members: {}}
           for (const key in ret.data) {
-            if (key != 'users') {
-              entry.groups[key] = key.replace(/-/g, ' - ')
-            }
-            for (const username of ret.data[key]) {
-              if (!(username in entry.members)) {
-                entry.members[username] = {}
+            if (key == 'users') {
+              for (const username of ret.data.users) {
+                if (!(username in entry.members)) {
+                  entry.members[username] = {}
+                }
               }
-              entry.members[username][key] = true
+            } else {
+              entry.groups[key] = key.replace(/-/g, ' - ')
+              for (const username of ret.data[key]) {
+                if (!(username in entry.members)) {
+                  entry.members[username] = {}
+                }
+                entry.members[username][key] = true
+              }
             }
           }
           for (let username in entry.members) {
