@@ -406,7 +406,7 @@ export default {
   </div>
   <div v-else>
     <h3>Welcome to the IceCube Neutrino Observatory identity management console.</h3>
-    <p>Existing users should <span style="font-size: 150%"><login></login></span></p>
+    <p>Existing users should <span style="font-size: 150%"><login :keycloak="keycloak"></login></span></p>
     <p>New users should ask their PI for a registration link.</p>
   </div>
 </article>`
