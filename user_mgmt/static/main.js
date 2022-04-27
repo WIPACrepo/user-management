@@ -98,7 +98,7 @@ Vue.component('login', {
   methods: {
     login: async function() {
       console.log('login')
-      await this.keycloak.login({redirectUri:window.location})
+      await this.keycloak.login(window.location)
     }
   },
   template: `<span class="login-link" @click="login">{{ name }}</span>`
