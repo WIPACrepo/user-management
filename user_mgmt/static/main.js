@@ -230,16 +230,19 @@ export default async function vue_startup(keycloak){
       visibleRoutes: async function() {
         var current = this.current;
         var ret = []
+        const authenticated = keycloak.authenticated()
         for (const r of this.routes) {
           if (r.path[0] == '*')
             continue
-          if (r.path.startsWith('/register') && current != 'register')
+          if (r.path.startsWith('/register') && current != 'register' && authenticated) {
+            console.log('skipping register route')
             continue
+          }
           if (krs_debug !== true && r.meta && r.meta.testing) {
             console.log('skipping route because this is only for testing')
             continue
           }
-          if (r.meta && r.meta.requiresAuth && !keycloak.authenticated()) {
+          if (r.meta && r.meta.requiresAuth && !authenticated) {
             console.log('skipping route because we are not authenticated')
             continue
           }

@@ -248,7 +248,7 @@ Vue.component('inst', {
       </div>
     </div>
     <div v-else class="indent">No approvals waiting</div>
-    <h4>Existing users:</h4>
+    <h4>Institution members:</h4>
     <div class="insttable indent">
       <table class="inst-members">
         <thead>
@@ -269,6 +269,10 @@ Vue.component('inst', {
     <h4>Add user:</h4>
     <div class="indent add">
       <addinstuser :submit="addMember"></addinstuser>
+    </div>
+    <div class="indent add">
+      New user:
+      <router-link :to="{name: 'register', experiment: experiment, institution: institution}">Register</router-link>
     </div>
   </div>
   <div class="indent loading" v-else>Loading...</div>
@@ -317,7 +321,7 @@ Vue.component('addinstuser', {
   props: ['submit'],
   template: `
 <div>
-  Username: <input name="username" v-model.trim="username" placeholder="username" @input="$emit('input', $event.target.value)" @keyup.enter="submit">
+  Existing user by username: <input name="username" v-model.trim="username" placeholder="username" @input="$emit('input', $event.target.value)" @keyup.enter="submit">
   <button @click="submit(username)">Add</button>
 </div>`
 })

@@ -404,10 +404,10 @@ export default {
       </div>
     </div>
   </div>
-  <div v-else>
+  <div v-else class="welcome">
     <h3>Welcome to the IceCube Neutrino Observatory identity management console.</h3>
-    <p>Existing users should <span style="font-size: 150%"><login :keycloak="keycloak"></login></span></p>
-    <p>New users should ask their PI for a registration link.</p>
+    <p>Existing users should <login :keycloak="keycloak"></login>.</p>
+    <p>New users should <router-link :to="{name: 'register'}">register</router-link>.</p>
   </div>
 </article>`
 }

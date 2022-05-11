@@ -7,7 +7,7 @@ context('Home Page', () => {
     keycloak({authenticated: false})
 
     cy.get('#nav .active').contains('home', {matchCase: false})
-    cy.get('#nav li').should('have.length', 1)
+    cy.get('#nav li').contains('institutions', {matchCase: false}).should('not.exist')
 
     cy.get('.account .login-link').should('contain', 'Sign in')
 
@@ -22,7 +22,6 @@ context('Home Page', () => {
     keycloak()
 
     cy.get('#nav .active').contains('home', {matchCase: false})
-    cy.get('#nav li').should('have.length', 1)
 
     cy.get('.account').should('include.text', 'Foo Bar')
     cy.get('.account .login-link').should('contain', 'Sign out')
@@ -37,8 +36,6 @@ context('Home Page', () => {
     cy.visit('/')
     keycloak({insts: ['instA'], groups: ['groupB']})
 
-    cy.get('#nav li').should('have.length', 1)
-
     cy.get('.institution').should('include.text', 'instA')
     cy.get('.group').should('include.text', 'groupB')
   })
@@ -47,7 +44,7 @@ context('Home Page', () => {
     cy.visit('/')
     keycloak({admin_insts: {instA:['user']}, admin_groups: {groupB:['user']}})
 
-    cy.get('#nav li').should('have.length', 3)
+    cy.get('#nav li').contains('institutions', {matchCase: false}).should('exist')
 
     cy.get('.account').should('exist')
   })

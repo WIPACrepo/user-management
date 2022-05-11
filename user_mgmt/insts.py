@@ -394,10 +394,10 @@ class InstApprovalsActionApprove(MyHandler):
                 "first_name": user_data['first_name'],
                 "last_name": user_data['last_name'],
                 "email": user_data['external_email'],
-                "attribs": {
-                    "author_name": user_data['author_name'],
-                },
+                "attribs": {},
             }
+            if user_data.get('author_name', ''):
+                args['attribs']['author_name'] = user_data['author_name']
             await krs.users.create_user(rest_client=self.krs_client, **args)
             password = ''.join(random.choices(string.ascii_letters+string.digits, k=16))
             await krs.users.set_user_password(args['username'], password, temporary=True, rest_client=self.krs_client)
