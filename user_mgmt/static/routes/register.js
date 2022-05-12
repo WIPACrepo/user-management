@@ -9,7 +9,6 @@ export default {
       institution: '',
       firstName: '',
       lastName: '',
-      authorListName: '',
       email: '',
       valid: true,
       errMessage: '',
@@ -24,11 +23,18 @@ export default {
     validLastName: function() {
       return this.lastName
     },
-    validAuthorListName: function() {
-      return this.authorListName
-    },
     validEmail: function() {
       return this.email.indexOf('@',1) > 0
+    },
+    institutions: function() {
+      try {
+        if (this.$asyncComputed.experiments.success && this.experiment in this.experiments) {
+          console.log('experiments', this.experiments)
+          console.log('institutions', this.experiments[this.experiment])
+          return this.experiments[this.experiment]
+        }
+      } catch(e) { }
+      return {}
     }
   },
   asyncComputed: {
@@ -46,21 +52,13 @@ export default {
         return false
       }
     },
-    experiments: get_all_inst_subgroups,
-    institutions: function() {
-      try {
-        return this.experiments[this.experiment]
-      } catch(error) {
-        return {}
-      }
-    }
+    experiments: get_all_inst_subgroups
   },
   methods: {
       submit: async function(e) {
           // validate
           this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
-                  && this.validLastName && (!this.authorListName || this.validAuthorListName)
-                  && this.validEmail)
+                  && this.validLastName && this.validEmail)
 
           // now submit
           if (this.valid) {
@@ -71,7 +69,6 @@ export default {
                       institution: this.institution,
                       first_name: this.firstName,
                       last_name: this.lastName,
-                      author_name: this.authorListName,
                       email: this.email
                   });
                   console.log('Response:')
@@ -107,7 +104,7 @@ export default {
       </div>
       <div class="entry">
         <p>Select your experiment: <span class="red">*</span></p>
-        <select v-model="experiment">
+        <select v-model="experiment" data-test="experiment">
           <option disabled value="">Please select one</option>
           <option v-for="exp in Object.keys(experiments).sort()">{{ exp }}</option>
         </select>
@@ -115,23 +112,22 @@ export default {
       </div>
       <div class="entry">
         <p>Select your institution: <span class="red">*</span></p>
-        <select v-model="institution">
+        <select v-model="institution" :disabled="Object.keys(institutions).length < 1" data-test="institution">
           <option disabled value="">Please select one</option>
           <option v-for="inst in Object.keys(institutions).sort()">{{ inst }}</option>
         </select>
         <span class="red" v-if="!valid && !validInstitution">invalid entry</span>
+        <div class="help">Note: You cannot select your institution until you've selected your experiment</div>
       </div>
       <textinput name="First Name" inputName="first_name" v-model.trim="firstName"
        required=true :valid="validFirstName" :allValid="valid"></textinput>
       <textinput name="Last Name" inputName="last_name" v-model.trim="lastName"
        required=true :valid="validLastName" :allValid="valid"></textinput>
-      <textinput name="Author List Name (usually abbreviated)" inputName="authorname"
-       v-model.trim="authorListName" :valid="validAuthorListName" :allValid="valid"></textinput>
-      <textinput name="Email Address" inputName="email" v-model.trim="email"
+      <textinput name="External Email Address" inputName="email" v-model.trim="email"
        required=true :valid="validEmail" :allValid="valid"></textinput>
       <div v-if="errMessage" class="error_box" v-html="errMessage"></div>
       <div class="entry" v-if="!submitted">
-        <input type="submit" value="Submit Registration">
+        <input type="submit" data-test="submit" value="Submit Registration">
       </div>
     </form>
 </article>`

@@ -125,6 +125,9 @@ article {
     margin: 1em 0 2em;
 }
 
+article.home .welcome {
+    font-size: 150%;
+}
 article.home div.join {
     margin: 1em 0;
 }
@@ -135,6 +138,11 @@ article.home button {
 article.home div.institution, article.home div.group {
     padding: 0.5em 0;
     border-bottom: 1px dotted black;
+}
+
+article.register .help {
+    font-size: 90%;
+    margin: .2em 0;
 }
 
 article.institutions .inst, article.groups .group {

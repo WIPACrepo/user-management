@@ -181,6 +181,13 @@ export default (params) => {
 
   cy.intercept({
     method: 'POST',
+    url: '/api/inst_approvals',
+  }, {
+    statusCode: 200,
+  }).as('api-inst-approvals-post')
+
+  cy.intercept({
+    method: 'POST',
     url: '/api/inst_approvals/*/actions/approve',
   }, {
     statusCode: 200,
