@@ -9,6 +9,7 @@ const Home = () => import('./routes/home.js')
 const UserInfo = () => import('./routes/userinfo.js')
 const Register = () => import('./routes/register.js')
 const Insts = () => import('./routes/insts.js')
+const UserProfile = () => import('./routes/userprofile.js')
 const Groups = () => import('./routes/groups.js')
 const Error404 = () => import('./routes/error404.js')
 
@@ -196,6 +197,9 @@ export default async function vue_startup(keycloak){
     { path: '/institutions', name: 'Institutions', component: Insts,
       props: {keycloak: keycloak}, meta: { requiresAuth: true, requiresInstAdmin: true }
     },
+    { path: '/userprofile', name: 'User Profile', component: UserProfile,
+      props: {keycloak: keycloak}, meta: { requiresAuth: true, requiresInstAdmin: true }
+    },
     { path: '/groups', name: 'Groups', component: Groups,
       props: {keycloak: keycloak}, meta: { requiresAuth: true, requiresGroupAdmin: true }
     },
@@ -236,6 +240,10 @@ export default async function vue_startup(keycloak){
             continue
           if (r.path.startsWith('/register') && current != 'register' && authenticated) {
             console.log('skipping register route')
+            continue
+          }
+          if (r.path.startsWith('/userprofile') && current != 'User Profile') {
+            console.log('skipping userprofile route')
             continue
           }
           if (krs_debug !== true && r.meta && r.meta.testing) {

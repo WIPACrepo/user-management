@@ -189,3 +189,77 @@ export async function get_all_groups(keycloak) {
     return {}
   }
 };
+
+// mixin for profile
+export var profileMixin = {
+  data: function() {
+    return {
+      keycloak: null,
+      error: null,
+      form_fields: {},
+      field_names: {
+        'firstName': null,
+        'lastName': null,
+        'email': 'External email (for password resets)',
+        'author_name': 'Short author name (F. Last)',
+        'author_firstName': 'Override first name for author lists',
+        'author_lastName': 'Override last name for author lists',
+        'author_email': 'Override email for author lists',
+        'orcid': 'ORCID code (0000-0000-0000-0000)'
+      }
+    }
+  },
+  props: ['username', 'keycloak'],
+  created: function() {
+    this.download()
+  },
+  methods: {
+    download: async function(){
+      if (!this.keycloak.authenticated())
+        return
+      try {
+        const token = await this.keycloak.get_token()
+        const resp = await axios.get('/api/users/'+this.username, {
+          headers: {'Authorization': 'bearer '+token}
+        })
+        console.log('/api/users/XXX ret:', resp.data)
+        let newfields = {}
+        for (const k in this.field_names) {
+          if (k in resp.data) {
+            console.log('set form field '+k+' to '+resp.data[k])
+            newfields[k] = resp.data[k]
+          } else {
+            newfields[k] = ''
+          }
+        }
+        this.form_fields = newfields
+        this.error = null
+      } catch(error) {
+        this.error = 'Error: '+error
+        console.log(error)
+      }
+    },
+    update: async function() {
+      try {
+        const token = await this.keycloak.get_token()
+        await axios.put('/api/users/'+this.username, this.form_fields, {
+          headers: {'Authorization': 'bearer '+token}
+        })
+        this.error = null
+      } catch(error) {
+        this.error = 'Error: '+error
+        console.log(error)
+      }
+    }
+  },
+  template: `
+<div class="profile indent">
+  <div class="field" v-for="val, key in field_names">
+    <label for="key">{{ key }}</label>
+    <input type="text" v-model="form_fields[key]" :name="key" />
+    <div class="help" v-if="val != null">{{ val }}</div>
+  </div>
+  <button @click="update" data-test="submit">Update</button>
+  <div class="error" v-if="error">{{ error }}</div>
+</div>`
+};

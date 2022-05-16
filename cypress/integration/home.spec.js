@@ -23,9 +23,6 @@ context('Home Page', () => {
 
     cy.get('#nav .active').contains('home', {matchCase: false})
 
-    cy.get('.account').should('include.text', 'Foo Bar')
-    cy.get('.account .login-link').should('contain', 'Sign out')
-
     cy.get('article.home .join button').should('exist')
 
     cy.get('.account .login-link').click()
@@ -47,5 +44,32 @@ context('Home Page', () => {
     cy.get('#nav li').contains('institutions', {matchCase: false}).should('exist')
 
     cy.get('.account').should('exist')
+  })
+
+  it('user profile', () => {
+    cy.visit('/')
+    keycloak({user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar'}})
+
+    cy.get('.account').should('exist')
+
+    cy.get('.profile').should('exist')
+
+    cy.get('.profile [name="orcid"]').should('exist').type('1234-1234-1234-1234')
+    cy.get('.profile button').click()
+
+    
+    cy.wait('@api-user-profile-put').should(({ request, response }) => {
+      expect(request.url).to.include('user')
+      expect(request.body).to.deep.eq({
+        'firstName': 'Foo',
+        'lastName': 'Bar',
+        'email': 'foo@bar',
+        'author_name': 'F. Bar',
+        'author_firstName': '',
+        'author_lastName': '',
+        'author_email': '',
+        'orcid': '1234-1234-1234-1234'
+      })
+    })
   })
 })

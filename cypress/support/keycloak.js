@@ -13,7 +13,7 @@ export default (params) => {
     group_approvals: {},    // group approvals = {groupname: [users]}
     authenticated: true,    // is user logged in?
     username: 'user',
-    given_name: 'Foo Bar'
+    user_profile: {'firstName': 'Foo', 'lastName': 'Bar', 'email': 'foo@bar'},
   }, params)
 
   let raw_groups = []
@@ -284,6 +284,22 @@ export default (params) => {
     body: {},
   }).as('api-group-approvals-deny')
 
+  cy.intercept({
+    method: 'GET',
+    url: '/api/users/*',
+  }, {
+    statusCode: 200,
+    body: params.user_profile,
+  }).as('api-user-profile')
+
+  cy.intercept({
+    method: 'PUT',
+    url: '/api/users/*',
+  }, {
+    statusCode: 200,
+    body: {},
+  }).as('api-user-profile-put')
+
   const obj = {
     authenticated: () => params.authenticated,
     login: async function(){},
@@ -294,7 +310,8 @@ export default (params) => {
       groups: raw_groups
     }},
     get_userInfo: async function(){
-      return {given_name: params.given_name}
+      return {given_name: params.user_profile.firstName,
+              family_name: params.user_profile.lastName}
     }
   }
   cy.spy(obj, 'login').as('login')
