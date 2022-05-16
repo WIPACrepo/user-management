@@ -46,7 +46,7 @@ context('Home Page', () => {
     cy.get('.account').should('exist')
   })
 
-  it.only('user profile', () => {
+  it('user profile', () => {
     cy.visit('/')
     keycloak({user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar'}})
 

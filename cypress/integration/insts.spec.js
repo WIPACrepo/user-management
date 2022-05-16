@@ -107,4 +107,33 @@ context('Institutions Page', () => {
     cy.get('.add button').click()
     cy.wait('@api-institution-users-update').its('request.url').should('include', 'userD')
   })
+
+  it('inst edit user profile', () => {
+    cy.visit('/institutions')
+    keycloak({
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
+      user_profile: {'firstName': 'Foo', 'lastName': 'Bar', 'email': 'foo@bar', 'orcid': '0000-0000-0000-0000'}
+    })
+
+    cy.get('[data-test="userA"] .profile').click()
+    
+    cy.get('.profile').should('exist')
+
+    cy.get('.profile [name="orcid"]').should('have.value', '0000-0000-0000-0000').type('{selectAll}{del}1234-1234-1234-1234')
+    cy.get('.profile button').click()
+
+    cy.wait('@api-user-profile-put').should(({ request, response }) => {
+      expect(request.url).to.include('userA')
+      expect(request.body).to.deep.eq({
+        'firstName': 'Foo',
+        'lastName': 'Bar',
+        'email': 'foo@bar',
+        'author_name': '',
+        'author_firstName': '',
+        'author_lastName': '',
+        'author_email': '',
+        'orcid': '1234-1234-1234-1234'
+      })
+    })
+  })
 })

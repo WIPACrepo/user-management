@@ -229,6 +229,9 @@ Vue.component('inst', {
       } catch (error) {
         this.error = "Error removing user: "+error['message']
       }
+    },
+    go_to_profile: function(username) {
+      this.$router.push({path: "/userprofile", query: {username: username}})
     }
   },
   template: `
@@ -260,7 +263,7 @@ Vue.component('inst', {
         </thead>
         <tbody>
           <instmember :username="username" :groups="groups" :group_names="members.groups"
-              :remove="removeMember" :update="updateMember"
+              :remove="removeMember" :update="updateMember" :profile="go_to_profile"
               v-for="(groups, username) in members.members">
           </instmember>
         </tbody>
@@ -289,7 +292,7 @@ Vue.component('instmember', {
       'update': null
     }
   },
-  props: ['username', 'groups', 'group_names', 'remove', 'update'],
+  props: ['username', 'groups', 'group_names', 'remove', 'update', 'profile'],
   created: function() {
     this.user_groups = Object.assign({}, this.groups)
     console.log('user_groups:', this.user_groups)
@@ -307,7 +310,7 @@ Vue.component('instmember', {
 <tr :data-test="username">
   <td><span class="username">{{ username }}</span> <span class="delete material-icons" @click="remove(username)">delete_forever</span></td>
   <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" /></td>
-  <td><button class="update" @click="update(username, user_groups)" v-if="changed">Update</button></td>
+  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed">Update</button></td>
 </tr>`
 })
 

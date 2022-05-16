@@ -131,21 +131,27 @@ article.home .welcome {
 article.home div.join {
     margin: 1em 0;
 }
-article.home .profile .field {
+article.home .profile .field,
+article.userprofile .profile .field {
     margin: 0.4em 0;
 }
-article.home .profile label {
+article.home .profile label,
+article.userprofile .profile label {
     min-width: 8em;
     display: inline-block;
 }
-article.home .profile input {
+article.home .profile input,
+article.userprofile .profile input {
     padding: .1em;
 }
 article.home .profile .help,
-article.home .profile button  {
+article.home .profile button,
+article.userprofile .profile .help,
+article.userprofile .profile button  {
     margin-left: 8.2em;
 }
-article.home button {
+article.home button,
+article.userprofile button {
     margin: 0.2em 1em;
     padding: 0.2em;
 }
@@ -204,6 +210,9 @@ article.institutions .inst .inst-members tbody td:last-child {
 article.institutions .inst .inst-members tbody .delete {
     cursor: pointer;
     vertical-align: bottom;
+}
+article.institutions .inst .inst-members tbody td.actions {
+    text-align: left;
 }
 article.institutions .inst h4 {
     margin: 1em 0 .3em;

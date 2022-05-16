@@ -195,6 +195,7 @@ export var profileMixin = {
   data: function() {
     return {
       keycloak: null,
+      error: null,
       form_fields: {},
       field_names: {
         'firstName': null,
@@ -232,7 +233,9 @@ export var profileMixin = {
           }
         }
         this.form_fields = newfields
+        this.error = null
       } catch(error) {
+        this.error = 'Error: '+error
         console.log(error)
       }
     },
@@ -242,7 +245,9 @@ export var profileMixin = {
         await axios.put('/api/users/'+this.username, this.form_fields, {
           headers: {'Authorization': 'bearer '+token}
         })
+        this.error = null
       } catch(error) {
+        this.error = 'Error: '+error
         console.log(error)
       }
     }
@@ -255,5 +260,6 @@ export var profileMixin = {
     <div class="help" v-if="val != null">{{ val }}</div>
   </div>
   <button @click="update" data-test="submit">Update</button>
+  <div class="error" v-if="error">{{ error }}</div>
 </div>`
 };
