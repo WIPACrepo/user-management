@@ -137,7 +137,7 @@ article.userprofile .profile .field {
 }
 article.home .profile label,
 article.userprofile .profile label {
-    min-width: 8em;
+    min-width: 10em;
     display: inline-block;
 }
 article.home .profile input,
@@ -148,7 +148,7 @@ article.home .profile .help,
 article.home .profile button,
 article.userprofile .profile .help,
 article.userprofile .profile button  {
-    margin-left: 8.2em;
+    margin-left: 10.3em;
 }
 article.home button,
 article.userprofile button {
