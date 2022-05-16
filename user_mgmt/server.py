@@ -21,6 +21,7 @@ from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
+from .users import User
 
 
 class Error(RequestHandler):
@@ -108,6 +109,8 @@ def create_server():
     server.add_route('/api/group_approvals', GroupApprovals, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/approve', GroupApprovalsActionApprove, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/deny', GroupApprovalsActionDeny, kwargs)
+
+    server.add_route(r'/api/users/(?P<username>\w+)', User, kwargs)
 
     server.add_route(r'/api/(.*)', Error)
     server.add_route(r'/(.*)', Main, main_args)
