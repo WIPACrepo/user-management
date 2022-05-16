@@ -1,6 +1,6 @@
 /** Home route **/
 
-import {get_my_experiments, get_my_institutions, get_my_groups, get_all_inst_subgroups, get_all_groups} from '../helpers.js'
+import {get_username, get_my_experiments, get_my_institutions, get_my_groups, get_all_inst_subgroups, get_all_groups, profileMixin} from '../helpers.js'
 
 export default {
   data: function(){
@@ -21,6 +21,9 @@ export default {
   },
   props: ['keycloak'],
   asyncComputed: {
+    my_username: async function() {
+      return await get_username(this.keycloak)
+    },
     my_experiments: {
       get: async function(){
         let exps = await get_my_experiments(this.keycloak)
@@ -315,6 +318,7 @@ export default {
   <div v-if="keycloak.authenticated()">
     <h2 style="margin-bottom: 1em">My profile:</h2>
     <div class="error_box" v-if="error" v-html="error"></div>
+    <my-profile :username="my_username" :keycloak="keycloak" v-if="my_username"></my-profile>
     <h3>Experiments / Institutions</h3>
     <div v-if="$asyncComputed.my_experiments.success">
       <div class="indent" v-for="exp in Object.keys(my_experiments).sort()">
@@ -411,3 +415,7 @@ export default {
   </div>
 </article>`
 }
+
+Vue.component('my-profile', {
+  mixins: [profileMixin]
+})

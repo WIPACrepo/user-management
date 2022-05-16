@@ -131,6 +131,20 @@ article.home .welcome {
 article.home div.join {
     margin: 1em 0;
 }
+article.home .profile .field {
+    margin: 0.4em 0;
+}
+article.home .profile label {
+    min-width: 8em;
+    display: inline-block;
+}
+article.home .profile input {
+    padding: .1em;
+}
+article.home .profile .help,
+article.home .profile button  {
+    margin-left: 8.2em;
+}
 article.home button {
     margin: 0.2em 1em;
     padding: 0.2em;

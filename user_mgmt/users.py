@@ -107,7 +107,8 @@ class User(MyHandler):
         args = {}
         for k,v in {'firstName': 'first_name', 'lastName': 'last_name', 'email': 'email'}.items():
             if k in data:
-                args[v] = data.pop(k)
+                val = data.pop(k)
+                args[v] = None if not val else val
         assert all(k.startswith('author_') or k in ('orcid',) for k in data)
         args['attribs'] = data
 
