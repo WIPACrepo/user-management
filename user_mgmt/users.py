@@ -97,7 +97,7 @@ class User(MyHandler):
         await self.check_auth(username)
 
         try:
-            user_info = await krs.users.user_info(username, rest_client=self.krs_client)
+            await krs.users.user_info(username, rest_client=self.krs_client)
         except Exception:
             raise HTTPError(404, 'invalid username')
 
