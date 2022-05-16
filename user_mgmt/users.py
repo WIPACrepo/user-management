@@ -2,7 +2,6 @@
 Handle user profile updates.
 """
 import logging
-import uuid
 
 from tornado.web import HTTPError
 from rest_tools.server import catch_error, authenticated
@@ -38,7 +37,7 @@ class User(MyHandler):
     async def check_auth(self, username):
         """
         Check auth
-        
+
         Should match either as the user in question, or an admin of an
         institution they are a member of.
         """
@@ -50,7 +49,7 @@ class User(MyHandler):
                 raise HTTPError(404, 'invalid username')
             if not is_admin_of_inst_member(insts, user_groups):
                 raise HTTPError(403, 'invalid authorization')
-    
+
     @authenticated
     @catch_error
     async def get(self, username):
@@ -113,7 +112,7 @@ class User(MyHandler):
         args['attribs'] = data
 
         try:
-            user_info = await krs.users.modify_user(username, **args, rest_client=self.krs_client)
+            await krs.users.modify_user(username, **args, rest_client=self.krs_client)
         except Exception:
             raise HTTPError(400, 'bad update')
 
