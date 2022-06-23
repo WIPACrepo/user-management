@@ -203,6 +203,7 @@ export var profileMixin = {
         'email': 'External email (for password resets)',
         'github': 'GitHub username',
         'slack': 'Slack username',
+        'mobile': 'Phone / mobile number',
         'author_name': 'Short author name (F. Last)',
         'author_firstName': 'Override first name for author lists',
         'author_lastName': 'Override last name for author lists',

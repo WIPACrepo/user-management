@@ -16,6 +16,9 @@ VALID_FIELDS = {
     'firstName': str,
     'lastName': str,
     'email': str,
+    'github': str,
+    'slack': str,
+    'mobile': str,
     'author_name': str,
     'author_firstName': str,
     'author_lastName': str,
@@ -76,7 +79,7 @@ class User(MyHandler):
             profile[k] = user_info[k]
         attrs = user_info.get('attributes', {})
         for k in attrs:
-            if k.startswith('author_') or k in ('orcid',):
+            if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile'):
                 profile[k] = attrs[k]
         logging.info('profile: %r', profile)
 
@@ -108,7 +111,7 @@ class User(MyHandler):
             if k in data:
                 val = data.pop(k)
                 args[v] = None if not val else val
-        assert all(k.startswith('author_') or k in ('orcid',) for k in data)
+        assert all(k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile') for k in data)
         args['attribs'] = data
 
         try:
