@@ -132,7 +132,9 @@ context('Institutions Page', () => {
         'author_firstName': '',
         'author_lastName': '',
         'author_email': '',
-        'orcid': '1234-1234-1234-1234'
+        'orcid': '1234-1234-1234-1234',
+        'github': '',
+        'slack': ''
       })
     })
   })
