@@ -70,7 +70,8 @@ context('Home Page', () => {
         'author_email': '',
         'orcid': '1234-1234-1234-1234',
         'github': '',
-        'slack': ''
+        'slack': '',
+        'mobile': ''
       })
     })
   })
