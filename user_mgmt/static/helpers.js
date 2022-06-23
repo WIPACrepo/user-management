@@ -201,6 +201,8 @@ export var profileMixin = {
         'firstName': null,
         'lastName': null,
         'email': 'External email (for password resets)',
+        'github': 'GitHub username',
+        'slack': 'Slack username',
         'author_name': 'Short author name (F. Last)',
         'author_firstName': 'Override first name for author lists',
         'author_lastName': 'Override last name for author lists',
