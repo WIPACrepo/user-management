@@ -6,7 +6,6 @@ import uuid
 import random
 import string
 
-import unidecode
 from tornado.web import HTTPError
 from rest_tools.server import catch_error, authenticated
 

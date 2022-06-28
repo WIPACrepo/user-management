@@ -32,7 +32,7 @@ VALID_FIELDS = {
 BAD_WORDS = []
 if 'BAD_WORDS_FILE' in os.environ:
     with open(os.environ['BAD_WORDS_FILE']) as f:
-        BAD_WORDS = [x for x in map(lamba x: x.split('#', 1)[0].strip(), f.read().split('\n')) if x]
+        BAD_WORDS = [x for x in map(lambda x: x.split('#', 1)[0].strip(), f.read().split('\n')) if x]
 
 
 def is_admin_of_inst_member(admin_insts, user_groups):
