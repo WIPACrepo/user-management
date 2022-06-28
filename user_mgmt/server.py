@@ -113,7 +113,7 @@ def create_server():
 
     server.add_route(r'/api/users', MultiUser, kwargs)
     server.add_route(r'/api/users/(?P<username>\w+)', User, kwargs)
-    server.add_round('/api/username', Username, kwargs)
+    server.add_route('/api/username', Username, kwargs)
 
     server.add_route(r'/api/(.*)', Error)
     server.add_route(r'/(.*)', Main, main_args)
