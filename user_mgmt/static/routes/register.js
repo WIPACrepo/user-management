@@ -9,6 +9,7 @@ export default {
       institution: '',
       firstName: '',
       lastName: '',
+      username: '',
       email: '',
       valid: true,
       errMessage: '',
@@ -38,6 +39,7 @@ export default {
     }
   },
   asyncComputed: {
+    experiments: get_all_inst_subgroups,
     validExperiment: function() {
       try {
         return this.experiment != '' && this.experiments !== null && this.experiment in this.experiments
@@ -52,13 +54,45 @@ export default {
         return false
       }
     },
-    experiments: get_all_inst_subgroups
+    validUsername: async function() {
+      if (!(this.validFirstName && this.validLastName)) {
+        return true
+      }
+      try {
+        let args = {
+            first_name: this.firstName,
+            last_name: this.lastName
+        }
+        if (this.username != '') {
+          args.username = this.username
+        }
+        const resp = await axios.post('/api/username', args);
+        if (this.username != resp.data['username']) {
+          this.username = resp.data['username']
+        }
+        return true
+      } catch(error) {
+        console.log(error)
+        let error_message = 'undefined error';
+        if (error.response) {
+            if ('error' in error.response.data) {
+                error_message = 'Message: '+error.response.data['error'];
+            } else {
+                error_message = JSON.stringify(error.response.data)
+            }
+        } else if (error.request) {
+            error_message = 'server did not respond';
+        }
+        this.errMessage = '<span class="red">Invalid username<br>'+error_message+'</span>'
+        return false
+      }
+    }
   },
   methods: {
       submit: async function(e) {
           // validate
           this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
-                  && this.validLastName && this.validEmail)
+                  && this.validLastName && this.validUsername && this.validEmail)
 
           // now submit
           if (this.valid) {
@@ -69,6 +103,7 @@ export default {
                       institution: this.institution,
                       first_name: this.firstName,
                       last_name: this.lastName,
+                      username: this.username,
                       email: this.email
                   });
                   console.log('Response:')
@@ -123,6 +158,8 @@ export default {
        required=true :valid="validFirstName" :allValid="valid"></textinput>
       <textinput name="Last Name" inputName="last_name" v-model.trim="lastName"
        required=true :valid="validLastName" :allValid="valid"></textinput>
+      <textinput name="Username" inputName="username" v-model.trim="username"
+       required=true :valid="validUsername" :allValid="valid"></textinput>
       <textinput name="External Email Address" inputName="email" v-model.trim="email"
        required=true :valid="validEmail" :allValid="valid"></textinput>
       <div v-if="errMessage" class="error_box" v-html="errMessage"></div>
