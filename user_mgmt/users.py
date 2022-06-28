@@ -6,6 +6,7 @@ import logging
 
 from tornado.web import HTTPError
 from rest_tools.server import catch_error, authenticated
+import unidecode
 
 import krs.users
 import krs.groups
@@ -112,7 +113,7 @@ class Username(MyHandler):
             # make sure username passes filters
             if not self._username_valid(username):
                 raise HTTPError(400, 'invalid username')
-    
+
             # make sure username does not exist
             if await self._username_in_use(username):
                 raise HTTPError(400, 'username in use')
