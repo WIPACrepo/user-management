@@ -118,7 +118,7 @@ class Username(MyHandler):
             if await self._username_in_use(username):
                 raise HTTPError(400, 'username in use')
 
-        return {'username': username}
+        self.write({'username': username})
 
 
 class UserBase(MyHandler):
