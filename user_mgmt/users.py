@@ -61,7 +61,7 @@ class Username(MyHandler):
         """Check if a username is valid - length, bad words."""
         if len(username) > 16:
             return False
-        if any(BAD_WORDS in username):
+        if any(word in username for word in BAD_WORDS):
             return False
         return True
 
@@ -103,7 +103,7 @@ class Username(MyHandler):
             # make a new username
             number = 0
             for _ in range(100):
-                username = self.gen_username(data['first_name'], data['last_name'], number)
+                username = self._gen_username(data['first_name'], data['last_name'], number)
                 if not await self._username_in_use(username):
                     break
                 number += 1

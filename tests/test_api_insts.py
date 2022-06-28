@@ -203,6 +203,7 @@ async def test_inst_approvals_register(server, mongo_client, email_patch):
         'institution': 'UW-Madison',
         'first_name': 'First',
         'last_name': 'Last',
+        'username': 'flast',
         'email': 'test@test',
     }
     r = await asyncio.wrap_future(session.post(address+'/api/inst_approvals', json=data))
@@ -239,6 +240,7 @@ async def test_inst_approvals_register_with_admins(server, mongo_client, email_p
         'institution': 'UW-Madison',
         'first_name': 'First',
         'last_name': 'Last',
+        'username': 'flast',
         'email': 'test@test',
     }
     r = await asyncio.wrap_future(session.post(address+'/api/inst_approvals', json=data))
@@ -561,6 +563,7 @@ async def test_inst_approvals_actions_approve_posix(server, mongo_client, email_
         'institution': 'UW-Madison',
         'first_name': 'first',
         'last_name': 'last',
+        'username': 'flast',
         'email': 'test@test',
     }
     _, krs_client, address, *_ = server
