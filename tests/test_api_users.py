@@ -10,6 +10,8 @@ import krs.email
 from .krs_util import keycloak_bootstrap
 from .util import port, server, mongo_client, email_patch
 
+import user_mgmt.users
+
 
 @pytest.mark.asyncio
 async def test_user(server):
@@ -91,4 +93,34 @@ async def test_username_select(server):
     await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
-    
+
+@pytest.mark.asyncio
+async def test_username_invalid(server, monkeypatch):
+    rest, krs_client, *_ = server
+    client = await rest('test')
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fooooooooooooooooooooooooo'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'foò'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    monkeypatch.setattr(user_mgmt.users, 'BAD_WORDS', ['bad'])
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fobado'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)

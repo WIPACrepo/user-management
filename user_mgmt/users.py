@@ -59,6 +59,9 @@ class Username(MyHandler):
     @staticmethod
     def _username_valid(username):
         """Check if a username is valid - length, bad words."""
+        ascii_username = unidecode.unidecode(username).replace("'", '').replace(' ', '').lower()
+        if ascii_username != username:
+            return False
         if len(username) > 16:
             return False
         if any(word in username for word in BAD_WORDS):
