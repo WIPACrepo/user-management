@@ -15,6 +15,7 @@ import krs.groups
 import krs.email
 
 from .handler import MyHandler
+from .users import Username
 
 audit_logger = logging.getLogger('audit')
 
@@ -247,6 +248,7 @@ class InstApprovals(MyHandler):
                 'institution': str,
                 'first_name': str,
                 'last_name': str,
+                'username': str,
                 'email': str,
             }
             opt_fields = {
@@ -255,28 +257,22 @@ class InstApprovals(MyHandler):
             }
             data = self.json_filter(req_fields, opt_fields)
 
-            # make ascii username
-            def gen_username(number):
-                ret = unidecode.unidecode(data['first_name'][0] + data['last_name']).replace("'", '').replace(' ', '').lower()
-                if len(ret) > 16:
-                    ret = ret[:16]
-                if number > 0:
-                    ret += str(number)
-                return ret
+            username = data['username']
 
-            number = 0
-            for _ in range(100):
-                username = gen_username(number)
-                ret = await self.db.inst_approvals.find_one({"username": username})
-                if not ret:
-                    try:
-                        await self.user_cache.get_user(username)
-                    except krs.users.UserDoesNotExist:
-                        break  # username is available
-                # username in use, try again
-                number += 1
+            # check if username is valid
+            if not Username._username_valid(username):
+                raise HTTPError(400, 'invalid username')
+
+            # check for existing username
+            ret = await self.db.inst_approvals.find_one({"username": username})
+            if ret:
+                raise HTTPError(400, 'invalid username')
+            try:
+                await krs.users.user_info(username, rest_client=self.krs_client)
+            except krs.users.UserDoesNotExist:
+                pass  # username is available
             else:
-                raise HTTPError(500, 'cannot generate unique username')
+                raise HTTPError(400, 'invalid username')
 
             user_data = {
                 'id': uuid.uuid1().hex,

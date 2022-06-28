@@ -21,7 +21,7 @@ from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
-from .users import MultiUser, User
+from .users import MultiUser, User, Username
 
 
 class Error(RequestHandler):
@@ -113,6 +113,7 @@ def create_server():
 
     server.add_route(r'/api/users', MultiUser, kwargs)
     server.add_route(r'/api/users/(?P<username>\w+)', User, kwargs)
+    server.add_round('/api/username', Username, kwargs)
 
     server.add_route(r'/api/(.*)', Error)
     server.add_route(r'/(.*)', Main, main_args)

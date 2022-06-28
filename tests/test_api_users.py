@@ -57,3 +57,38 @@ async def test_user_inst_admin(server):
     assert ret['firstName'] == 'first'
     assert ret['lastName'] == 'last'
     assert ret['email'] == 'test@test'
+
+
+@pytest.mark.asyncio
+async def test_username_autogen(server):
+    rest, krs_client, *_ = server
+    client = await rest('test')
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+    }
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbar'
+
+    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbar1'
+
+@pytest.mark.asyncio
+async def test_username_select(server):
+    rest, krs_client, *_ = server
+    client = await rest('test')
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fbar'
+    }
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbar'
+
+    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+    
