@@ -94,3 +94,31 @@ async def test_invalidate_all(keycloak_bootstrap):
     cache.invalidate()
     ret = await cache.get_members('/foo')
     assert ret == []
+
+@pytest.mark.asyncio
+async def test_list_users(keycloak_bootstrap):
+    await krs.users.create_user('testuser', 'first', 'last', 'email', rest_client=keycloak_bootstrap)
+
+    cache = user_mgmt.cache.KeycloakUserCache(ttl=1, krs_client=keycloak_bootstrap)
+
+    ret = await cache.list_users()
+    assert ret == ['testuser']
+
+@pytest.mark.asyncio
+async def test_get_user(keycloak_bootstrap):
+    await krs.users.create_user('testuser', 'first', 'last', 'email', rest_client=keycloak_bootstrap)
+
+    cache = user_mgmt.cache.KeycloakUserCache(ttl=1, krs_client=keycloak_bootstrap)
+
+    ret = await cache.get_user('testuser')
+    assert ret['firstName'] == 'first'
+
+@pytest.mark.asyncio
+async def test_get_users(keycloak_bootstrap):
+    await krs.users.create_user('testuser', 'first', 'last', 'email', rest_client=keycloak_bootstrap)
+
+    cache = user_mgmt.cache.KeycloakUserCache(ttl=1, krs_client=keycloak_bootstrap)
+
+    ret = await cache.get_users(['testuser'])
+    assert 'testuser' in ret
+    assert ret['testuser']['firstName'] == 'first'

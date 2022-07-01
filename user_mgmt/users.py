@@ -36,7 +36,7 @@ def is_admin_of_inst_member(admin_insts, user_groups):
     return False
 
 
-class User(MyHandler):
+class UserBase(MyHandler):
     async def check_auth(self, username):
         """
         Check auth
@@ -53,6 +53,45 @@ class User(MyHandler):
             if not is_admin_of_inst_member(insts, user_groups):
                 raise HTTPError(403, 'invalid authorization')
 
+
+class MultiUser(UserBase):
+    @authenticated
+    @catch_error
+    async def get(self):
+        """
+        Get user profiles.
+
+        Returns:
+            dict: dict of username: profile
+        """
+        usernames = self.get_arguments('username')
+        logging.info('get users %s', usernames)
+        for username in usernames:
+            await self.check_auth(username)
+        logging.info('auth is good')
+
+        ret = {}
+        for username in usernames:
+            try:
+                user_info = self.user_cache.get_user(username)
+            except Exception:
+                raise HTTPError(404, 'invalid username')
+            logging.info('valid username')
+
+            profile = {}
+            for k in ('firstName', 'lastName', 'email', 'username'):
+                profile[k] = user_info[k]
+            attrs = user_info.get('attributes', {})
+            for k in attrs:
+                if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile'):
+                    profile[k] = attrs[k]
+            logging.debug('profile: %r', profile)
+            ret[username] = profile
+
+        self.write(ret)
+
+
+class User(UserBase):
     @authenticated
     @catch_error
     async def get(self, username):
@@ -69,7 +108,7 @@ class User(MyHandler):
         logging.info('auth is good')
 
         try:
-            user_info = await krs.users.user_info(username, rest_client=self.krs_client)
+            user_info = self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(404, 'invalid username')
         logging.info('valid username')
@@ -100,7 +139,7 @@ class User(MyHandler):
         await self.check_auth(username)
 
         try:
-            await krs.users.user_info(username, rest_client=self.krs_client)
+            await self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(404, 'invalid username')
 
@@ -118,5 +157,7 @@ class User(MyHandler):
             await krs.users.modify_user(username, **args, rest_client=self.krs_client)
         except Exception:
             raise HTTPError(400, 'bad update')
+        else:
+            self.user_cache.invalidate([username])
 
         self.write({})

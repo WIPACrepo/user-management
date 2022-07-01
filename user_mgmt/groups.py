@@ -7,7 +7,6 @@ import uuid
 from tornado.web import HTTPError
 from rest_tools.server import catch_error, authenticated
 
-import krs.users
 import krs.groups
 
 from .handler import MyHandler
@@ -97,7 +96,7 @@ class GroupUser(MyHandler):
             raise HTTPError(403, 'invalid authorization')
 
         try:
-            await krs.users.user_info(username, rest_client=self.krs_client)
+            await self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(404, 'username does not exist')
 
@@ -129,7 +128,7 @@ class GroupUser(MyHandler):
             raise HTTPError(403, 'invalid authorization')
 
         try:
-            await krs.users.user_info(username, rest_client=self.krs_client)
+            await self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(404, 'username does not exist')
 
@@ -223,7 +222,7 @@ class GroupApprovalsActionApprove(MyHandler):
         # send email
         try:
             try:
-                args = await krs.users.user_info(ret['username'], rest_client=self.krs_client)
+                args = await self.user_cache.get_user(ret['username'])
             except Exception:
                 raise HTTPError(400, 'invalid username')
             krs.email.send_email(
@@ -262,7 +261,7 @@ class GroupApprovalsActionDeny(MyHandler):
         # send email
         try:
             try:
-                args = await krs.users.user_info(ret['username'], rest_client=self.krs_client)
+                args = await self.user_cache.get_user(ret['username'])
             except Exception:
                 raise HTTPError(400, 'invalid username')
             krs.email.send_email(
