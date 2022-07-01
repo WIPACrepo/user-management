@@ -86,11 +86,10 @@ class KeycloakUserCache:
 
     async def list_usernames(self):
         ret = await list_users(rest_client=self._krs_client)
-        users = TTLCache(1000000, ttl)
+        self._users.clear()
         for username in ret:
-            users[username] = ret[username]
-        self._users = users
-        return list(users)
+            self._users[username] = ret[username]
+        return list(ret)
 
     async def get_user(self, username):
         ret = self._users.get(username, None)

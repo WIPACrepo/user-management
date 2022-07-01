@@ -73,7 +73,7 @@ class MultiUser(UserBase):
         ret = {}
         for username in usernames:
             try:
-                user_info = self.user_cache.get_user(username)
+                user_info = await self.user_cache.get_user(username)
             except Exception:
                 raise HTTPError(404, 'invalid username')
             logging.info('valid username')
@@ -108,7 +108,7 @@ class User(UserBase):
         logging.info('auth is good')
 
         try:
-            user_info = self.user_cache.get_user(username)
+            user_info = await self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(404, 'invalid username')
         logging.info('valid username')
