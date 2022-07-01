@@ -101,7 +101,7 @@ async def test_list_users(keycloak_bootstrap):
 
     cache = user_mgmt.cache.KeycloakUserCache(ttl=1, krs_client=keycloak_bootstrap)
 
-    ret = await cache.list_users()
+    ret = await cache.list_usernames()
     assert ret == ['testuser']
 
 @pytest.mark.asyncio
