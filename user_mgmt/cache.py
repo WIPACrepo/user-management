@@ -3,6 +3,7 @@ import logging
 from cachetools import TTLCache
 
 from krs.groups import list_groups, group_info, group_info_by_id, get_group_membership_by_id
+from krs.users import list_users, user_info
 from krs.institutions import list_insts
 
 
@@ -68,3 +69,49 @@ class KeycloakGroupCache:
             for k in list(self._group_members):
                 if k.startswith(path):
                     del self._group_members[k]
+
+
+class KeycloakUserCache:
+    """
+    A TTL cache for Keycloak user requests.
+
+    Args:
+        ttl (int): number of seconds to keep items in cache (default: 3600)
+        krs_client (RestClient): rest client for talking to Keycloak
+    """
+    def __init__(self, ttl=3600, krs_client=None):
+        self._ttl = ttl
+        self._krs_client = krs_client
+        self._users = TTLCache(1000000, ttl)
+
+    async def list_usernames(self):
+        ret = await list_users(rest_client=self._krs_client)
+        self._users.clear()
+        for username in ret:
+            self._users[username] = ret[username]
+        return list(ret)
+
+    async def get_user(self, username):
+        ret = self._users.get(username, None)
+        if not ret:
+            ret = await user_info(username, rest_client=self._krs_client)
+            self._users[username] = ret
+        return ret
+
+    async def get_users(self, usernames=None):
+        if not usernames:
+            await self.list_usernames()
+            return dict(self._users)
+
+        ret = {}
+        for username in usernames:
+            ret[username] = await self.get_user(username)
+        return ret
+
+    def invalidate(self, usernames=None):
+        if not usernames:
+            self._users.clear()
+        else:
+            for username in usernames:
+                if username in self._users:
+                    del self._users[username]

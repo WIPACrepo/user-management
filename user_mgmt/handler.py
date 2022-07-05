@@ -6,15 +6,15 @@ from tornado.escape import json_decode, json_encode
 from rest_tools.server import RestHandler
 
 import krs.email
-from krs.users import user_info
 
 
 class MyHandler(RestHandler):
-    def initialize(self, db=None, krs_client=None, group_cache=None, **kwargs):
+    def initialize(self, db=None, krs_client=None, group_cache=None, user_cache=None, **kwargs):
         super().initialize(**kwargs)
         self.db = db
         self.krs_client = krs_client
         self.group_cache = group_cache
+        self.user_cache = user_cache
 
     def write(self, chunk):
         """
@@ -65,7 +65,7 @@ class MyHandler(RestHandler):
         ret = await self.group_cache.get_members(group_path+'/_admin')
         users = {}
         for username in ret:
-            ret2 = await user_info(username, rest_client=self.krs_client)
+            ret2 = await self.user_cache.get_user(username)
             users[username] = ret2
         logging.info(f'get_admins: {users}')
         return users

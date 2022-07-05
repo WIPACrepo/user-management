@@ -14,14 +14,14 @@ import motor.motor_asyncio
 
 import krs.token
 
-from .cache import KeycloakGroupCache
+from .cache import KeycloakGroupCache, KeycloakUserCache
 from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstitutionMultiUsers, InstitutionUser,
                     InstApprovals, InstitutionMultiApprovals,
                     InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
-from .users import User
+from .users import MultiUser, User
 
 
 class Error(RequestHandler):
@@ -82,6 +82,7 @@ def create_server():
         timeout=10,
     )
     kwargs['group_cache'] = KeycloakGroupCache(krs_client=kwargs['krs_client'])
+    kwargs['user_cache'] = KeycloakUserCache(krs_client=kwargs['krs_client'])
 
     main_args = {
         'keycloak_url': config['KEYCLOAK_URL'],
@@ -110,6 +111,7 @@ def create_server():
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/approve', GroupApprovalsActionApprove, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/deny', GroupApprovalsActionDeny, kwargs)
 
+    server.add_route(r'/api/users', MultiUser, kwargs)
     server.add_route(r'/api/users/(?P<username>\w+)', User, kwargs)
 
     server.add_route(r'/api/(.*)', Error)

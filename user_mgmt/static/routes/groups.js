@@ -63,17 +63,34 @@ export default {
           let rets = await Promise.all(promises);
           console.log('promises_ret', rets)
           let j=0;
+          let usernames = new URLSearchParams()
           for (let i=0;i<group_admins.length;i++) {
             const group = group_admins[i];
             if (group in all_groups) {
               const ret = rets[j];
               j += 1;
+              let members = {}
+              for (const username of ret.data) {
+                usernames.append('username', username)
+                members[username] = {}
+              }
               let entry = {
                 id: all_groups[group],
                 name: group,
-                members: ret.data
+                members: members
               }
               groups.push(entry)
+            }
+          }
+          const ret2 = await axios.get('/api/users', {
+            headers: {'Authorization': 'bearer '+token},
+            params: usernames
+          })
+          for (const entry of groups) {
+            for (const username in entry.members) {
+              if (username in ret2.data) {
+                entry.members[username] = ret2.data[username]
+              }
             }
           }
           console.log('groups:', groups)
@@ -169,6 +186,15 @@ export default {
       } catch (error) {
         this.error = "Error removing user: "+error['message']
       }
+    },
+    getname: function(user, username) {
+      if ('firstName' in user && 'lastName' in user) {
+        return user.firstName+' '+user.lastName
+      } else if ('lastName' in user) {
+        return user.lastName
+      } else {
+        return username
+      }
     }
   },
   template: `
@@ -192,11 +218,11 @@ export default {
   <div v-if="$asyncComputed.groups.success" data-test="administered-groups">
     <h3>Administered groups:</h3>
     <div class="group" v-for="group in groups" :data-test="group.name">
-      <p>{{ group["name"] }}</p>
-      <div class="double_indent" v-if="group['members'].length > 0">
-        <div class="user" v-for="user in group['members']" :data-test="user">
-          <span class="username">{{ user }}</span>
-          <button @click="remove(group, user)">Remove</button>
+      <p>{{ group.name }}</p>
+      <div class="double_indent" v-if="Object.keys(group.members).length > 0">
+        <div class="user" v-for="(user, username) in group.members" :data-test="username">
+          <span class="username">{{ getname(user, username) }}</span>
+          <button @click="remove(group, username)">Remove</button>
         </div>
       </div>
       <div class="double_indent" v-else>No members</div>

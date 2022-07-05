@@ -157,7 +157,7 @@ class InstitutionUser(MyHandler):
             raise HTTPError(403, 'invalid authorization')
 
         try:
-            await krs.users.user_info(username, rest_client=self.krs_client)
+            await self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(400, 'invalid username')
 
@@ -202,7 +202,7 @@ class InstitutionUser(MyHandler):
             raise HTTPError(403, 'invalid authorization')
 
         try:
-            await krs.users.user_info(username, rest_client=self.krs_client)
+            await self.user_cache.get_user(username)
         except Exception:
             raise HTTPError(400, 'invalid username')
 
@@ -270,7 +270,7 @@ class InstApprovals(MyHandler):
                 ret = await self.db.inst_approvals.find_one({"username": username})
                 if not ret:
                     try:
-                        await krs.users.user_info(username, rest_client=self.krs_client)
+                        await self.user_cache.get_user(username)
                     except krs.users.UserDoesNotExist:
                         break  # username is available
                 # username in use, try again
@@ -483,7 +483,7 @@ listed in the "Other Governing Agreements" section of the policy linked above.
 ''')
             else:
                 try:
-                    args = await krs.users.user_info(ret['username'], rest_client=self.krs_client)
+                    args = await self.user_cache.get_user(ret['username'])
                 except Exception:
                     raise HTTPError(400, 'invalid username')
                 krs.email.send_email(
@@ -538,7 +538,7 @@ class InstApprovalsActionDeny(MyHandler):
                 }
             else:
                 try:
-                    args = await krs.users.user_info(ret['username'], rest_client=self.krs_client)
+                    args = await self.user_cache.get_user(ret['username'])
                 except Exception:
                     raise HTTPError(400, 'invalid username')
             krs.email.send_email(

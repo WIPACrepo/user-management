@@ -23,7 +23,9 @@ context('Institutions Page', () => {
   it('inst table', () => {
     cy.visit('/institutions')
     keycloak({
-      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
+      admin_insts: {instA:{users:['userA', 'userB', 'user'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'}
     })
 
     cy.get('[data-test="userA"]').within(() => {
@@ -39,6 +41,9 @@ context('Institutions Page', () => {
           "authorlist-astro": true
         })
       })
+    })
+    cy.get('[data-test="user"]').within(() => {
+      cy.get('.username').contains('Foo Bar')
     })
   })
 
