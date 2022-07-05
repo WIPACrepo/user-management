@@ -13,9 +13,10 @@ export default (params) => {
     group_approvals: {},    // group approvals = {groupname: [users]}
     authenticated: true,    // is user logged in?
     username: 'user',
-    user_profile: {'firstName': 'Foo', 'lastName': 'Bar', 'email': 'foo@bar'},
+    user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'},
   }, params)
 
+  let user_profiles = {}
   let raw_groups = []
   let api_insts = {}
   let api_groups = {}
@@ -34,6 +35,11 @@ export default (params) => {
       }
       for (const v of params.admin_insts[i][k]) {
         api_insts[i][k].push(v)
+      }
+      if ('users' in params.admin_insts[i]) {
+        for (const un of params.admin_insts[i].users) {
+          user_profiles[un] = {'email': un+'@foo'}
+        }
       }
     }
     raw_groups.push('/institutions/'+params.exp+'/'+i+'/_admin')
@@ -54,6 +60,7 @@ export default (params) => {
     }
     for (const v of params.admin_groups[g]) {
       api_group_details[group_id].users.push(v)
+      user_profiles[v] = {'email': v+'@foo'}
     }
     raw_groups.push(group_path+'/_admin')
   }
@@ -97,6 +104,8 @@ export default (params) => {
       })
     }
   }
+
+  user_profiles[params.username] = params.user_profile
 
   cy.intercept({
     method: 'GET',
@@ -284,6 +293,7 @@ export default (params) => {
     body: {},
   }).as('api-group-approvals-deny')
 
+
   cy.intercept({
     method: 'GET',
     url: '/api/users/*',
@@ -299,6 +309,26 @@ export default (params) => {
     statusCode: 200,
     body: {},
   }).as('api-user-profile-put')
+
+  cy.intercept({
+    method: 'GET',
+    pathname: '/api/users',
+  }, (req) => {
+    const usernames = Object.values(req.query)
+    console.log('api-multi-user-profile - usernames=', usernames)
+    let ret = {}
+    for (const username of usernames) {
+      if (!(username in user_profiles)) {
+        req.reply({statusCode: 404, body: {}})
+        return
+      }
+      ret[username] = user_profiles[username]
+    }
+    req.reply({
+      statusCode: 200,
+      body: ret,
+    })
+  }).as('api-multi-user-profile')
 
   const obj = {
     authenticated: () => params.authenticated,

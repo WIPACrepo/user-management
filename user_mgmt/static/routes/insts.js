@@ -87,25 +87,37 @@ Vue.component('inst', {
             if (key == 'users') {
               for (const username of ret.data.users) {
                 if (!(username in entry.members)) {
-                  entry.members[username] = {}
+                  entry.members[username] = {groups: {}}
                 }
               }
             } else {
               entry.groups[key] = key.replace(/-/g, ' - ')
               for (const username of ret.data[key]) {
                 if (!(username in entry.members)) {
-                  entry.members[username] = {}
+                  entry.members[username] = {groups: {}}
                 }
-                entry.members[username][key] = true
+                entry.members[username].groups[key] = true
               }
             }
           }
+          let params = new URLSearchParams()
+          for (const username in entry.members) {
+            params.append('username', username)
+          }
+          let fut = axios.get('/api/users', {
+            headers: {'Authorization': 'bearer '+token},
+            params: params
+          })
           for (let username in entry.members) {
             for (const name in entry.groups) {
-              if (!(name in entry.members[username])) {
-                entry.members[username][name] = false
+              if (!(name in entry.members[username].groups)) {
+                entry.members[username].groups[name] = false
               }
             }
+          }
+          const ret2 = await fut
+          for (const username in ret2.data) {
+            Object.assign(entry.members[username], ret2.data[username])
           }
           console.log('members', entry)
           return entry
@@ -262,9 +274,9 @@ Vue.component('inst', {
           </tr>
         </thead>
         <tbody>
-          <instmember :username="username" :groups="groups" :group_names="members.groups"
+          <instmember :username="username" :memberdata="data" :group_names="members.groups"
               :remove="removeMember" :update="updateMember" :profile="go_to_profile"
-              v-for="(groups, username) in members.members">
+              v-for="(data, username) in members.members">
           </instmember>
         </tbody>
       </table>
@@ -286,29 +298,38 @@ Vue.component('instmember', {
   data: function(){
     return {
       'username': '',
-      'groups': null,
+      'memberdata': null,
       'user_groups': {},
       'remove': null,
       'update': null
     }
   },
-  props: ['username', 'groups', 'group_names', 'remove', 'update', 'profile'],
+  props: ['username', 'memberdata', 'group_names', 'remove', 'update', 'profile'],
   created: function() {
-    this.user_groups = Object.assign({}, this.groups)
+    this.user_groups = Object.assign({}, this.memberdata.groups)
     console.log('user_groups:', this.user_groups)
   },
   computed: {
     changed: function() {
       let ret = false
       for (const g in this.group_names) {
-        ret |= (this.groups[g] != this.user_groups[g])
+        ret |= (this.memberdata.groups[g] != this.user_groups[g])
       }
       return ret
+    },
+    name: function() {
+      if ('firstName' in this.memberdata && 'lastName' in this.memberdata) {
+        return this.memberdata.firstName+' '+this.memberdata.lastName
+      } else if ('lastName' in this.memberdata) {
+        return this.memberdata.lastName
+      } else {
+        return this.username
+      }
     }
   },
   template: `
 <tr :data-test="username">
-  <td><span class="username">{{ username }}</span> <span class="delete material-icons" @click="remove(username)">delete_forever</span></td>
+  <td><span class="username">{{ name }}</span> <span class="delete material-icons" @click="remove(username)">delete_forever</span></td>
   <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" /></td>
   <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed">Update</button></td>
 </tr>`
