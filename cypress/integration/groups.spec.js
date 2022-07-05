@@ -5,7 +5,9 @@ context('Groups Page', () => {
   it('group admin', () => {
     cy.visit('/groups')
     keycloak({
-      admin_groups: {'groupA': ['userA', 'userB']}
+      admin_groups: {'groupA': ['userA', 'userB', 'user']},
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'}
     })
 
     cy.get('#nav .active').contains('groups', {matchCase: false})
@@ -15,7 +17,7 @@ context('Groups Page', () => {
     cy.get('[data-test="administered-groups"]').within(() => {
       cy.get('[data-test="/tokens/groupA"]').contains('userA', {matchCase: false})
       cy.get('[data-test="/tokens/groupA"]').contains('userB', {matchCase: false})
-      cy.get('[data-test="/tokens/groupA"]').contains('userB', {matchCase: false})
+      cy.get('[data-test="/tokens/groupA"]').contains('Foo Bar', {matchCase: false})
 
       cy.get('[data-test="/tokens/groupA"] [data-test="userB"] button').click()
       cy.wait('@api-group-user-delete').its('request.url').should('include', 'userB')
