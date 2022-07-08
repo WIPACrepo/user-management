@@ -191,7 +191,8 @@ export default async function vue_startup(keycloak){
     { path: '/register', name: 'register', component: Register,
       props: (route) => ({
         experiment: route.query.experiment,
-        institution: route.query.institution
+        institution: route.query.institution,
+        reg_token: route.query.reg_token
       })
     },
     { path: '/institutions', name: 'Institutions', component: Insts,

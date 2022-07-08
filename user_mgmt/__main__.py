@@ -28,4 +28,4 @@ logging.basicConfig(format=logformat, level=setlevel[config['LOG_LEVEL'].upper()
 
 # start server
 create_server()
-asyncio.get_event_loop().run_forever()
+asyncio.new_event_loop().run_forever()

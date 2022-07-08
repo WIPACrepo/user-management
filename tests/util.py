@@ -10,6 +10,7 @@ from wipac_dev_tools import from_environment
 import motor.motor_asyncio
 
 from user_mgmt.server import create_server
+from user_mgmt.registration import create_token
 
 import krs.bootstrap
 import krs.users
@@ -68,14 +69,27 @@ async def mongo_client():
     ret = db[db_name]
 
     await ret.user_registrations.drop()
+    await ret.reg_tokens.drop()
     await ret.inst_approvals.drop()
     await ret.group_approvals.drop()
     try:
         yield ret
     finally:
         await ret.user_registrations.drop()
+        await ret.reg_tokens.drop()
         await ret.inst_approvals.drop()
         await ret.group_approvals.drop()
+
+@pytest.fixture
+async def reg_token_client(mongo_client, server):
+    _, _, url, *_ = server
+    async def client(exp_seconds=None, timeout=10):
+        kwargs = {}
+        if exp_seconds:
+            kwargs['exp_seconds'] = exp_seconds
+        token = await create_token(mongo_client, **kwargs)
+        return RestClient(url, token=token, timeout=timeout, retries=0)
+    yield client
 
 @pytest.fixture
 def email_patch(mocker):

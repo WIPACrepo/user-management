@@ -12,6 +12,7 @@ import krs.users
 import krs.groups
 
 from .handler import MyHandler
+from .register import authenticate_reg_token
 
 
 VALID_FIELDS = {
@@ -78,6 +79,8 @@ class Username(MyHandler):
                 return False  # username is available
         return True
 
+    @authenticate_reg_token
+    @catch_error
     async def post(self):
         """
         Create a new username, or validate a given one.

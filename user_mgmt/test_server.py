@@ -32,4 +32,4 @@ def test_server():
 
 if __name__ == '__main__':
     test_server()
-    asyncio.get_event_loop().run_forever()
+    asyncio.new_event_loop().run_forever()

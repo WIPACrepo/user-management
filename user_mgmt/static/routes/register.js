@@ -7,6 +7,7 @@ export default {
     return {
       experiment: '',
       institution: '',
+      reg_token: '',
       firstName: '',
       lastName: '',
       username: '',
@@ -16,7 +17,10 @@ export default {
       submitted: false
     }
   },
-  props: ['experiment', 'institution'],
+  props: ['experiment', 'institution', 'reg_token'],
+  created: function() {
+    validate_token()
+  },
   computed: {
     validFirstName: function() {
       return this.firstName
@@ -66,7 +70,9 @@ export default {
         if (this.username != '') {
           args.username = this.username
         }
-        const resp = await axios.post('/api/username', args);
+        const resp = await axios.post('/api/username', args, {
+          headers: {'Authorization': 'bearer '+this.reg_token}
+        });
         if (this.username != resp.data['username']) {
           this.username = resp.data['username']
         }
@@ -89,6 +95,16 @@ export default {
     }
   },
   methods: {
+    validate_token: async function() {
+      try {
+        await axios.post('/api/reg_token/'+this.reg_token);
+      } catch(error) {
+        console.log('invalid reg_token')
+        this.$router.push({name: 'home'})
+        return false
+      }
+      return true
+    },
       submit: async function(e) {
           // validate
           this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
@@ -105,6 +121,8 @@ export default {
                       last_name: this.lastName,
                       username: this.username,
                       email: this.email
+                  }, {
+                    headers: {'Authorization': 'bearer '+this.reg_token}
                   });
                   console.log('Response:')
                   console.log(resp)

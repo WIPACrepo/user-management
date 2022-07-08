@@ -73,6 +73,22 @@ Vue.component('inst', {
       default: [],
       watch: ['refresh']
     },
+    reg_token: {
+      get: async function() {
+        try {
+          const token = await this.keycloak.get_token();
+          const ret = await axios.post('/api/reg_token', {
+            headers: {'Authorization': 'bearer '+token}
+          })
+          return ret.data.token
+        } catch (error) {
+          console.log('error getting registration token', error)
+          this.error = "Error getting registration token: "+error['message']
+          return ''
+        }
+      },
+      default: ''
+    },
     members: {
       get: async function() {
         try {
@@ -287,7 +303,7 @@ Vue.component('inst', {
     </div>
     <div class="indent add">
       New user:
-      <router-link :to="{name: 'register', experiment: experiment, institution: institution}">Register</router-link>
+      <router-link :to="{name: 'register', experiment: experiment, institution: institution, reg_token: reg_token}">Register</router-link>
     </div>
   </div>
   <div class="indent loading" v-else>Loading...</div>
