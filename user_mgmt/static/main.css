@@ -228,4 +228,9 @@ article.institutions .add, article.groups .add {
 article.institutions .add input, article.groups .add input {
     width: 8em
 }
-
+article.institutions .invite {
+    margin-top: .5em;
+}
+article.institutions #register-invite {
+    widtH: 80%;
+}

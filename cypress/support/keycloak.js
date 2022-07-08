@@ -14,6 +14,7 @@ export default (params) => {
     authenticated: true,    // is user logged in?
     username: 'user',
     user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'},
+    new_username: 'fbar'
   }, params)
 
   let user_profiles = {}
@@ -329,6 +330,14 @@ export default (params) => {
       body: ret,
     })
   }).as('api-multi-user-profile')
+
+  cy.intercept({
+    method: 'POST',
+    url: '/api/username',
+  }, {
+    statusCode: 200,
+    body: {username: params.new_username},
+  }).as('api-username-post')
 
   const obj = {
     authenticated: () => params.authenticated,

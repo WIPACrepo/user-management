@@ -8,7 +8,7 @@ import krs.groups
 import krs.email
 
 from .krs_util import keycloak_bootstrap
-from .util import port, server, mongo_client, email_patch
+from .util import port, server, mongo_client, reg_token_client, email_patch
 
 
 @pytest.mark.asyncio
@@ -186,28 +186,26 @@ async def test_institution_removeuser(server):
     assert ret == {'users': [], 'authorlist': []}
 
 @pytest.mark.asyncio
-async def test_inst_approvals_register(server, mongo_client, email_patch):
+async def test_inst_approvals_register(server, mongo_client, reg_token_client, email_patch):
     _, krs_client, address, *_ = server
-    session = AsyncSession(retries=0)
+    client = await reg_token_client()
 
     await krs.groups.create_group('/institutions', rest_client=krs_client)
     await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
     await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
 
     with pytest.raises(Exception):
-        r = await asyncio.wrap_future(session.post(address+'/api/inst_approvals'))
-        r.raise_for_status()
+        await client.request('POST', '/api/inst_approvals')
 
     data = {
         'experiment': 'IceCube',
         'institution': 'UW-Madison',
         'first_name': 'First',
         'last_name': 'Last',
+        'username': 'flast',
         'email': 'test@test',
     }
-    r = await asyncio.wrap_future(session.post(address+'/api/inst_approvals', json=data))
-    r.raise_for_status()
-    ret = r.json()
+    ret = await client.request('POST', '/api/inst_approvals', data)
     approval_id = ret['id']
 
     email_patch.assert_not_called()
@@ -224,9 +222,30 @@ async def test_inst_approvals_register(server, mongo_client, email_patch):
     assert ret[0]['institution'] == data['institution']
 
 @pytest.mark.asyncio
-async def test_inst_approvals_register_with_admins(server, mongo_client, email_patch):
+async def test_inst_approvals_register_invalid_auth(server, mongo_client, reg_token_client, email_patch):
+    _, krs_client, address, *_ = server
+    client = await reg_token_client(exp_seconds=0)
+    await asyncio.sleep(0.01)
+
+    await krs.groups.create_group('/institutions', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
+
+    data = {
+        'experiment': 'IceCube',
+        'institution': 'UW-Madison',
+        'first_name': 'First',
+        'last_name': 'Last',
+        'username': 'flast',
+        'email': 'test@test',
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/inst_approvals', data)
+
+@pytest.mark.asyncio
+async def test_inst_approvals_register_with_admins(server, mongo_client, reg_token_client, email_patch):
     rest, krs_client, address, *_ = server
-    session = AsyncSession(retries=0)
+    client = await reg_token_client()
 
     await krs.groups.create_group('/institutions', rest_client=krs_client)
     await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
@@ -239,11 +258,10 @@ async def test_inst_approvals_register_with_admins(server, mongo_client, email_p
         'institution': 'UW-Madison',
         'first_name': 'First',
         'last_name': 'Last',
+        'username': 'flast',
         'email': 'test@test',
     }
-    r = await asyncio.wrap_future(session.post(address+'/api/inst_approvals', json=data))
-    r.raise_for_status()
-    ret = r.json()
+    ret = await client.request('POST', '/api/inst_approvals', data)
     approval_id = ret['id']
 
     email_patch.assert_called()
@@ -546,7 +564,7 @@ async def test_inst_approvals_actions_approve_gen2(server, mongo_client, email_p
     assert 'test' in ret
 
 @pytest.mark.asyncio
-async def test_inst_approvals_actions_approve_posix(server, mongo_client, email_patch):
+async def test_inst_approvals_actions_approve_posix(server, mongo_client, reg_token_client, email_patch):
     rest, krs_client, *_ = server
 
     await krs.groups.create_group('/institutions', rest_client=krs_client)
@@ -561,13 +579,11 @@ async def test_inst_approvals_actions_approve_posix(server, mongo_client, email_
         'institution': 'UW-Madison',
         'first_name': 'first',
         'last_name': 'last',
+        'username': 'flast',
         'email': 'test@test',
     }
-    _, krs_client, address, *_ = server
-    session = AsyncSession(retries=0)
-    r = await asyncio.wrap_future(session.post(address+'/api/inst_approvals', json=data))
-    r.raise_for_status()
-    ret = r.json()
+    client = await reg_token_client()
+    ret = await client.request('POST', '/api/inst_approvals', data)
     approval_id = ret['id']
 
     email_patch.assert_called()

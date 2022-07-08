@@ -8,7 +8,9 @@ import krs.groups
 import krs.email
 
 from .krs_util import keycloak_bootstrap
-from .util import port, server, mongo_client, email_patch
+from .util import port, server, mongo_client, reg_token_client, email_patch
+
+import user_mgmt.users
 
 
 @pytest.mark.asyncio
@@ -57,3 +59,86 @@ async def test_user_inst_admin(server):
     assert ret['firstName'] == 'first'
     assert ret['lastName'] == 'last'
     assert ret['email'] == 'test@test'
+
+
+@pytest.mark.asyncio
+async def test_username_autogen(server, reg_token_client):
+    rest, krs_client, *_ = server
+    client = await reg_token_client()
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+    }
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbar'
+
+    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbar1'
+
+@pytest.mark.asyncio
+async def test_username_select(server, reg_token_client):
+    rest, krs_client, *_ = server
+    client = await reg_token_client()
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fbar'
+    }
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbar'
+
+    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+@pytest.mark.asyncio
+async def test_username_auth(server, reg_token_client):
+    rest, krs_client, *_ = server
+    client = await rest('test')
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fbar'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    client2 = await reg_token_client(exp_seconds=0)
+    await asyncio.sleep(0.01)
+    with pytest.raises(Exception):
+        await client2.request('POST', '/api/username', args)
+
+@pytest.mark.asyncio
+async def test_username_invalid(server, reg_token_client, monkeypatch):
+    rest, krs_client, *_ = server
+    client = await reg_token_client()
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fooooooooooooooooooooooooo'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'foò'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    monkeypatch.setattr(user_mgmt.users, 'BAD_WORDS', ['bad'])
+
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fobado'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
