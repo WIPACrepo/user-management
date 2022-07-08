@@ -19,7 +19,7 @@ async def create_token(db, username, exp_seconds=TOKEN_EXP_SEC):
     token = uuid.uuid1().hex
     now = time.time()
     exp = now+exp_seconds
-    logging.debug('create token %s with exp %f', token, exp)
+    logging.debug('create token %s with exp %f (+%f)', token, exp, exp_seconds)
     await db.reg_tokens.insert_one({
         'token': token,
         'create': now,
@@ -37,9 +37,10 @@ async def valid_token(db, token):
     logging.debug('testing token for validity: %s', token)
 
     ret = await db.reg_tokens.find_one({'token': token}, projection={'_id': False})
-    if (not ret) or ret.get('exp') < time.time():
+    now = time.time()
+    if (not ret) or ret.get('exp') < now:
         raise HTTPError(403, 'invalid authorization')
-    logging.debug('valid token: %r', ret)
+    logging.debug('valid token (now=%f): %r', now, ret)
 
 
 def authenticate_reg_token(method):

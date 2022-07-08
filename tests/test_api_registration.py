@@ -15,6 +15,13 @@ async def test_valid_token(mongo_client):
     await user_mgmt.registration.valid_token(mongo_client, token)
 
 @pytest.mark.asyncio
+async def test_invalid_token(mongo_client):
+    token = await user_mgmt.registration.create_token(mongo_client, 'test', exp_seconds=0)
+    await asyncio.sleep(0.01)
+    with pytest.raises(Exception):
+        await user_mgmt.registration.valid_token(mongo_client, token)
+
+@pytest.mark.asyncio
 async def test_registration_token_create(server, mongo_client):
     rest, krs_client, *_ = server
 
