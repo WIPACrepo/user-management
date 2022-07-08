@@ -112,7 +112,7 @@ def create_server():
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/approve', GroupApprovalsActionApprove, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/deny', GroupApprovalsActionDeny, kwargs)
 
-    server.add_route(r'/api/reg_token', RegistrationToken, kwargs)
+    server.add_route('/api/reg_token', RegistrationToken, kwargs)
     server.add_route(r'/api/reg_token/(?P<token>\w+)', RegistrationTokenValid, kwargs)
 
     server.add_route(r'/api/users', MultiUser, kwargs)

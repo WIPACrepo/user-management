@@ -45,6 +45,7 @@ context('Institutions Page', () => {
     cy.get('[data-test="user"]').within(() => {
       cy.get('.username').contains('Foo Bar')
     })
+    cy.get('[data-test="registration-link"]').should('exist')
   })
 
   it('inst delete user', () => {

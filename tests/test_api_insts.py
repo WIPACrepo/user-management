@@ -225,6 +225,7 @@ async def test_inst_approvals_register(server, mongo_client, reg_token_client, e
 async def test_inst_approvals_register_invalid_auth(server, mongo_client, reg_token_client, email_patch):
     _, krs_client, address, *_ = server
     client = await reg_token_client(exp_seconds=0)
+    await asyncio.sleep(0.01)
 
     await krs.groups.create_group('/institutions', rest_client=krs_client)
     await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
@@ -260,9 +261,7 @@ async def test_inst_approvals_register_with_admins(server, mongo_client, reg_tok
         'username': 'flast',
         'email': 'test@test',
     }
-    r = await client.request('POST', '/api/inst_approvals', data)
-    r.raise_for_status()
-    ret = r.json()
+    ret = await client.request('POST', '/api/inst_approvals', data)
     approval_id = ret['id']
 
     email_patch.assert_called()

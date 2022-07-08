@@ -301,9 +301,9 @@ Vue.component('inst', {
     <div class="indent add">
       <addinstuser :submit="addMember"></addinstuser>
     </div>
-    <div class="indent add">
+    <div class="indent add" v-if="$asyncComputed.reg_token.success && reg_token != ''">
       New user:
-      <router-link :to="{name: 'register', experiment: experiment, institution: institution, reg_token: reg_token}">Register</router-link>
+      <router-link :to="{name: 'register', query: {experiment: experiment, institution: institution, reg_token: reg_token}}">Register</router-link>
     </div>
   </div>
   <div class="indent loading" v-else>Loading...</div>
