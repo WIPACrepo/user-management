@@ -19,7 +19,7 @@ export default {
   },
   props: ['experiment', 'institution', 'reg_token'],
   created: function() {
-    validate_token()
+    this.validate_token()
   },
   computed: {
     validFirstName: function() {
