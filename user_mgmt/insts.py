@@ -14,7 +14,7 @@ import krs.groups
 import krs.email
 
 from .handler import MyHandler
-from .register import valid_token
+from .registration import valid_token
 from .users import Username
 
 audit_logger = logging.getLogger('audit')

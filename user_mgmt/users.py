@@ -12,7 +12,7 @@ import krs.users
 import krs.groups
 
 from .handler import MyHandler
-from .register import authenticate_reg_token
+from .registration import authenticate_reg_token
 
 
 VALID_FIELDS = {

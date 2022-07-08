@@ -87,7 +87,7 @@ async def reg_token_client(mongo_client, server):
         kwargs = {}
         if exp_seconds:
             kwargs['exp_seconds'] = exp_seconds
-        token = await create_token(mongo_client, **kwargs)
+        token = await create_token(mongo_client, username='test', **kwargs)
         return RestClient(url, token=token, timeout=timeout, retries=0)
     yield client
 
