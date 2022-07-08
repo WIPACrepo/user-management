@@ -7,23 +7,12 @@ import krs.groups
 
 from .krs_util import keycloak_bootstrap
 from .util import port, server, mongo_client, email_patch
-from user_mgmt.registration import valid_token
+import user_mgmt.registration
 
 @pytest.mark.asyncio
-async def test_valid_token(server, mongo_client):
-    rest, krs_client, *_ = server
-
-    await krs.groups.create_group('/institutions', rest_client=krs_client)
-    await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
-    await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
-
-    client = await rest('test')
-    client2 = await rest('test2', groups=['/institutions/IceCube/UW-Madison/_admin'])
-
-    ret = await client2.request('POST', '/api/reg_token')
-    token = ret['token']
-
-    valid_token(mongo_client, token)
+async def test_valid_token(mongo_client):
+    token = await user_mgmt.registration.create_token(mongo_client, 'test')
+    await user_mgmt.registration.valid_token(mongo_client, token)
 
 @pytest.mark.asyncio
 async def test_registration_token_create(server, mongo_client):

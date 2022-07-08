@@ -2,6 +2,7 @@
 Handle group mamagement actions.
 """
 from functools import wraps
+import logging
 import time
 import uuid
 
@@ -16,10 +17,12 @@ TOKEN_EXP_SEC = 3600*24*7  # 7 days
 
 async def create_token(db, username, exp_seconds=TOKEN_EXP_SEC):
     token = uuid.uuid1().hex
-    exp = time.time()+exp_seconds
+    now = time.time()
+    exp = now+exp_seconds
+    logging.debug('create token %s with exp %f', token, exp)
     await db.reg_tokens.insert_one({
         'token': token,
-        'create': time.time(),
+        'create': now,
         'exp': exp,
         'auth_user': username,
     })
@@ -31,10 +34,12 @@ async def valid_token(db, token):
         uuid.UUID(token)
     except Exception:
         raise HTTPError(403, 'invalid authorization')
+    logging.debug('testing token for validity: %s', token)
 
     ret = await db.reg_tokens.find_one({'token': token}, projection={'_id': False})
     if (not ret) or ret.get('exp') < time.time():
         raise HTTPError(403, 'invalid authorization')
+    logging.debug('valid token: %r', ret)
 
 
 def authenticate_reg_token(method):
@@ -54,6 +59,7 @@ def authenticate_reg_token(method):
                 raise Exception('bad header type')
             await valid_token(self.db, token)
         except Exception:
+            logging.debug('failed registration token auth', exc_info=True)
             raise HTTPError(403, reason="authentication failed")
         return await method(self, *args, **kwargs)
     return wrapper
