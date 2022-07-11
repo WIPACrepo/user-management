@@ -63,6 +63,10 @@ class MyHandler(RestHandler):
             raise HTTPError(400, f'invalid fields: {extra_fields}', reason='extra invalid fields in request')
         return data
 
+    def is_super_admin(self):
+        """Is the current user a super admin?"""
+        return '/admin' in self.auth_data['groups']
+
     async def get_admins(self, group_path):
         ret = await self.group_cache.get_members(group_path+'/_admin')
         users = {}
@@ -93,7 +97,7 @@ class MyHandler(RestHandler):
     async def get_admin_groups(self):
         if self._get_admin_groups_cache:
             return self._get_admin_groups_cache
-        if '/admin' in self.auth_data['groups']:  # super admin - all groups
+        if self.is_super_admin():  # super admin - all groups
             admin_groups = await self.group_cache.list_groups()
         else:
             admin_groups = [g[:-7] for g in self.auth_data['groups'] if g.endswith('/_admin')]
@@ -109,7 +113,7 @@ class MyHandler(RestHandler):
     async def get_admin_institutions(self):
         if self._get_admin_institutions_cache:
             return self._get_admin_institutions_cache
-        if '/admin' in self.auth_data['groups']:  # super admin - all institutions
+        if self.is_super_admin():  # super admin - all institutions
             admin_groups = await self.group_cache.list_institutions()
             insts = defaultdict(list)
             for group in admin_groups:

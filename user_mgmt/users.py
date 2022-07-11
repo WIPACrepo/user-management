@@ -37,15 +37,6 @@ if 'BAD_WORDS_FILE' in os.environ:
         BAD_WORDS = [x for x in map(lambda x: x.split('#', 1)[0].strip(), f.read().split('\n')) if x]
 
 
-def is_admin_of_inst_member(admin_insts, user_groups):
-    for exp in admin_insts:
-        for inst in admin_insts[exp]:
-            group_name = f'/institutions/{exp}/{inst}'
-            if group_name in user_groups:
-                return True
-    return False
-
-
 class Username(MyHandler):
     @staticmethod
     def _gen_username(first_name, last_name, number):
@@ -135,14 +126,17 @@ class UserBase(MyHandler):
         Should match either as the user in question, or an admin of an
         institution they are a member of.
         """
+        if self.is_super_admin():
+            return
         if username != self.auth_data['username']:
             insts = await self.get_admin_institutions()
-            try:
-                user_groups = await krs.groups.get_user_groups(username, rest_client=self.krs_client)
-            except Exception:
-                raise HTTPError(404, 'invalid username')
-            if not is_admin_of_inst_member(insts, user_groups):
-                raise HTTPError(403, 'invalid authorization')
+            for exp in insts:
+                for inst in insts[exp]:
+                    group_path = f'/institutions/{exp}/{inst}'
+                    members = await self.group_cache.get_members(group_path)
+                    if username in members:
+                        return
+            raise HTTPError(403, 'invalid authorization')
 
 
 class MultiUser(UserBase):
