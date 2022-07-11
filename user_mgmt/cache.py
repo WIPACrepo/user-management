@@ -15,15 +15,15 @@ class KeycloakGroupCache:
     A TTL cache for Keycloak group requests.
 
     Args:
-        ttl (int): number of seconds to keep items in cache (default: 3600)
+        ttl (int): number of seconds to keep items in cache (default: 1 day)
         krs_client (RestClient): rest client for talking to Keycloak
     """
-    def __init__(self, ttl=3600, krs_client=None):
+    def __init__(self, ttl=3600*24, krs_client=None):
         self._ttl = ttl
         self._krs_client = krs_client
-        self._group_ids = TTLCache(1000000, ttl*24)  # group ids (shouldn't change)
-        self._group_info = TTLCache(10000000, ttl*24)  # group info by id (shouldn't change)
-        self._group_list = TTLCache(10000000, ttl/60)  # group_path list for all groups
+        self._group_ids = TTLCache(1000000, ttl*7)  # group ids (shouldn't change)
+        self._group_info = TTLCache(10000000, ttl*7)  # group info by id (shouldn't change)
+        self._group_list = TTLCache(10000000, ttl/24/10)  # group_path list for all groups
         self._group_members = TTLCache(10000000, ttl)  # group memberships
 
     async def list_groups(self):
@@ -76,10 +76,10 @@ class KeycloakUserCache:
     A TTL cache for Keycloak user requests.
 
     Args:
-        ttl (int): number of seconds to keep items in cache (default: 3600)
+        ttl (int): number of seconds to keep items in cache (default: 1 day)
         krs_client (RestClient): rest client for talking to Keycloak
     """
-    def __init__(self, ttl=3600, krs_client=None):
+    def __init__(self, ttl=3600*24, krs_client=None):
         self._ttl = ttl
         self._krs_client = krs_client
         self._users = TTLCache(1000000, ttl)
