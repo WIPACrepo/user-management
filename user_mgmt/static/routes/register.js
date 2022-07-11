@@ -97,7 +97,7 @@ export default {
   methods: {
     validate_token: async function() {
       try {
-        await axios.post('/api/reg_token/'+this.reg_token);
+        await axios.get('/api/reg_token/'+this.reg_token);
       } catch(error) {
         console.log('invalid reg_token')
         this.$router.push({name: 'home'})

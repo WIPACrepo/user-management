@@ -77,7 +77,7 @@ Vue.component('inst', {
       get: async function() {
         try {
           const token = await this.keycloak.get_token();
-          const ret = await axios.post('/api/reg_token', {
+          const ret = await axios.post('/api/reg_token', {}, {
             headers: {'Authorization': 'bearer '+token}
           })
           return ret.data.token
