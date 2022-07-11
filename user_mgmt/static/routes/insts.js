@@ -306,7 +306,7 @@ Vue.component('inst', {
       <div>New user page: <router-link :to="{name: 'register', query: {experiment: experiment, institution: institution, reg_token: reg_token} }">Register</router-link></div>
       <div class="invite">
         <label for="register-invite">You may also hand out this invite to new users, which expires in 7 days:</label><br>
-        <textarea id="register-invite">Please fill out the form at this link to register for an account:
+        <textarea id="register-invite" rows="4">Please fill out the form at this link to register for an account:
 {{ window.location.protocol + '//' + window.location.host + $router.resolve({name: 'register', query: {experiment: experiment, institution: institution, reg_token: reg_token} }).href }}</textarea>
       </div>
     </div>
