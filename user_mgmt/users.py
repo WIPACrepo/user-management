@@ -171,7 +171,7 @@ class MultiUser(UserBase):
 
             profile = {}
             for k in ('firstName', 'lastName', 'email', 'username'):
-                profile[k] = user_info[k]
+                profile[k] = user_info.get(k, '')
             attrs = user_info.get('attributes', {})
             for k in attrs:
                 if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile'):
