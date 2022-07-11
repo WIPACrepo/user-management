@@ -12,6 +12,7 @@ export default (params) => {
     admin_groups: {},       // groups user is admin for = {groupname: [users]}
     group_approvals: {},    // group approvals = {groupname: [users]}
     authenticated: true,    // is user logged in?
+    token_raw: 'thetoken',  // raw token string
     username: 'user',
     user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'},
     new_username: 'fbar'
@@ -343,7 +344,7 @@ export default (params) => {
     authenticated: () => params.authenticated,
     login: async function(){},
     logout: async function(){},
-    get_token: async function(){ return 'thetoken' },
+    get_token: async function(){ return params.token_raw },
     get_tokenParsed: async function(){ return {
       username: params.username,
       groups: raw_groups

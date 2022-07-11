@@ -123,9 +123,16 @@ context('Institutions Page', () => {
   it('inst register new user', () => {
     cy.visit('/institutions')
     keycloak({
-      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
+      admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
+      token_raw: 'tokentoken'
     })
     reg_token({token: 'foobar'})
+
+    cy.wait('@api-reg_token').should(({ request, response }) => {
+      expect(request.headers).to.include({
+        'authorization': 'bearer tokentoken'
+      })
+    })
 
     cy.get('[data-test="registration-link"]').should('exist').should('have.attr', 'data-reg-token', 'foobar')
   })

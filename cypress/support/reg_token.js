@@ -18,7 +18,7 @@ export default (params) => {
   }).as('api-reg_token')
 
   cy.intercept({
-    method: 'POST',
+    method: 'GET',
     url: '/api/reg_token/*',
   }, {
     statusCode: 200,
