@@ -15,6 +15,8 @@ class MyHandler(RestHandler):
         self.krs_client = krs_client
         self.group_cache = group_cache
         self.user_cache = user_cache
+        self._get_admin_groups_cache = None
+        self._get_admin_institutions_cache = None
 
     def write(self, chunk):
         """
@@ -89,6 +91,8 @@ class MyHandler(RestHandler):
             logging.warning(f'failed to send email for approval to {group_path}', exc_info=True)
 
     async def get_admin_groups(self):
+        if self._get_admin_groups_cache:
+            return self._get_admin_groups_cache
         if '/admin' in self.auth_data['groups']:  # super admin - all groups
             admin_groups = await self.group_cache.list_groups()
         else:
@@ -99,9 +103,12 @@ class MyHandler(RestHandler):
             if len(val) >= 1 and val[0] != 'institutions':
                 groups.add(group)
         logging.info(f'get_admin_groups: {groups}')
+        self._get_admin_groups_cache = groups
         return groups
 
     async def get_admin_institutions(self):
+        if self._get_admin_institutions_cache:
+            return self._get_admin_institutions_cache
         if '/admin' in self.auth_data['groups']:  # super admin - all institutions
             admin_groups = await self.group_cache.list_institutions()
             insts = defaultdict(list)
@@ -117,4 +124,5 @@ class MyHandler(RestHandler):
                 if len(val) == 3 and val[0] == 'institutions':
                     insts[val[1]].append(val[2])
         logging.info(f'get_admin_instutitons: {insts}')
+        self._get_admin_institutions_cache = insts
         return insts
