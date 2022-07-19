@@ -89,7 +89,7 @@ async def test_username_autogen_short(server, reg_token_client):
     ret = await client.request('POST', '/api/username', args)
     assert ret['username'] == 'fbar0'
 
-    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    await krs.users.create_user('fbar0', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
     ret = await client.request('POST', '/api/username', args)
     assert ret['username'] == 'fbar01'
 
