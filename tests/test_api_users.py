@@ -68,14 +68,30 @@ async def test_username_autogen(server, reg_token_client):
 
     args = {
         'first_name': 'Foo',
+        'last_name': 'Barbar',
+    }
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbarbar'
+
+    await krs.users.create_user('fbarbar', 'foo', 'barbar', 'foo@bar', rest_client=krs_client)
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'fbarbar1'
+
+@pytest.mark.asyncio
+async def test_username_autogen_short(server, reg_token_client):
+    rest, krs_client, *_ = server
+    client = await reg_token_client()
+
+    args = {
+        'first_name': 'Foo',
         'last_name': 'Bar',
     }
     ret = await client.request('POST', '/api/username', args)
-    assert ret['username'] == 'fbar'
+    assert ret['username'] == 'fbar0'
 
-    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    await krs.users.create_user('fbar0', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
     ret = await client.request('POST', '/api/username', args)
-    assert ret['username'] == 'fbar1'
+    assert ret['username'] == 'fbar01'
 
 @pytest.mark.asyncio
 async def test_username_select(server, reg_token_client):
@@ -85,12 +101,12 @@ async def test_username_select(server, reg_token_client):
     args = {
         'first_name': 'Foo',
         'last_name': 'Bar',
-        'username': 'fbar'
+        'username': 'fbarbar'
     }
     ret = await client.request('POST', '/api/username', args)
-    assert ret['username'] == 'fbar'
+    assert ret['username'] == 'fbarbar'
 
-    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    await krs.users.create_user('fbarbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
@@ -102,7 +118,7 @@ async def test_username_auth(server, reg_token_client):
     args = {
         'first_name': 'Foo',
         'last_name': 'Bar',
-        'username': 'fbar'
+        'username': 'fbarbar'
     }
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
@@ -117,6 +133,16 @@ async def test_username_invalid(server, reg_token_client, monkeypatch):
     rest, krs_client, *_ = server
     client = await reg_token_client()
 
+    # short
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'foo'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    # long
     args = {
         'first_name': 'Foo',
         'last_name': 'Bar',
@@ -125,6 +151,7 @@ async def test_username_invalid(server, reg_token_client, monkeypatch):
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
+    # non-ascii
     args = {
         'first_name': 'Foo',
         'last_name': 'Bar',
@@ -133,6 +160,7 @@ async def test_username_invalid(server, reg_token_client, monkeypatch):
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
+    # bad word
     monkeypatch.setattr(user_mgmt.users, 'BAD_WORDS', ['bad'])
 
     args = {

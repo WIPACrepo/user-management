@@ -19,17 +19,22 @@ const Error404 = () => import('./routes/error404.js')
 Vue.component('textinput', {
   data: function(){
     return {
+      name: '',
+      inputName: '',
+      value: '',
       required: false,
       valid: true,
-      allValid: true
+      allValid: true,
+      helptext: ''
     }
   },
-  props: ['name', 'inputName', 'value', 'required', 'valid', 'allValid'],
+  props: ['name', 'inputName', 'value', 'required', 'valid', 'allValid', 'helptext'],
   template: `
 <div class="entry">
   <p>{{ name }}: <span v-if="required" class="red">*</span></p>
   <input :name="inputName" :value="value" @input="$emit('input', $event.target.value)">
   <span class="red" v-if="!allValid && !valid && (required || value)">invalid entry</span>
+  <div class="help" v-if="helptext">{{ helptext }}</div>
 </div>`
 })
 

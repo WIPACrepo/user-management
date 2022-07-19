@@ -42,8 +42,10 @@ class Username(MyHandler):
     def _gen_username(first_name, last_name, number):
         """Make ascii username from first and last name."""
         ret = unidecode.unidecode(first_name[0] + last_name).replace("'", '').replace(' ', '').lower()
-        if len(ret) > 16:
-            ret = ret[:16]
+        if len(ret) < 5:
+            ret = f'{ret:0<5s}'
+        if len(ret) > 8:
+            ret = ret[:8]
         if number > 0:
             ret += str(number)
         return ret
@@ -53,6 +55,8 @@ class Username(MyHandler):
         """Check if a username is valid - length, bad words."""
         ascii_username = unidecode.unidecode(username).replace("'", '').replace(' ', '').lower()
         if ascii_username != username:
+            return False
+        if len(username) < 5:
             return False
         if len(username) > 16:
             return False

@@ -177,7 +177,7 @@ export default {
       <textinput name="Last Name" inputName="last_name" v-model.trim="lastName"
        required=true :valid="validLastName" :allValid="valid"></textinput>
       <textinput name="Username" inputName="username" v-model.trim="username"
-       required=true :valid="validUsername" :allValid="valid"></textinput>
+       required=true :valid="validUsername" :allValid="valid" helptext="Note: must be between 5-16 characters"></textinput>
       <textinput name="External Email Address" inputName="email" v-model.trim="email"
        required=true :valid="validEmail" :allValid="valid"></textinput>
       <div v-if="errMessage" class="error_box" v-html="errMessage"></div>
