@@ -43,7 +43,7 @@ class Username(MyHandler):
         """Make ascii username from first and last name."""
         ret = unidecode.unidecode(first_name[0] + last_name).replace("'", '').replace(' ', '').lower()
         if len(ret) < 5:
-            ret = f'{ret:05s}'
+            ret = f'{ret:0<5s}'
         if len(ret) > 8:
             ret = ret[:8]
         if number > 0:

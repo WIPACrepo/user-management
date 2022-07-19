@@ -73,7 +73,7 @@ async def test_username_autogen(server, reg_token_client):
     ret = await client.request('POST', '/api/username', args)
     assert ret['username'] == 'fbarbar'
 
-    await krs.users.create_user('fbar', 'foo', 'barbar', 'foo@bar', rest_client=krs_client)
+    await krs.users.create_user('fbarbar', 'foo', 'barbar', 'foo@bar', rest_client=krs_client)
     ret = await client.request('POST', '/api/username', args)
     assert ret['username'] == 'fbarbar1'
 
@@ -106,7 +106,7 @@ async def test_username_select(server, reg_token_client):
     ret = await client.request('POST', '/api/username', args)
     assert ret['username'] == 'fbarbar'
 
-    await krs.users.create_user('fbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
+    await krs.users.create_user('fbarbar', 'foo', 'bar', 'foo@bar', rest_client=krs_client)
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
