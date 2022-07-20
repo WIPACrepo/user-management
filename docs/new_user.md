@@ -5,18 +5,15 @@ hide:
 
 # New User Registration
 
-New users should register through
-[https://user-management.icecube.aq/register](https://user-management.icecube.aq/register).
+New users should register through a link provided by their institution lead.
 
 Here is an example of the registration page:
 
 ![registration](images/registration.png)
 
-Most fields are explanatory.  The Author List Name should be filled in
-if you should appear on the author list, but can be ignored.
-The email address should be an external email account (maybe your local
-institution account) that can receive password resets and other
-account-oriented emails.
+Most fields are explanatory. The email address should be an external
+email account (maybe your local institution account) that can receive
+password resets and other account-oriented emails.
 
 ## Upcoming Actions
 
