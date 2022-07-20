@@ -42,7 +42,7 @@ pyjwt[crypto]==2.4.0
     # via
     #   wipac-keycloak-rest-services
     #   wipac-rest-tools
-pymongo==4.1.1
+pymongo==4.2.0
     # via motor
 requests==2.28.1
     # via
