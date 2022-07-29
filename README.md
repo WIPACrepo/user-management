@@ -1,10 +1,8 @@
 <!--- Top of README Badges (automated) --->
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/WIPACrepo/user-management?include_prereleases)](https://github.com/WIPACrepo/user-management/) [![Lines of code](https://img.shields.io/tokei/lines/github/WIPACrepo/user-management)](https://github.com/WIPACrepo/user-management/) [![GitHub issues](https://img.shields.io/github/issues/WIPACrepo/user-management)](https://github.com/WIPACrepo/user-management/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aopen) [![GitHub pull requests](https://img.shields.io/github/issues-pr/WIPACrepo/user-management)](https://github.com/WIPACrepo/user-management/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aopen) 
 <!--- End of README Badges (automated) --->
-# keycloak-rest-services
-Services surrounding Keycloak, that use the REST API to read/update state.
-
-[![CircleCI](https://circleci.com/gh/WIPACrepo/keycloak-rest-services.svg?style=svg&circle-token=87c420d0b5ba0dffb28337618e7cf0df7a905bf8)](https://circleci.com/gh/WIPACrepo/keycloak-rest-services)
+# user-management
+A frontend for Keycloak user manangement for WIPAC/IceCube.
 
 * [Basic Design](#basic-design)
   + [Direct Actions](#direct-actions)
@@ -13,7 +11,6 @@ Services surrounding Keycloak, that use the REST API to read/update state.
 * [Web App](#web-app)
 * [Running Tests](#running-tests)
   + [Getting Test Coverage](#getting-test-coverage)
-* [Manually Running Scripts](#manually-running-scripts)
 
 ## Basic Design
 
