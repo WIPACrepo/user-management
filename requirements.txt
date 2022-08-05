@@ -75,7 +75,7 @@ wipac-rest-tools==1.3.3
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
-yarl==1.7.2
+yarl==1.8.1
     # via
     #   aio-pika
     #   aiormq
