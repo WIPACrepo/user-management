@@ -266,3 +266,19 @@ export var profileMixin = {
   <div class="error" v-if="error">{{ error }}</div>
 </div>`
 };
+
+export function debounce(fn, delay) {
+  var timeoutID = null
+  return function () {
+    clearTimeout(timeoutID)
+    var args = arguments
+    var that = this
+    timeoutID = setTimeout(function () {
+      fn.apply(that, args)
+    }, delay)
+  }
+};
+
+export function sleep(ms) {                                                                                                                                                                                       
+  return new Promise((resolve) => setTimeout(resolve, ms));                                                                                                                                                
+};
