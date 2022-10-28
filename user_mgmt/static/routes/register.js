@@ -81,6 +81,7 @@ export default {
         if (orig_username != resp.data['username'] && this.username == orig_username) {
           this.username = resp.data['username']
         }
+        this.errMessage = ''
         return true
       } catch(error) {
         console.log(error)

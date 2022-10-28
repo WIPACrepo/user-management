@@ -68,7 +68,7 @@ class Institution(MyHandler):
         try:
             group_info = await krs.groups.group_info(inst_group, rest_client=self.krs_client)
         except Exception:
-            raise HTTPError(404, 'institution does not exist')
+            raise HTTPError(404, reason='institution does not exist')
 
         ret = {
             'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')]
@@ -114,7 +114,7 @@ class InstitutionMultiUsers(MyHandler):
         """
         insts = await self.get_admin_institutions()
         if experiment not in insts or institution not in insts[experiment]:
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         inst_group = f'/institutions/{experiment}/{institution}'
 
@@ -122,7 +122,7 @@ class InstitutionMultiUsers(MyHandler):
         try:
             group_info = await krs.groups.group_info(inst_group, rest_client=self.krs_client)
         except Exception:
-            raise HTTPError(404, 'institution does not exist')
+            raise HTTPError(404, reason='institution does not exist')
 
         # get main membership
         ret = {}
@@ -155,12 +155,12 @@ class InstitutionUser(MyHandler):
         """
         insts = await self.get_admin_institutions()
         if experiment not in insts or institution not in insts[experiment]:
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         try:
             await self.user_cache.get_user(username)
         except Exception:
-            raise HTTPError(400, 'invalid username')
+            raise HTTPError(400, reason='invalid username')
 
         inst_group = f'/institutions/{experiment}/{institution}'
 
@@ -168,7 +168,7 @@ class InstitutionUser(MyHandler):
         try:
             group_info = await krs.groups.group_info(inst_group, rest_client=self.krs_client)
         except Exception:
-            raise HTTPError(404, 'institution does not exist')
+            raise HTTPError(404, reason='institution does not exist')
         child_groups = [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')]
 
         opt_fields = {key: bool for key in child_groups}
@@ -200,18 +200,18 @@ class InstitutionUser(MyHandler):
         inst_group = f'/institutions/{experiment}/{institution}'
         insts = await self.get_admin_institutions()
         if (experiment not in insts or institution not in insts[experiment]) and inst_group not in self.auth_data['groups']:
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         try:
             await self.user_cache.get_user(username)
         except Exception:
-            raise HTTPError(400, 'invalid username')
+            raise HTTPError(400, reason='invalid username')
 
         # get child groups
         try:
             group_info = await krs.groups.group_info(inst_group, rest_client=self.krs_client)
         except Exception:
-            raise HTTPError(404, 'institution does not exist')
+            raise HTTPError(404, reason='institution does not exist')
         child_groups = [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')]
 
         await krs.groups.remove_user_group(inst_group, username, rest_client=self.krs_client)
@@ -269,18 +269,18 @@ class InstApprovals(MyHandler):
 
             # check if username is valid
             if not Username._username_valid(username):
-                raise HTTPError(400, 'invalid username')
+                raise HTTPError(400, reason='invalid username')
 
             # check for existing username
             ret = await self.db.inst_approvals.find_one({"username": username})
             if ret:
-                raise HTTPError(400, 'invalid username')
+                raise HTTPError(400, reason='invalid username')
             try:
                 await krs.users.user_info(username, rest_client=self.krs_client)
             except krs.users.UserDoesNotExist:
                 pass  # username is available
             else:
-                raise HTTPError(400, 'invalid username')
+                raise HTTPError(400, reason='invalid username')
 
             user_data = {
                 'id': uuid.uuid1().hex,
@@ -327,7 +327,7 @@ Documentation is located at:
         """Get list of requests a user can approve"""
         insts = await self.get_admin_institutions()
         if not insts:
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         search = {'$or': [{'experiment': exp, 'institution': inst} for exp in insts for inst in insts[exp]]}
         ret = []
@@ -354,7 +354,7 @@ class InstitutionMultiApprovals(MyHandler):
         """
         insts = await self.get_admin_institutions()
         if experiment not in insts or institution not in insts[experiment]:
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         search = {'experiment': experiment, 'institution': institution}
         ret = []
@@ -381,9 +381,9 @@ class InstApprovalsActionApprove(MyHandler):
         insts = await self.get_admin_institutions()
         ret = await self.db.inst_approvals.find_one({'id': approval_id})
         if not ret:
-            raise HTTPError(404, 'no record for approval_id')
+            raise HTTPError(404, reason='no record for approval_id')
         if not any(ret['experiment'] == exp and ret['institution'] in insts[exp] for exp in insts):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         newuser = 'newuser' in ret and ret['newuser']
 
@@ -392,7 +392,7 @@ class InstApprovalsActionApprove(MyHandler):
             # create new user account
             user_data = await self.db.user_registrations.find_one({'id': ret['newuser']})
             if not user_data:
-                raise HTTPError(400, 'invalid new user')
+                raise HTTPError(400, reason='invalid new user')
             args = {
                 "username": user_data['username'],
                 "first_name": user_data['first_name'],
@@ -489,7 +489,7 @@ listed in the "Other Governing Agreements" section of the policy linked above.
                 try:
                     args = await self.user_cache.get_user(ret['username'])
                 except Exception:
-                    raise HTTPError(400, 'invalid username')
+                    raise HTTPError(400, reason='invalid username')
                 krs.email.send_email(
                     recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
                     subject='IceCube Account Institution Changes',
@@ -517,9 +517,9 @@ class InstApprovalsActionDeny(MyHandler):
         insts = await self.get_admin_institutions()
         ret = await self.db.inst_approvals.find_one({'id': approval_id})
         if not ret:
-            raise HTTPError(404, 'no record for approval_id')
+            raise HTTPError(404, reason='no record for approval_id')
         if not any(ret['experiment'] == exp and ret['institution'] in insts[exp] for exp in insts):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         newuser = 'newuser' in ret and ret['newuser']
 
@@ -527,7 +527,7 @@ class InstApprovalsActionDeny(MyHandler):
         if newuser:
             user_data = await self.db.user_registrations.find_one({'id': ret['newuser']})
             if not user_data:
-                raise HTTPError(400, 'invalid new user')
+                raise HTTPError(400, reason='invalid new user')
             await self.db.user_registrations.delete_one({'id': ret['newuser']})
         await self.db.inst_approvals.delete_one({'id': approval_id})
 
@@ -544,7 +544,7 @@ class InstApprovalsActionDeny(MyHandler):
                 try:
                     args = await self.user_cache.get_user(ret['username'])
                 except Exception:
-                    raise HTTPError(400, 'invalid username')
+                    raise HTTPError(400, reason='invalid username')
             krs.email.send_email(
                 recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
                 subject='IceCube Account Request Denied',
