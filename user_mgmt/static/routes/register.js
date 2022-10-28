@@ -1,6 +1,6 @@
 /** Register route **/
 
-import {get_all_inst_subgroups} from '../helpers.js'
+import {get_all_inst_subgroups, debounce, sleep} from '../helpers.js'
 
 export default {
   data: function(){
@@ -9,9 +9,13 @@ export default {
       institution: '',
       reg_token: '',
       firstName: '',
+      debouncedFirstName: '',
       lastName: '',
+      debouncedLastName: '',
       username: '',
+      debouncedUsername: '',
       email: '',
+      debouncedEmail: '',
       valid: true,
       errMessage: '',
       submitted: false
@@ -23,13 +27,13 @@ export default {
   },
   computed: {
     validFirstName: function() {
-      return this.firstName
+      return this.debouncedFirstName
     },
     validLastName: function() {
-      return this.lastName
+      return this.debouncedLastName
     },
     validEmail: function() {
-      return this.email.indexOf('@',1) > 0
+      return this.debouncedEmail.indexOf('@',1) > 0
     },
     institutions: function() {
       try {
@@ -63,17 +67,18 @@ export default {
         return true
       }
       try {
+        const orig_username = this.debouncedUsername;
         let args = {
-            first_name: this.firstName,
-            last_name: this.lastName
+            first_name: this.debouncedFirstName,
+            last_name: this.debouncedLastName
         }
-        if (this.username != '') {
-          args.username = this.username
+        if (orig_username != '') {
+          args.username = orig_username
         }
         const resp = await axios.post('/api/username', args, {
           headers: {'Authorization': 'bearer '+this.reg_token}
         });
-        if (this.username != resp.data['username']) {
+        if (orig_username != resp.data['username'] && this.username == orig_username) {
           this.username = resp.data['username']
         }
         return true
@@ -94,6 +99,20 @@ export default {
       }
     }
   },
+  watch: {
+    firstName: debounce(function(newVal) {
+      this.debouncedFirstName = newVal
+    }, 250),
+    lastName: debounce(function(newVal) {
+      this.debouncedLastName = newVal
+    }, 250),
+    username: debounce(function(newVal) {
+      this.debouncedUsername = newVal
+    }, 250),
+    email: debounce(function(newVal) {
+      this.debouncedEmail = newVal
+    }, 250)
+  },
   methods: {
     validate_token: async function() {
       try {
@@ -106,6 +125,9 @@ export default {
       return true
     },
       submit: async function(e) {
+          // wait for debounce
+          await sleep(250)
+          
           // validate
           this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
                   && this.validLastName && this.validUsername && this.validEmail)

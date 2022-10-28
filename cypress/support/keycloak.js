@@ -335,9 +335,17 @@ export default (params) => {
   cy.intercept({
     method: 'POST',
     url: '/api/username',
-  }, {
-    statusCode: 200,
-    body: {username: params.new_username},
+  }, (req) => {
+    let ret = ''
+    if (typeof params.new_username === 'function') {
+      ret = params.new_username(req.body.username)
+    } else {
+      ret = params.new_username
+    }
+    req.reply({
+      statusCode: 200,
+      body: {username: ret},
+    })
   }).as('api-username-post')
 
   const obj = {
