@@ -109,15 +109,15 @@ class Username(MyHandler):
                     break
                 number += 1
             else:
-                raise HTTPError(500, 'cannot generate unique username')
+                raise HTTPError(500, reason='cannot generate unique username')
         else:
             # make sure username passes filters
             if not self._username_valid(username):
-                raise HTTPError(400, 'invalid username')
+                raise HTTPError(400, reason='invalid username')
 
             # make sure username does not exist
             if await self._username_in_use(username):
-                raise HTTPError(400, 'username in use')
+                raise HTTPError(400, reason='username in use')
 
         self.write({'username': username})
 
@@ -140,7 +140,7 @@ class UserBase(MyHandler):
                     members = await self.group_cache.get_members(group_path)
                     if username in members:
                         return
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
 
 class MultiUser(UserBase):
@@ -164,7 +164,7 @@ class MultiUser(UserBase):
             try:
                 user_info = await self.user_cache.get_user(username)
             except Exception:
-                raise HTTPError(404, 'invalid username')
+                raise HTTPError(404, reason='invalid username')
             logging.info('valid username')
 
             profile = {}
@@ -199,7 +199,7 @@ class User(UserBase):
         try:
             user_info = await self.user_cache.get_user(username)
         except Exception:
-            raise HTTPError(404, 'invalid username')
+            raise HTTPError(404, reason='invalid username')
         logging.info('valid username')
 
         profile = {}
@@ -230,7 +230,7 @@ class User(UserBase):
         try:
             await self.user_cache.get_user(username)
         except Exception:
-            raise HTTPError(404, 'invalid username')
+            raise HTTPError(404, reason='invalid username')
 
         data = self.json_filter({}, VALID_FIELDS)
 
@@ -245,7 +245,7 @@ class User(UserBase):
         try:
             await krs.users.modify_user(username, **args, rest_client=self.krs_client)
         except Exception:
-            raise HTTPError(400, 'bad update')
+            raise HTTPError(400, reason='bad update')
         else:
             self.user_cache.invalidate([username])
 

@@ -59,13 +59,13 @@ class Group(MyHandler):
         try:
             group = await self.group_cache.get_group_info_from_id(group_id)
         except Exception:
-            raise HTTPError(404, 'group does not exist')
+            raise HTTPError(404, reason='group does not exist')
 
         if group['name'].startswith('_'):
-            raise HTTPError(400, 'bad group request')
+            raise HTTPError(400, reason='bad group request')
         admin_groups = await self.get_admin_groups()
         if not is_authorized_group(group['path'], admin_groups):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         ret = await self.group_cache.get_members(group['path'])
         self.write(sorted(ret))
@@ -87,18 +87,18 @@ class GroupUser(MyHandler):
         try:
             group = await self.group_cache.get_group_info_from_id(group_id)
         except Exception:
-            raise HTTPError(404, 'group does not exist')
+            raise HTTPError(404, reason='group does not exist')
 
         if group['name'].startswith('_'):
-            raise HTTPError(400, 'bad group request')
+            raise HTTPError(400, reason='bad group request')
         admin_groups = await self.get_admin_groups()
         if not is_authorized_group(group['path'], admin_groups):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         try:
             await self.user_cache.get_user(username)
         except Exception:
-            raise HTTPError(404, 'username does not exist')
+            raise HTTPError(404, reason='username does not exist')
 
         await krs.groups.add_user_group(group['path'], username, rest_client=self.krs_client)
         self.group_cache.invalidate(group['path'])
@@ -119,18 +119,18 @@ class GroupUser(MyHandler):
         try:
             group = await self.group_cache.get_group_info_from_id(group_id)
         except Exception:
-            raise HTTPError(404, 'group does not exist')
+            raise HTTPError(404, reason='group does not exist')
 
         if group['name'].startswith('_'):
-            raise HTTPError(400, 'bad group request')
+            raise HTTPError(400, reason='bad group request')
         admin_groups = await self.get_admin_groups()
         if not is_authorized_group(group['path'], admin_groups):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         try:
             await self.user_cache.get_user(username)
         except Exception:
-            raise HTTPError(404, 'username does not exist')
+            raise HTTPError(404, reason='username does not exist')
 
         await krs.groups.remove_user_group(group['path'], username, rest_client=self.krs_client)
         self.group_cache.invalidate(group['path'])
@@ -153,13 +153,13 @@ class GroupApprovals(MyHandler):
         approval_data['id'] = uuid.uuid1().hex
 
         if approval_data['group'].rsplit('/')[-1].startswith('_'):
-            raise HTTPError(400, 'bad group request')
+            raise HTTPError(400, reason='bad group request')
 
         ret = await self.group_cache.list_groups()
         groups = get_administered_groups(ret)
         if approval_data['group'] not in groups:
             logging.info(f'{approval_data}\n{groups}')
-            raise HTTPError(400, 'bad group request')
+            raise HTTPError(400, reason='bad group request')
         approval_data['group_id'] = groups[approval_data['group']]
 
         await self.db.group_approvals.insert_one(approval_data)
@@ -206,9 +206,9 @@ class GroupApprovalsActionApprove(MyHandler):
         admin_groups = await self.get_admin_groups()
         ret = await self.db.group_approvals.find_one({'id': approval_id})
         if not ret:
-            raise HTTPError(404, 'no record for approval_id')
+            raise HTTPError(404, reason='no record for approval_id')
         if not is_authorized_group(ret['group'], admin_groups):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         audit_logger.info(f'{self.auth_data["username"]} is approving request {approval_id}')
 
@@ -224,7 +224,7 @@ class GroupApprovalsActionApprove(MyHandler):
             try:
                 args = await self.user_cache.get_user(ret['username'])
             except Exception:
-                raise HTTPError(400, 'invalid username')
+                raise HTTPError(400, reason='invalid username')
             krs.email.send_email(
                 recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
                 subject='IceCube Group Request Approved',
@@ -251,9 +251,9 @@ class GroupApprovalsActionDeny(MyHandler):
         admin_groups = await self.get_admin_groups()
         ret = await self.db.group_approvals.find_one({'id': approval_id})
         if not ret:
-            raise HTTPError(404, 'no record for approval_id')
+            raise HTTPError(404, reason='no record for approval_id')
         if not is_authorized_group(ret['group'], admin_groups):
-            raise HTTPError(403, 'invalid authorization')
+            raise HTTPError(403, reason='invalid authorization')
 
         audit_logger.info(f'{self.auth_data["username"]} is denying request {approval_id}')
         await self.db.group_approvals.delete_one({'id': approval_id})
@@ -263,7 +263,7 @@ class GroupApprovalsActionDeny(MyHandler):
             try:
                 args = await self.user_cache.get_user(ret['username'])
             except Exception:
-                raise HTTPError(400, 'invalid username')
+                raise HTTPError(400, reason='invalid username')
             krs.email.send_email(
                 recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
                 subject='IceCube Group Request Denied',
