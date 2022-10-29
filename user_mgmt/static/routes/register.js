@@ -103,9 +103,13 @@ export default {
   watch: {
     firstName: debounce(function(newVal) {
       this.debouncedFirstName = newVal
+      this.username = ''
+      this.debouncedUsername = ''
     }, 250),
     lastName: debounce(function(newVal) {
       this.debouncedLastName = newVal
+      this.username = ''
+      this.debouncedUsername = ''
     }, 250),
     username: debounce(function(newVal) {
       this.debouncedUsername = newVal
