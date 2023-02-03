@@ -140,7 +140,7 @@ export async function get_my_group_admins(keycloak) {
       if (group == '/admin') {
         console.log("super admin - all groups")
         groups = [];
-        const ret = await get_all_groups();
+        const ret = await get_all_groups(keycloak);
         for (const g in ret) {
             groups.push(g);
         }
