@@ -125,7 +125,7 @@ class Username(MyHandler):
 class UserBase(MyHandler):
     async def check_auth(self, username):
         """
-        Check auth
+        Check auth.
 
         Should match either as the user in question, or an admin of an
         institution they are a member of.
@@ -133,6 +133,7 @@ class UserBase(MyHandler):
         if self.is_super_admin():
             return
         if username != self.auth_data['username']:
+            # do inst admin check
             insts = await self.get_admin_institutions()
             for exp in insts:
                 for inst in insts[exp]:
@@ -140,6 +141,33 @@ class UserBase(MyHandler):
                     members = await self.group_cache.get_members(group_path)
                     if username in members:
                         return
+            raise HTTPError(403, reason='invalid authorization')
+
+    async def check_auth_read_only(self, username):
+        """
+        Check auth - read only version.
+
+        Should match either as the user in question, or an admin of an
+        institution they are a member of, or an admin of a group they are
+        a member of.
+        """
+        if self.is_super_admin():
+            return
+        if username != self.auth_data['username']:
+            # do inst admin check
+            insts = await self.get_admin_institutions()
+            for exp in insts:
+                for inst in insts[exp]:
+                    group_path = f'/institutions/{exp}/{inst}'
+                    members = await self.group_cache.get_members(group_path)
+                    if username in members:
+                        return
+            # do group admin check
+            groups = await self.get_admin_groups()
+            for group_path in groups:
+                members = await self.group_cache.get_members(group_path)
+                if username in members:
+                    return
             raise HTTPError(403, reason='invalid authorization')
 
 
@@ -156,7 +184,7 @@ class MultiUser(UserBase):
         usernames = self.get_arguments('username')
         logging.info('get users %s', usernames)
         for username in usernames:
-            await self.check_auth(username)
+            await self.check_auth_read_only(username)
         logging.info('auth is good')
 
         ret = {}
@@ -193,7 +221,7 @@ class User(UserBase):
             dict: user profile
         """
         logging.info('get user %s', username)
-        await self.check_auth(username)
+        await self.check_auth_read_only(username)
         logging.info('auth is good')
 
         try:
