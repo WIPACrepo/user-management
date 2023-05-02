@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.31 (2023-05-02)
+### Other
+* Update wipac-keycloak-rest-services to 1.3.8 ([#43](https://github.com/WIPACrepo/user-management/issues/43)) ([`112922d`](https://github.com/WIPACrepo/user-management/commit/112922db7efd91dcb9500a1e082b40a0b2207573))
+
 ## v1.2.30 (2023-02-07)
 
 
