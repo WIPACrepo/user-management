@@ -13,6 +13,11 @@ from .util import port, server, mongo_client, reg_token_client, email_patch
 import user_mgmt.users
 
 
+def test_invalid_usernames():
+    assert user_mgmt.users.Username._username_valid('foo-bar')
+    assert not user_mgmt.users.Username._username_valid('foo-bār')
+
+
 @pytest.mark.asyncio
 async def test_user(server):
     rest, krs_client, *_ = server
@@ -22,6 +27,16 @@ async def test_user(server):
     assert ret['firstName'] == 'first'
     assert ret['lastName'] == 'last'
     assert ret['email'] == 'test@test'
+
+@pytest.mark.asyncio
+async def test_user_dash(server):
+    rest, krs_client, *_ = server
+    client = await rest('test-user')
+
+    ret = await client.request('GET', '/api/users/test-user')
+    assert ret['firstName'] == 'first'
+    assert ret['lastName'] == 'last'
+    assert ret['email'] == 'test-user@test'
 
 
 @pytest.mark.asyncio
