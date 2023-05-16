@@ -97,7 +97,7 @@ def create_server():
     server.add_route(r'/api/experiments/(?P<experiment>[\w\-]+)/institutions', MultiInstitutions, kwargs)
     server.add_route(r'/api/experiments/(?P<experiment>[\w\-]+)/institutions/(?P<institution>[\w\-]+)', Institution, kwargs)
     server.add_route(r'/api/experiments/(?P<experiment>[\w\-]+)/institutions/(?P<institution>[\w\-]+)/users', InstitutionMultiUsers, kwargs)
-    server.add_route(r'/api/experiments/(?P<experiment>[\w\-]+)/institutions/(?P<institution>[\w\-]+)/users/(?P<username>\w+)', InstitutionUser, kwargs)
+    server.add_route(r'/api/experiments/(?P<experiment>[\w\-]+)/institutions/(?P<institution>[\w\-]+)/users/(?P<username>[\w\-]+)', InstitutionUser, kwargs)
 
     server.add_route('/api/inst_approvals', InstApprovals, kwargs)
     server.add_route(r'/api/inst_approvals/(?P<approval_id>\w+)/actions/approve', InstApprovalsActionApprove, kwargs)
@@ -106,7 +106,7 @@ def create_server():
 
     server.add_route('/api/groups', MultiGroups, kwargs)
     server.add_route(r'/api/groups/(?P<group_id>[\w\-]+)', Group, kwargs)
-    server.add_route(r'/api/groups/(?P<group_id>[\w\-]+)/(?P<username>\w+)', GroupUser, kwargs)
+    server.add_route(r'/api/groups/(?P<group_id>[\w\-]+)/(?P<username>[\w\-]+)', GroupUser, kwargs)
 
     server.add_route('/api/group_approvals', GroupApprovals, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/approve', GroupApprovalsActionApprove, kwargs)
@@ -116,7 +116,7 @@ def create_server():
     server.add_route(r'/api/reg_token/(?P<token>\w+)', RegistrationTokenValid, kwargs)
 
     server.add_route(r'/api/users', MultiUser, kwargs)
-    server.add_route(r'/api/users/(?P<username>\w+)', User, kwargs)
+    server.add_route(r'/api/users/(?P<username>[\w\-]+)', User, kwargs)
     server.add_route('/api/username', Username, kwargs)
 
     server.add_route(r'/api/(.*)', Error)
