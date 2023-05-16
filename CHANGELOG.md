@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.32 (2023-05-16)
+### Other
+* Allow usernames with dashes ([#44](https://github.com/WIPACrepo/user-management/issues/44)) ([`9f81b9e`](https://github.com/WIPACrepo/user-management/commit/9f81b9e6721e5bb85a2062e6c44ba0397a47d390))
+
 ## v1.2.31 (2023-05-02)
 ### Other
 * Update wipac-keycloak-rest-services to 1.3.8 ([#43](https://github.com/WIPACrepo/user-management/issues/43)) ([`112922d`](https://github.com/WIPACrepo/user-management/commit/112922db7efd91dcb9500a1e082b40a0b2207573))
