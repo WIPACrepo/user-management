@@ -210,7 +210,7 @@ export default {
 
       try {
         const token = await this.keycloak.get_token()
-        const username = await get_username();
+        const username = await get_username(this.keycloak);
         const resp = await axios.delete('/api/experiments/'+exp+'/institutions/'+inst+'/users/'+username, {
           headers: {'Authorization': 'bearer '+token}
         });
@@ -252,7 +252,7 @@ export default {
 
       try {
         const token = await this.keycloak.get_token()
-        const username = await get_username();
+        const username = await get_username(this.keycloak);
         let data = {}
         data[sub] = false
         for (const subgroup of this.experiments[exp][inst].subgroups) {
@@ -284,12 +284,13 @@ export default {
     leave_group_action: async function(group_id) {
       let confirm_msg = 'Are you sure you want to leave the group '+this.group+'?'
       if (!window.confirm(confirm_msg)) {
+        console.log('cancelled leave_group_action() for '+group_id)
         return;
       }
 
       try {
         const token = await this.keycloak.get_token()
-        const username = await get_username();
+        const username = await get_username(this.keycloak);
         const resp = await axios.delete('/api/groups/'+group_id+'/'+username, {
           headers: {'Authorization': 'bearer '+token}
         });
@@ -381,7 +382,7 @@ export default {
     <div class="indent" v-else>Loading institution information...</div>
     <h3>Groups</h3>
     <div v-if="$asyncComputed.my_groups.success">
-      <div class="indent group" v-for="grp in Object.keys(my_groups).sort()">
+      <div class="indent group" v-for="grp in Object.keys(my_groups).sort()" :data-test="grp">
         <span class="italics">{{ grp }}</span>
         <button @click="leave_group_action(my_groups[grp])">Leave group</button>
       </div>
