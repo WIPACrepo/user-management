@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.33 (2023-05-19)
+### Other
+* Fix home page actions, specifically leave-group ([#45](https://github.com/WIPACrepo/user-management/issues/45)) ([`3683cff`](https://github.com/WIPACrepo/user-management/commit/3683cffa1109cb00e66d30bd881447d18c993681))
+
 ## v1.2.32 (2023-05-16)
 ### Other
 * Allow usernames with dashes ([#44](https://github.com/WIPACrepo/user-management/issues/44)) ([`9f81b9e`](https://github.com/WIPACrepo/user-management/commit/9f81b9e6721e5bb85a2062e6c44ba0397a47d390))
