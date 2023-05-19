@@ -34,7 +34,17 @@ context('Home Page', () => {
     keycloak({insts: ['instA'], groups: ['groupB']})
 
     cy.get('.institution').should('include.text', 'instA')
+
+    cy.wait('@api-groups').should(({ request, response }) => {
+      expect(response.body).to.deep.eq({
+        "/tokens/groupB": "groupB-id"
+      })
+    })
     cy.get('.group').should('include.text', 'groupB')
+    cy.get('[data-test="/tokens/groupB"] button').should('exist').click()
+    cy.wait('@api-group-user-delete').should(({ request, response }) => {
+      expect(request.url).to.match(/groupB-id\/user$/)
+    })
   })
 
   it('inst admin', () => {
