@@ -48,7 +48,7 @@ pypng==0.20220715.0
     # via qrcode
 qrcode==7.4.2
     # via wipac-rest-tools
-requests==2.30.0
+requests==2.31.0
     # via
     #   requests-futures
     #   wipac-dev-tools
@@ -62,7 +62,7 @@ tornado==6.3.2
     #   wipac-rest-tools
 types-cryptography==3.3.23.2
     # via pyjwt
-typing-extensions==4.5.0
+typing-extensions==4.6.1
     # via
     #   qrcode
     #   wipac-dev-tools
@@ -70,14 +70,14 @@ unidecode==1.3.6
     # via user-mgmt (setup.py)
 urllib3==2.0.2
     # via requests
-wipac-dev-tools==1.6.15
+wipac-dev-tools==1.6.16
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
     #   wipac-rest-tools
-wipac-keycloak-rest-services==1.3.9
+wipac-keycloak-rest-services==1.3.10
     # via user-mgmt (setup.py)
-wipac-rest-tools==1.4.18
+wipac-rest-tools==1.4.19
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
