@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.34 (2023-05-25)
+### Other
+* <bot> update requirements.txt ([`a1adf39`](https://github.com/WIPACrepo/user-management/commit/a1adf398a27c6de76ee1900e22af537a659a112b))
+* <bot> update requirements-tests.txt ([`484babd`](https://github.com/WIPACrepo/user-management/commit/484babd6245423da96994996af1dfc3c18a56c91))
+* Bump py-versions CI release v2.1 ([`b0ed387`](https://github.com/WIPACrepo/user-management/commit/b0ed387827271969adc6335087412f2cf1a08212))
+
 ## v1.2.33 (2023-05-19)
 ### Other
 * Fix home page actions, specifically leave-group ([#45](https://github.com/WIPACrepo/user-management/issues/45)) ([`3683cff`](https://github.com/WIPACrepo/user-management/commit/3683cffa1109cb00e66d30bd881447d18c993681))
