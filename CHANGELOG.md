@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.35 (2023-07-31)
+
+### Other
+
+* Pin semantic release ([`6c49427`](https://github.com/WIPACrepo/user-management/commit/6c4942774d3f2039ff07bb82a79b971becf1ac15))
+* Debug user profile auth ([#47](https://github.com/WIPACrepo/user-management/issues/47)) ([`2362225`](https://github.com/WIPACrepo/user-management/commit/2362225957e9804dea8e812d32f3a8bf8febea83))
+
 ## v1.2.34 (2023-05-25)
 ### Other
 * <bot> update requirements.txt ([`a1adf39`](https://github.com/WIPACrepo/user-management/commit/a1adf398a27c6de76ee1900e22af537a659a112b))
