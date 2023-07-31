@@ -74,6 +74,7 @@ context('Home Page', () => {
         'firstName': 'Foo',
         'lastName': 'Bar',
         'email': 'foo@bar',
+        'mailing_list_email': '',
         'author_name': 'F. Bar',
         'author_firstName': '',
         'author_lastName': '',

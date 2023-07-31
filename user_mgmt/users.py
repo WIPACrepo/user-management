@@ -19,6 +19,7 @@ VALID_FIELDS = {
     'firstName': str,
     'lastName': str,
     'email': str,
+    'mailing_list_email': str,
     'github': str,
     'slack': str,
     'mobile': str,
@@ -202,7 +203,7 @@ class MultiUser(UserBase):
                 profile[k] = user_info.get(k, '')
             attrs = user_info.get('attributes', {})
             for k in attrs:
-                if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile'):
+                if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile', 'mailing_list_email'):
                     profile[k] = attrs[k]
             logging.debug('profile: %r', profile)
             ret[username] = profile
@@ -237,7 +238,7 @@ class User(UserBase):
             profile[k] = user_info[k]
         attrs = user_info.get('attributes', {})
         for k in attrs:
-            if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile'):
+            if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile', 'mailing_list_email'):
                 profile[k] = attrs[k]
         logging.info('profile: %r', profile)
 
@@ -269,7 +270,7 @@ class User(UserBase):
             if k in data:
                 val = data.pop(k)
                 args[v] = None if not val else val
-        assert all(k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile') for k in data)
+        assert all(k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile', 'mailing_list_email') for k in data)
         args['attribs'] = data
 
         try:
