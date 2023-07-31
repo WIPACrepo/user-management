@@ -158,6 +158,7 @@ context('Institutions Page', () => {
         'firstName': 'Foo',
         'lastName': 'Bar',
         'email': 'foo@bar',
+        'mailing_list_email': '',
         'author_name': '',
         'author_firstName': '',
         'author_lastName': '',
