@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.36 (2023-07-31)
+
+### Other
+
+* Mailing list email ([#49](https://github.com/WIPACrepo/user-management/issues/49)) ([`933986d`](https://github.com/WIPACrepo/user-management/commit/933986d944228fe74364e8ad059b27e5ca859298))
+
 ## v1.2.35 (2023-07-31)
 
 ### Other
