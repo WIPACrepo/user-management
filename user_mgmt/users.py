@@ -141,6 +141,7 @@ class UserBase(MyHandler):
                     members = await self.group_cache.get_members(group_path)
                     if username in members:
                         return
+            logging.warning('failed inst admin check for admin %r and username %r', self.current_user, username)
             raise HTTPError(403, reason='invalid authorization')
 
     async def check_auth_read_only(self, username):
@@ -168,6 +169,7 @@ class UserBase(MyHandler):
                 members = await self.group_cache.get_members(group_path)
                 if username in members:
                     return
+            logging.warning('failed group or inst admin check for admin %r and username %r', self.current_user, username)
             raise HTTPError(403, reason='invalid authorization')
 
 
