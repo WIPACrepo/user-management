@@ -22,7 +22,7 @@ coverage[toml]==7.2.7
     # via
     #   pytest-cov
     #   user-mgmt (setup.py)
-cryptography==41.0.2
+cryptography==41.0.3
     # via pyjwt
 dnspython==2.4.1
     # via pymongo
@@ -109,9 +109,9 @@ wipac-dev-tools==1.6.16
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
     #   wipac-rest-tools
-wipac-keycloak-rest-services==1.4.18
+wipac-keycloak-rest-services==1.4.19
     # via user-mgmt (setup.py)
-wipac-rest-tools==1.4.20
+wipac-rest-tools==1.4.21
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
