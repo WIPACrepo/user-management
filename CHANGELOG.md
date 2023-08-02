@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.37 (2023-08-02)
+
+### Other
+
+* Use python 3.9 ([#50](https://github.com/WIPACrepo/user-management/issues/50)) ([`be12155`](https://github.com/WIPACrepo/user-management/commit/be12155f7c4f820292aa118088384e689fa2a173))
+
 ## v1.2.36 (2023-07-31)
 
 ### Other
