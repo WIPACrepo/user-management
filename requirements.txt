@@ -73,7 +73,7 @@ wipac-dev-tools==1.6.16
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
     #   wipac-rest-tools
-wipac-keycloak-rest-services==1.4.27
+wipac-keycloak-rest-services==1.4.28
     # via user-mgmt (setup.py)
 wipac-rest-tools==1.5.0
     # via
