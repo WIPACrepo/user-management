@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.38 (2023-08-07)
+
+### Other
+
+* <bot> update requirements.txt ([`6cf1543`](https://github.com/WIPACrepo/user-management/commit/6cf1543a2155d890e2645ddd74f77d774a8adde6))
+* <bot> update requirements-tests.txt ([`8df9634`](https://github.com/WIPACrepo/user-management/commit/8df96344c73d5bbfeaceb4909f2709028bb9b64d))
+* Clarify meaning of mailing_list_email attr ([#53](https://github.com/WIPACrepo/user-management/issues/53)) ([`6f23b82`](https://github.com/WIPACrepo/user-management/commit/6f23b8298d825a139a24b0cf0cd61bedd70e65d9))
+
 ## v1.2.37 (2023-08-02)
 
 ### Other
