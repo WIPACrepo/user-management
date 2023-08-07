@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=tests --output-file=requirements-tests.txt
 #
-aio-pika==9.2.0
+aio-pika==9.2.1
     # via wipac-keycloak-rest-services
 aiormq==6.7.7
     # via aio-pika
@@ -109,9 +109,9 @@ wipac-dev-tools==1.6.16
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
     #   wipac-rest-tools
-wipac-keycloak-rest-services==1.4.19
+wipac-keycloak-rest-services==1.4.27
     # via user-mgmt (setup.py)
-wipac-rest-tools==1.4.21
+wipac-rest-tools==1.5.0
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
