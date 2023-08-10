@@ -201,7 +201,7 @@ export var profileMixin = {
         'firstName': null,
         'lastName': null,
         'email': 'External email (for password resets)',
-        'mailing_list_email': 'Override your @icecube.wisc.edu address for mailing lists',
+        'mailing_list_email': 'Override your icecube.wisc.edu address for mailing lists',
         'github': 'GitHub username',
         'slack': 'Slack username',
         'mobile': 'Phone / mobile number',
