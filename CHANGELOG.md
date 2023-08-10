@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.39 (2023-08-10)
+
+### Other
+
+* Clarify meaning of mailing_list_email attr #3 ([#55](https://github.com/WIPACrepo/user-management/issues/55)) ([`e2924e1`](https://github.com/WIPACrepo/user-management/commit/e2924e17fdbfb66e82560637a543ce3f68ebf2c2))
+* Clarify meaning of mailing_list_email attr again ([#54](https://github.com/WIPACrepo/user-management/issues/54)) ([`6a2fa71`](https://github.com/WIPACrepo/user-management/commit/6a2fa71b2895dca0a7fb06260e89c92406d30643))
+
 ## v1.2.38 (2023-08-07)
 
 ### Other
