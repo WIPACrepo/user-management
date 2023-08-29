@@ -283,10 +283,10 @@ class User(UserBase):
                 args[v] = None if not val else val
         for k in data:
             try:
-                EXTRA_ARGS[k](data[k])
+                EXTRA_ATTRS[k](data[k])
             except Exception:
                 raise HTTPError(400, reason='invalid field')
-                
+
         args['attribs'] = data
 
         try:
