@@ -166,7 +166,8 @@ context('Institutions Page', () => {
         'orcid': '1234-1234-1234-1234',
         'github': '',
         'slack': '',
-        'mobile': ''
+        'mobile': '',
+        'phd_year': ''
       })
     })
   })
