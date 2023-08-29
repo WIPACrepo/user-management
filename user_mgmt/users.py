@@ -27,12 +27,12 @@ KEYCLOAK_ATTRS = {
 #: attr name and validation function
 EXTRA_ATTRS = {
     'mailing_list_email': lambda x: x == '' or '@' in x,
-    'github': str,
-    'slack': str,
-    'mobile': str,
-    'author_name': str,
-    'author_firstName': str,
-    'author_lastName': str,
+    'github': True,
+    'slack': True,
+    'mobile': True,
+    'author_name': True,
+    'author_firstName': True,
+    'author_lastName': True,
     'author_email': lambda x: x == '' or '@' in x,
     'orcid': lambda x: x == '' or (len(x.split('-')) == 4 and (len(y) == 4 and int(y) for y in x.split('-'))),
     'phd_year': lambda x: x == '' or (len(x) == 4 and int(x)),
@@ -283,7 +283,7 @@ class User(UserBase):
                 args[v] = None if not val else val
         for k in data:
             try:
-                EXTRA_ATTRS[k](data[k])
+                assert EXTRA_ATTRS[k](data[k])
             except Exception:
                 raise HTTPError(400, reason='invalid field')
 
