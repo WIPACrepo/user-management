@@ -27,12 +27,12 @@ KEYCLOAK_ATTRS = {
 #: attr name and validation function
 EXTRA_ATTRS = {
     'mailing_list_email': lambda x: x == '' or '@' in x,
-    'github': True,
-    'slack': True,
-    'mobile': True,
-    'author_name': True,
-    'author_firstName': True,
-    'author_lastName': True,
+    'github': lambda x: True,
+    'slack': lambda x: True,
+    'mobile': lambda x: True,
+    'author_name': lambda x: True,
+    'author_firstName': lambda x: True,
+    'author_lastName': lambda x: True,
     'author_email': lambda x: x == '' or '@' in x,
     'orcid': lambda x: x == '' or (len(x.split('-')) == 4 and (len(y) == 4 and int(y) for y in x.split('-'))),
     'phd_year': lambda x: x == '' or (len(x) == 4 and int(x)),
