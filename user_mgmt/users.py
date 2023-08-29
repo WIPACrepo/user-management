@@ -285,7 +285,8 @@ class User(UserBase):
             try:
                 assert EXTRA_ATTRS[k](data[k])
             except Exception:
-                raise HTTPError(400, reason='invalid field')
+                logging.info('invalid field %r', k, exc_info=True)
+                raise HTTPError(400, reason=f'invalid field {k}')
 
         args['attribs'] = data
 
