@@ -34,7 +34,7 @@ EXTRA_ATTRS = {
     'author_firstName': lambda x: True,
     'author_lastName': lambda x: True,
     'author_email': lambda x: x == '' or '@' in x,
-    'orcid': lambda x: x == '' or (len(x.split('-')) == 4 and (len(y) == 4 and int(y) for y in x.split('-'))),
+    'orcid': lambda x: x == '' or (len(x.split('-')) == 4 and all(len(y) == 4 and int(y) for y in x.split('-'))),
     'phd_year': lambda x: x == '' or (len(x) == 4 and int(x)),
 }
 
