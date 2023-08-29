@@ -80,6 +80,7 @@ context('Home Page', () => {
         'author_lastName': '',
         'author_email': '',
         'orcid': '1234-1234-1234-1234',
+        'phd_year': '',
         'github': '',
         'slack': '',
         'mobile': ''

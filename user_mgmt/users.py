@@ -1,6 +1,7 @@
 """
 Handle user profile updates.
 """
+import itertools
 import os
 import logging
 
@@ -15,20 +16,30 @@ from .handler import MyHandler
 from .registration import authenticate_reg_token
 
 
-VALID_FIELDS = {
-    'firstName': str,
-    'lastName': str,
-    'email': str,
-    'mailing_list_email': str,
+#: user mgmt name : keycloak name
+KEYCLOAK_ATTRS = {
+    'username': 'username',
+    'firstName': 'first_name',
+    'lastName': 'last_name',
+    'email': 'email',
+}
+
+#: attr name and validation function
+EXTRA_ATTRS = {
+    'mailing_list_email': lambda x: x == '' or '@' in x,
     'github': str,
     'slack': str,
     'mobile': str,
     'author_name': str,
     'author_firstName': str,
     'author_lastName': str,
-    'author_email': str,
-    'orcid': str,
+    'author_email': lambda x: x == '' or '@' in x,
+    'orcid': lambda x: x == '' or (int(y) for y in x.split('-')),
+    'phd_year': lambda x: x == '' or (len(x) == 4 and int(x)),
 }
+
+#: valid writable attrs
+VALID_FIELDS = {k: str for k in itertools.chain(KEYCLOAK_ATTRS, EXTRA_ATTRS) if k != 'username'}
 
 
 # load bad words from file
@@ -199,11 +210,11 @@ class MultiUser(UserBase):
             logging.info('valid username')
 
             profile = {}
-            for k in ('firstName', 'lastName', 'email', 'username'):
+            for k in KEYCLOAK_ATTRS:
                 profile[k] = user_info.get(k, '')
             attrs = user_info.get('attributes', {})
             for k in attrs:
-                if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile', 'mailing_list_email'):
+                if k in EXTRA_ATTRS:
                     profile[k] = attrs[k]
             logging.debug('profile: %r', profile)
             ret[username] = profile
@@ -234,11 +245,11 @@ class User(UserBase):
         logging.info('valid username')
 
         profile = {}
-        for k in ('firstName', 'lastName', 'email', 'username'):
+        for k in KEYCLOAK_ATTRS:
             profile[k] = user_info[k]
         attrs = user_info.get('attributes', {})
         for k in attrs:
-            if k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile', 'mailing_list_email'):
+            if k in EXTRA_ATTRS:
                 profile[k] = attrs[k]
         logging.info('profile: %r', profile)
 
@@ -266,11 +277,16 @@ class User(UserBase):
         data = self.json_filter({}, VALID_FIELDS)
 
         args = {}
-        for k,v in {'firstName': 'first_name', 'lastName': 'last_name', 'email': 'email'}.items():
+        for k,v in KEYCLOAK_ATTRS.items():
             if k in data:
                 val = data.pop(k)
                 args[v] = None if not val else val
-        assert all(k.startswith('author_') or k in ('orcid', 'github', 'slack', 'mobile', 'mailing_list_email') for k in data)
+        for k in data:
+            try:
+                EXTRA_ARGS[k](data[k])
+            except Exception:
+                raise HTTPError(400, reason='invalid field')
+                
         args['attribs'] = data
 
         try:

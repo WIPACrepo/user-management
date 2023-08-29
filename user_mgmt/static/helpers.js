@@ -209,7 +209,8 @@ export var profileMixin = {
         'author_firstName': 'Override first name for author lists',
         'author_lastName': 'Override last name for author lists',
         'author_email': 'Override email for author lists',
-        'orcid': 'ORCID code (0000-0000-0000-0000)'
+        'orcid': 'ORCID code (0000-0000-0000-0000)',
+        'phd_year': '4 digit year of PhD, if attained'
       }
     }
   },
