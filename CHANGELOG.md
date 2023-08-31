@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.40 (2023-08-31)
+
+### Other
+
+* Add phd_year user attr ([#57](https://github.com/WIPACrepo/user-management/issues/57)) ([`24da405`](https://github.com/WIPACrepo/user-management/commit/24da405db27d60a5ee40cde8e2489b0d36bd9ca5))
+
 ## v1.2.39 (2023-08-10)
 
 ### Other
