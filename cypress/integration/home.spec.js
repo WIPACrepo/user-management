@@ -63,11 +63,12 @@ context('Home Page', () => {
     cy.get('.account').should('exist')
 
     cy.get('.profile').should('exist')
+    
+    cy.get('.profile [name="loginShell"]').should('exist').should('not.have.attr', 'disabled')
 
     cy.get('.profile [name="orcid"]').should('exist').type('1234-1234-1234-1234')
     cy.get('.profile button').click()
 
-    
     cy.wait('@api-user-profile-put').should(({ request, response }) => {
       expect(request.url).to.include('user')
       expect(request.body).to.deep.eq({
