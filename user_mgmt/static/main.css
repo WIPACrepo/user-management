@@ -137,18 +137,20 @@ article.userprofile .profile .field {
 }
 article.home .profile label,
 article.userprofile .profile label {
-    min-width: 11em;
+    min-width: 13em;
+    vertical-align: top;
+}
+article.home .profile .field>*,
+article.userprofile .profile .field>* {
     display: inline-block;
 }
 article.home .profile input,
 article.userprofile .profile input {
     padding: .1em;
 }
-article.home .profile .help,
 article.home .profile button,
-article.userprofile .profile .help,
 article.userprofile .profile button  {
-    margin-left: 11.3em;
+    margin-left: 0;
 }
 article.home button,
 article.userprofile button {

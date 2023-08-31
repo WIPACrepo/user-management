@@ -290,10 +290,15 @@ export var profileMixin = {
 <div class="profile indent">
   <div class="field" v-for="val, key in field_names">
     <label for="key">{{ val }}</label>
-    <input type="text" v-model="form_fields[key]" :name="key" :disabled="disabled(key, form_fields[key])" />
-    <div class="help" v-if="field_desc[key] != null">{{ field_desc[key] }}</div>
+    <div>
+      <input type="text" v-model="form_fields[key]" :name="key" :disabled="disabled(key, form_fields[key])" />
+      <div class="help" v-if="field_desc[key] != null">{{ field_desc[key] }}</div>
+    </div>
   </div>
-  <button @click="update" data-test="submit">Update</button>
+  <div class="field">
+    <label for="submit"></label>
+    <button @click="update" data-test="submit">Update</button>
+  </div>
   <div class="error" v-if="error">{{ error }}</div>
 </div>`
 };
