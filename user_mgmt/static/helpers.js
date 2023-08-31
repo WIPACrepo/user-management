@@ -198,6 +198,22 @@ export var profileMixin = {
       error: null,
       form_fields: {},
       field_names: {
+        'firstName': 'First Name',
+        'lastName': 'Last Name',
+        'email': 'Email',
+        'mailing_list_email': 'List Email',
+        'github': 'GitHub Profile',
+        'slack': 'Slack Profile',
+        'mobile': 'Phone',
+        'author_name': 'Author List Printed Name',
+        'author_firstName': 'Author List First Name',
+        'author_lastName': 'Author List Last Name',
+        'author_email': 'Author List Email',
+        'orcid': 'ORCID',
+        'phd_year': 'PhD Year',
+        'loginShell': 'Login Shell'
+      },
+      field_desc: {
         'firstName': null,
         'lastName': null,
         'email': 'External email (for password resets)',
@@ -210,7 +226,8 @@ export var profileMixin = {
         'author_lastName': 'Override last name for author lists',
         'author_email': 'Override email for author lists',
         'orcid': 'ORCID code (0000-0000-0000-0000)',
-        'phd_year': '4 digit year of PhD, if attained'
+        'phd_year': '4 digit year of PhD, if attained',
+        'loginShell': 'Linux login shell in Madison'
       }
     }
   },
@@ -261,14 +278,20 @@ export var profileMixin = {
         }
         this.error = 'Error: '+error
       }
+    },
+    disabled: function(key, val) {
+      if (key == 'loginShell' && val == "/sbin/nologin") {
+        return true
+      }
+      return false
     }
   },
   template: `
 <div class="profile indent">
   <div class="field" v-for="val, key in field_names">
-    <label for="key">{{ key }}</label>
-    <input type="text" v-model="form_fields[key]" :name="key" />
-    <div class="help" v-if="val != null">{{ val }}</div>
+    <label for="key">{{ val }}</label>
+    <input type="text" v-model="form_fields[key]" :name="key" :disabled="disabled(key, form_fields[key])" />
+    <div class="help" v-if="field_desc[key] != null">{{ field_desc[key] }}</div>
   </div>
   <button @click="update" data-test="submit">Update</button>
   <div class="error" v-if="error">{{ error }}</div>

@@ -63,11 +63,12 @@ context('Home Page', () => {
     cy.get('.account').should('exist')
 
     cy.get('.profile').should('exist')
+    
+    cy.get('.profile [name="loginShell"]').should('exist').should('not.have.attr', 'disabled')
 
     cy.get('.profile [name="orcid"]').should('exist').type('1234-1234-1234-1234')
     cy.get('.profile button').click()
 
-    
     cy.wait('@api-user-profile-put').should(({ request, response }) => {
       expect(request.url).to.include('user')
       expect(request.body).to.deep.eq({
@@ -83,8 +84,20 @@ context('Home Page', () => {
         'phd_year': '',
         'github': '',
         'slack': '',
-        'mobile': ''
+        'mobile': '',
+        'loginShell': ''
       })
     })
+  })
+
+  it('user profile disabled', () => {
+    cy.visit('/')
+    keycloak({user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar', loginShell: '/sbin/nologin'}})
+
+    cy.get('.account').should('exist')
+
+    cy.get('.profile').should('exist')
+
+    cy.get('.profile [name="loginShell"]').should('exist').should('have.attr', 'disabled')
   })
 })
