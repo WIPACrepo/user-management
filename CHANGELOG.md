@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.41 (2023-08-31)
+
+### Other
+
+* Better error messages for profile failures ([#58](https://github.com/WIPACrepo/user-management/issues/58)) ([`7108163`](https://github.com/WIPACrepo/user-management/commit/71081637ff1e047c1aa386d2429d82b0a19ef2c7))
+
 ## v1.2.40 (2023-08-31)
 
 ### Other
