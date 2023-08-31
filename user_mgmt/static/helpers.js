@@ -240,8 +240,11 @@ export var profileMixin = {
         this.form_fields = newfields
         this.error = null
       } catch(error) {
+        console.log(error.toJSON())
+        if ('error' in error.response.data) {
+          error = error.response.data['error']
+        }
         this.error = 'Error: '+error
-        console.log(error)
       }
     },
     update: async function() {
@@ -252,8 +255,11 @@ export var profileMixin = {
         })
         this.error = null
       } catch(error) {
+        console.log(error.toJSON())
+        if ('error' in error.response.data) {
+          error = error.response.data['error']
+        }
         this.error = 'Error: '+error
-        console.log(error)
       }
     }
   },
