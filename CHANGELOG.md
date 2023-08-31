@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.43 (2023-08-31)
+
+### Other
+
+* Fix profile alignment ([#60](https://github.com/WIPACrepo/user-management/issues/60)) ([`d7faee4`](https://github.com/WIPACrepo/user-management/commit/d7faee45023d5deeb9080be4d2eb385479ee60a6))
+
 ## v1.2.42 (2023-08-31)
 
 ### Other
