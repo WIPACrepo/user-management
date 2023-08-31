@@ -44,10 +44,31 @@ async def test_user_put(server):
     rest, krs_client, *_ = server
     client = await rest('test')
 
-    await client.request('PUT', '/api/users/test', {'author_name': 'F. Bar'})
+    await client.request('PUT', '/api/users/test', {'author_name': 'F. Bar', 'author_email': 'foo@bar'})
 
     ret = await krs.users.user_info('test', rest_client=krs_client)
     assert ret['attributes']['author_name'] == 'F. Bar'
+    assert ret['attributes']['author_email'] == 'foo@bar'
+
+    with pytest.raises(Exception):
+        await client.request('PUT', '/api/users/test', {'author_email': 'foo'})
+
+    await client.request('PUT', '/api/users/test', {'orcid': '0001-0002-0003-0004'})
+    ret = await krs.users.user_info('test', rest_client=krs_client)
+    assert ret['attributes']['orcid'] == '0001-0002-0003-0004'
+
+    with pytest.raises(Exception):
+        await client.request('PUT', '/api/users/test', {'orcid': '1-2-3-4'})
+
+    with pytest.raises(Exception):
+        await client.request('PUT', '/api/users/test', {'orcid': 'foo'})
+
+    with pytest.raises(Exception):
+        await client.request('PUT', '/api/users/test', {'phd_year': 'bar'})
+
+    with pytest.raises(Exception):
+        await client.request('PUT', '/api/users/test', {'phd_year': '12'})
+
 
 @pytest.mark.asyncio
 async def test_user_unauthorized(server):
