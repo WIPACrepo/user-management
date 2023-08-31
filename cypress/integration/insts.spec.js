@@ -167,7 +167,8 @@ context('Institutions Page', () => {
         'github': '',
         'slack': '',
         'mobile': '',
-        'phd_year': ''
+        'phd_year': '',
+        'loginShell': ''
       })
     })
   })

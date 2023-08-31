@@ -69,6 +69,17 @@ async def test_user_put(server):
     with pytest.raises(Exception):
         await client.request('PUT', '/api/users/test', {'phd_year': '12'})
 
+    await client.request('PUT', '/api/users/test', {'loginShell': '/bin/zsh'})
+    ret = await krs.users.user_info('test', rest_client=krs_client)
+    assert ret['attributes']['loginShell'] == '/bin/zsh'
+
+    with pytest.raises(Exception):
+        await client.request('PUT', '/api/users/test', {'loginShell': 'foo'})
+
+    await client.request('PUT', '/api/users/test', {'loginShell': ''})
+    ret = await krs.users.user_info('test', rest_client=krs_client)
+    assert ret['attributes']['loginShell'] == ''
+
 
 @pytest.mark.asyncio
 async def test_user_unauthorized(server):

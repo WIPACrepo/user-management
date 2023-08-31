@@ -83,8 +83,20 @@ context('Home Page', () => {
         'phd_year': '',
         'github': '',
         'slack': '',
-        'mobile': ''
+        'mobile': '',
+        'loginShell': ''
       })
     })
+  })
+
+  it('user profile disabled', () => {
+    cy.visit('/')
+    keycloak({user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar', loginShell: '/sbin/nologin'}})
+
+    cy.get('.account').should('exist')
+
+    cy.get('.profile').should('exist')
+
+    cy.get('.profile [name="loginShell"]').should('exist').should('have.attr', 'disabled')
   })
 })

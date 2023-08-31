@@ -210,7 +210,8 @@ export var profileMixin = {
         'author_lastName': 'Override last name for author lists',
         'author_email': 'Override email for author lists',
         'orcid': 'ORCID code (0000-0000-0000-0000)',
-        'phd_year': '4 digit year of PhD, if attained'
+        'phd_year': '4 digit year of PhD, if attained',
+        'loginShell': 'Linux login shell in Madison'
       }
     }
   },
@@ -261,13 +262,19 @@ export var profileMixin = {
         }
         this.error = 'Error: '+error
       }
+    },
+    disabled: function(key, val) {
+      if (key == 'loginShell' && val == "/sbin/nologin") {
+        return true
+      }
+      return false
     }
   },
   template: `
 <div class="profile indent">
   <div class="field" v-for="val, key in field_names">
     <label for="key">{{ key }}</label>
-    <input type="text" v-model="form_fields[key]" :name="key" />
+    <input type="text" v-model="form_fields[key]" :name="key" :disabled="disabled(key, val)" />
     <div class="help" v-if="val != null">{{ val }}</div>
   </div>
   <button @click="update" data-test="submit">Update</button>
