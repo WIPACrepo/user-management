@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.42 (2023-08-31)
+
+### Other
+
+* Add an option to edit the linux loginShell ([#59](https://github.com/WIPACrepo/user-management/issues/59)) ([`07ed98d`](https://github.com/WIPACrepo/user-management/commit/07ed98d403a45477c7be623911fcd29173ca7331))
+
 ## v1.2.41 (2023-08-31)
 
 ### Other
