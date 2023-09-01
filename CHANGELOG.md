@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.44 (2023-09-01)
+
+### Other
+
+* Orcid validation fixes ([#61](https://github.com/WIPACrepo/user-management/issues/61)) ([`d4c4527`](https://github.com/WIPACrepo/user-management/commit/d4c4527aae0236802ea8e1a9041c237279273a5e))
+
 ## v1.2.43 (2023-08-31)
 
 ### Other
