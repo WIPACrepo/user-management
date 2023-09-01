@@ -57,6 +57,10 @@ async def test_user_put(server):
     ret = await krs.users.user_info('test', rest_client=krs_client)
     assert ret['attributes']['orcid'] == '0001-0002-0003-0004'
 
+    await client.request('PUT', '/api/users/test', {'orcid': '0000-0001-8945-6722'})
+    ret = await krs.users.user_info('test', rest_client=krs_client)
+    assert ret['attributes']['orcid'] == '0000-0001-8945-6722'    
+
     with pytest.raises(Exception):
         await client.request('PUT', '/api/users/test', {'orcid': '1-2-3-4'})
 
