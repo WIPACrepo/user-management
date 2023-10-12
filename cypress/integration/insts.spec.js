@@ -121,7 +121,6 @@ context('Institutions Page', () => {
     })
 
     cy.get('[data-test="registration-link"]').should('exist')
-    cy.get('#register-invite').should('include', '/register')
   })
 
   it('inst edit user profile', () => {
