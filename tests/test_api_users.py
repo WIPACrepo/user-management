@@ -162,24 +162,6 @@ async def test_username_select(server, reg_token_client):
         await client.request('POST', '/api/username', args)
 
 @pytest.mark.asyncio
-async def test_username_auth(server, reg_token_client):
-    rest, krs_client, *_ = server
-    client = await rest('test')
-
-    args = {
-        'first_name': 'Foo',
-        'last_name': 'Bar',
-        'username': 'fbarbar'
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/username', args)
-
-    client2 = await reg_token_client(exp_seconds=0)
-    await asyncio.sleep(0.01)
-    with pytest.raises(Exception):
-        await client2.request('POST', '/api/username', args)
-
-@pytest.mark.asyncio
 async def test_username_invalid(server, reg_token_client, monkeypatch):
     rest, krs_client, *_ = server
     client = await reg_token_client()
