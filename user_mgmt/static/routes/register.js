@@ -7,7 +7,6 @@ export default {
     return {
       experiment: '',
       institution: '',
-      reg_token: '',
       firstName: '',
       debouncedFirstName: '',
       lastName: '',
@@ -21,10 +20,7 @@ export default {
       submitted: false
     }
   },
-  props: ['experiment', 'institution', 'reg_token'],
-  created: function() {
-    this.validate_token()
-  },
+  props: ['experiment', 'institution'],
   computed: {
     validFirstName: function() {
       return this.debouncedFirstName
@@ -75,9 +71,7 @@ export default {
         if (orig_username != '') {
           args.username = orig_username
         }
-        const resp = await axios.post('/api/username', args, {
-          headers: {'Authorization': 'bearer '+this.reg_token}
-        });
+        const resp = await axios.post('/api/username', args, {});
         if (orig_username != resp.data['username'] && this.username == orig_username) {
           this.username = resp.data['username']
         }
@@ -119,61 +113,49 @@ export default {
     }, 250)
   },
   methods: {
-    validate_token: async function() {
-      try {
-        await axios.get('/api/reg_token/'+this.reg_token);
-      } catch(error) {
-        console.log('invalid reg_token')
-        this.$router.push({name: 'home'})
-        return false
-      }
-      return true
-    },
-      submit: async function(e) {
-          // wait for debounce
-          await sleep(250)
-          
-          // validate
-          this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
-                  && this.validLastName && this.validUsername && this.validEmail)
+    submit: async function(e) {
+      // wait for debounce
+      await sleep(250)
 
-          // now submit
-          if (this.valid) {
-              this.errMessage = 'Submission processing';
-              try {
-                  const resp = await axios.post('/api/inst_approvals', {
-                      experiment: this.experiment,
-                      institution: this.institution,
-                      first_name: this.firstName,
-                      last_name: this.lastName,
-                      username: this.username,
-                      email: this.email
-                  }, {
-                    headers: {'Authorization': 'bearer '+this.reg_token}
-                  });
-                  console.log('Response:')
-                  console.log(resp)
-                  this.errMessage = 'Submission successful'
-                  this.submitted = true
-              } catch (error) {
-                  console.log('error')
-                  console.log(error)
-                  let error_message = 'undefined error';
-                  if (error.response) {
-                      if ('code' in error.response.data) {
-                          error_message = 'Code: '+error.response.data['code']+'<br>Message: '+error.response.data['error'];
-                      } else {
-                          error_message = JSON.stringify(error.response.data)
-                      }
-                  } else if (error.request) {
-                      error_message = 'server did not respond';
-                  }
-                  this.errMessage = '<span class="red">Error in submission<br>'+error_message+'</span>'
-              }
-          } else {
-              this.errMessage = '<span class="red">Please fix invalid entries</span>'
+      // validate
+      this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
+                    && this.validLastName && this.validUsername && this.validEmail)
+
+      // now submit
+      if (this.valid) {
+        this.errMessage = 'Submission processing';
+        try {
+          const resp = await axios.post('/api/inst_approvals', {
+            experiment: this.experiment,
+            institution: this.institution,
+            first_name: this.firstName,
+            last_name: this.lastName,
+            username: this.username,
+            email: this.email
+          }, {});
+          console.log('Response:')
+          console.log(resp)
+          this.errMessage = 'Submission successful'
+          this.submitted = true
+        } catch (error) {
+          console.log('error')
+          console.log(error)
+          let error_message = 'undefined error';
+          if (error.response) {
+            if ('code' in error.response.data) {
+              error_message = 'Code: '+error.response.data['code']+'<br>Message: '+error.response.data['error'];
+            } else {
+              error_message = JSON.stringify(error.response.data)
+            }
+          } else if (error.request) {
+            error_message = 'server did not respond';
           }
+          this.errMessage = '<span class="red">Error in submission<br>'+error_message+'</span>'
+        }
+      } else {
+        this.errMessage = '<span class="red">Please fix invalid entries</span>'
       }
+    }
   },
   template: `
 <article class="register">

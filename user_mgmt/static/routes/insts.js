@@ -73,22 +73,6 @@ Vue.component('inst', {
       default: [],
       watch: ['refresh']
     },
-    reg_token: {
-      get: async function() {
-        try {
-          const token = await this.keycloak.get_token();
-          const ret = await axios.post('/api/reg_token', {}, {
-            headers: {'Authorization': 'bearer '+token}
-          })
-          return ret.data.token
-        } catch (error) {
-          console.log('error getting registration token', error)
-          this.error = "Error getting registration token: "+error['message']
-          return ''
-        }
-      },
-      default: ''
-    },
     members: {
       get: async function() {
         try {
@@ -302,12 +286,12 @@ Vue.component('inst', {
       <addinstuser :submit="addMember"></addinstuser>
     </div>
     <h4>Register new user:</h4>
-    <div class="indent add" v-if="$asyncComputed.reg_token.success && reg_token != ''" data-test="registration-link" :data-reg-token="reg_token">
-      <div>New user page: <router-link :to="{name: 'register', query: {experiment: experiment, institution: institution, reg_token: reg_token} }">Register</router-link></div>
+    <div class="indent add" data-test="registration-link">
+      <div>New user page: <router-link :to="{name: 'register', query: {experiment: experiment, institution: institution} }">Register</router-link></div>
       <div class="invite">
-        <label for="register-invite">You may also hand out this invite to new users, which expires in 7 days:</label><br>
+        <label for="register-invite">You may also hand out this invite to new users:</label><br>
         <textarea id="register-invite" rows="4">Please fill out the form at this link to register for an account:
-{{ window.location.protocol + '//' + window.location.host + $router.resolve({name: 'register', query: {experiment: experiment, institution: institution, reg_token: reg_token} }).href }}</textarea>
+{{ window.location.protocol + '//' + window.location.host + $router.resolve({name: 'register', query: {experiment: experiment, institution: institution} }).href }}</textarea>
       </div>
     </div>
   </div>

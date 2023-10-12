@@ -1,6 +1,5 @@
 
 import keycloak from '../support/keycloak'
-import reg_token from '../support/reg_token'
 
 context('Institutions Page', () => {
   it('inst approvals', () => {
@@ -9,7 +8,6 @@ context('Institutions Page', () => {
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
       inst_approvals: {instA: ['userC']}
     })
-    reg_token({})
 
     cy.get('#nav .active').contains('institutions', {matchCase: false})
     cy.get('#nav li').should('have.length', 2)
@@ -29,7 +27,6 @@ context('Institutions Page', () => {
       username: 'user',
       user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'}
     })
-    reg_token({})
 
     cy.get('[data-test="userA"]').within(() => {
       cy.get('.username').contains('userA', {matchCase: false})
@@ -55,7 +52,6 @@ context('Institutions Page', () => {
     keycloak({
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
     })
-    reg_token({})
 
     cy.get('[data-test="userA"] .delete').click()
     cy.wait('@api-institution-users-delete').its('request.url').should('include', 'userA')
@@ -66,7 +62,6 @@ context('Institutions Page', () => {
     keycloak({
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
     })
-    reg_token({})
 
     cy.get('[data-test="userB"]').within(() => {
       cy.get('.username').contains('userB', {matchCase: false})
@@ -89,7 +84,6 @@ context('Institutions Page', () => {
     keycloak({
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist":['userA']}}
     })
-    reg_token({})
 
     cy.get('[data-test="userA"]').within(() => {
       cy.get('.username').contains('userA', {matchCase: false})
@@ -110,7 +104,6 @@ context('Institutions Page', () => {
     keycloak({
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}}
     })
-    reg_token({})
 
     cy.get('[data-test="userB"] .delete').click()
     cy.wait('@api-institution-users-delete').its('request.url').should('include', 'userB')
@@ -126,15 +119,9 @@ context('Institutions Page', () => {
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
       token_raw: 'tokentoken'
     })
-    reg_token({token: 'foobar'})
 
-    cy.wait('@api-reg_token').should(({ request, response }) => {
-      expect(request.headers).to.include({
-        'authorization': 'bearer tokentoken'
-      })
-    })
-
-    cy.get('[data-test="registration-link"]').should('exist').should('have.attr', 'data-reg-token', 'foobar')
+    cy.get('[data-test="registration-link"]').should('exist')
+    cy.get('#register-invite').should('include', '/register')
   })
 
   it('inst edit user profile', () => {
@@ -143,7 +130,6 @@ context('Institutions Page', () => {
       admin_insts: {instA:{users:['userA', 'userB'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
       user_profile: {'firstName': 'Foo', 'lastName': 'Bar', 'email': 'foo@bar', 'orcid': '0000-0000-0000-0000'}
     })
-    reg_token({})
 
     cy.get('[data-test="userA"] .profile').click()
     

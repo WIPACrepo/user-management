@@ -222,27 +222,6 @@ async def test_inst_approvals_register(server, mongo_client, reg_token_client, e
     assert ret[0]['institution'] == data['institution']
 
 @pytest.mark.asyncio
-async def test_inst_approvals_register_invalid_auth(server, mongo_client, reg_token_client, email_patch):
-    _, krs_client, address, *_ = server
-    client = await reg_token_client(exp_seconds=0)
-    await asyncio.sleep(0.01)
-
-    await krs.groups.create_group('/institutions', rest_client=krs_client)
-    await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
-    await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
-
-    data = {
-        'experiment': 'IceCube',
-        'institution': 'UW-Madison',
-        'first_name': 'First',
-        'last_name': 'Last',
-        'username': 'flast',
-        'email': 'test@test',
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/inst_approvals', data)
-
-@pytest.mark.asyncio
 async def test_inst_approvals_register_with_admins(server, mongo_client, reg_token_client, email_patch):
     rest, krs_client, address, *_ = server
     client = await reg_token_client()
