@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt
 #
-aio-pika==9.2.2
+aio-pika==9.3.0
     # via wipac-keycloak-rest-services
 aiormq==6.7.7
     # via aio-pika
@@ -14,11 +14,11 @@ cachetools==5.3.1
     #   wipac-rest-tools
 certifi==2023.7.22
     # via requests
-cffi==1.15.1
+cffi==1.16.0
     # via cryptography
-charset-normalizer==3.2.0
+charset-normalizer==3.3.0
     # via requests
-cryptography==41.0.3
+cryptography==41.0.4
     # via pyjwt
 dnspython==2.4.2
     # via pymongo
@@ -60,24 +60,26 @@ tornado==6.3.3
     # via
     #   user-mgmt (setup.py)
     #   wipac-rest-tools
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   qrcode
     #   wipac-dev-tools
-unidecode==1.3.6
+unidecode==1.3.7
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
-urllib3==2.0.4
-    # via requests
-wipac-dev-tools==1.6.16
+urllib3==2.0.6
+    # via
+    #   requests
+    #   wipac-rest-tools
+wipac-dev-tools==1.7.0
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
     #   wipac-rest-tools
-wipac-keycloak-rest-services==1.4.37
+wipac-keycloak-rest-services==1.4.43
     # via user-mgmt (setup.py)
-wipac-rest-tools==1.5.2
+wipac-rest-tools==1.6.0
     # via
     #   user-mgmt (setup.py)
     #   wipac-keycloak-rest-services
