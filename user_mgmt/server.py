@@ -21,7 +21,6 @@ from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
-from .registration import RegistrationToken, RegistrationTokenValid
 from .users import MultiUser, User, Username
 
 
