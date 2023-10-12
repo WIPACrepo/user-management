@@ -10,7 +10,6 @@ from wipac_dev_tools import from_environment
 import motor.motor_asyncio
 
 from user_mgmt.server import create_server
-from user_mgmt.registration import create_token
 
 import krs.bootstrap
 import krs.users
