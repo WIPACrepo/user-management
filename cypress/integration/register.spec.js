@@ -1,6 +1,5 @@
 
 import keycloak from '../support/keycloak'
-import reg_token from '../support/reg_token'
 
 context('Registration Page', () => {
   it('register', () => {
