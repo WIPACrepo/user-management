@@ -5,7 +5,7 @@ hide:
 
 # New User Registration
 
-New users should register through a link provided by their institution lead.
+New users should register at [https://user-management.icecube.aq/register](https://user-management.icecube.aq/register)
 
 Here is an example of the registration page:
 
