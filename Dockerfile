@@ -1,15 +1,18 @@
-FROM python:3.9
+FROM python:3.10
 
 RUN useradd -m -U keycloak
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN mkdir /app && chown keycloak:keycloak /app
 
-WORKDIR /home/keycloak
+WORKDIR /app
 USER keycloak
 
 COPY . .
 
-ENV PYTHONPATH=/home/keycloak
+USER root
+
+RUN pip install -e .
+
+USER keycloak
 
 CMD ["python", "-m", "user_mgmt"]

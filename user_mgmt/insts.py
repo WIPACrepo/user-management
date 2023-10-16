@@ -14,7 +14,6 @@ import krs.groups
 import krs.email
 
 from .handler import MyHandler
-from .registration import valid_token
 from .users import Username
 
 audit_logger = logging.getLogger('audit')
@@ -242,14 +241,6 @@ class InstApprovals(MyHandler):
             approval_data['username'] = user
 
         else:
-            try:
-                type, token = self.request.headers['Authorization'].split(' ', 1)
-                if type.lower() != 'bearer':
-                    raise Exception('bad header type')
-                await valid_token(self.db, token)
-            except Exception:
-                raise HTTPError(403, reason="authentication failed")
-
             logging.info('new user registration')
             req_fields = {
                 'experiment': str,

@@ -10,16 +10,10 @@ to join your institution, or directly make changes for existing users.
 
 ## Registering New Users
 
-New users should register through a link provided on the institution page,
-which contains a 7-day authorization.
+New users should register through the [https://user-management.icecube.aq/register](registration page).
+It is possible to give out a specific link for an institution, like:
 
-As an example, for IceCube/Aachen, a registration link is:
-
-    https://user-management.icecube.aq/register?experiment=IceCube&institution=Aachen&reg_token=XXXXXXX
-
-Here is what the registration section looks like:
-
-![registration link](images/admin_inst_reg_link.png)
+    https://user-management.icecube.aq/register?experiment=IceCube&institution=Aachen
 
 ### Manually adding a new user
 

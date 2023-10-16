@@ -1,18 +1,12 @@
 
 import keycloak from '../support/keycloak'
-import reg_token from '../support/reg_token'
 
 context('Registration Page', () => {
   it('register', () => {
-    reg_token({token: 'foobar'})
-    cy.visit('/register?reg_token=foobar')
+    cy.visit('/register')
     keycloak({
       insts: ['instA'],
       new_username: 'fbar'
-    })
-
-    cy.wait('@api-reg_token-validate').should(({ request, response }) => {
-      expect(request.url).to.match(/foobar$/)
     })
 
     cy.get('#nav .active').contains('register', {matchCase: false})
@@ -26,9 +20,6 @@ context('Registration Page', () => {
     cy.get('[name="last_name"]').type('bar')
 
     cy.wait('@api-username-post').should(({ request, response }) => {
-      expect(request.headers).to.include({
-        'authorization': 'bearer foobar'
-      })
       expect(response.body).to.deep.eq({
         "username": "fbar"
       })
@@ -39,9 +30,6 @@ context('Registration Page', () => {
     cy.get('[data-test="submit"]').click()
 
     cy.wait('@api-inst-approvals-post').should(({ request, response }) => {
-      expect(request.headers).to.include({
-        'authorization': 'bearer foobar'
-      })
       expect(request.body).to.deep.eq({
         'experiment': 'test-exp',
         'institution': 'instA',
@@ -54,15 +42,10 @@ context('Registration Page', () => {
   })
 
   it('clear-username', () => {
-    reg_token({token: 'foobar'})
-    cy.visit('/register?reg_token=foobar')
+    cy.visit('/register')
     keycloak({
       insts: ['instA'],
       new_username: 'fbar'
-    })
-
-    cy.wait('@api-reg_token-validate').should(({ request, response }) => {
-      expect(request.url).to.match(/foobar$/)
     })
 
     cy.get('#nav .active').contains('register', {matchCase: false})
@@ -76,9 +59,6 @@ context('Registration Page', () => {
     cy.get('[name="last_name"]').type('bar')
 
     cy.wait('@api-username-post').should(({ request, response }) => {
-      expect(request.headers).to.include({
-        'authorization': 'bearer foobar'
-      })
       expect(response.body).to.deep.eq({
         "username": "fbar"
       })
@@ -89,9 +69,6 @@ context('Registration Page', () => {
     cy.get('[name="username"]').should('have.value', '')
 
     cy.wait('@api-username-post').should(({ request, response }) => {
-      expect(request.headers).to.include({
-        'authorization': 'bearer foobar'
-      })
       expect(response.body).to.deep.eq({
         "username": "fbar"
       })
@@ -100,8 +77,7 @@ context('Registration Page', () => {
   })
 
   it('username-cycle-detect', () => {
-    reg_token({token: 'foobar'})
-    cy.visit('/register?reg_token=foobar')
+    cy.visit('/register')
     keycloak({
       insts: ['instA'],
       new_username: function(input_username){
@@ -114,10 +90,6 @@ context('Registration Page', () => {
       }
     })
 
-    cy.wait('@api-reg_token-validate').should(({ request, response }) => {
-      expect(request.url).to.match(/foobar$/)
-    })
-
     cy.get('#nav .active').contains('register', {matchCase: false})
 
     cy.get('[data-test="institution"]').should('exist').should('be.disabled')
@@ -129,9 +101,6 @@ context('Registration Page', () => {
     cy.get('[name="last_name"]').type('bar')
 
     cy.wait('@api-username-post').should(({ request, response }) => {
-      expect(request.headers).to.include({
-        'authorization': 'bearer foobar'
-      })
       expect(response.body).to.deep.eq({
         "username": "fbar"
       })

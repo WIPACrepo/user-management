@@ -13,7 +13,6 @@ import krs.users
 import krs.groups
 
 from .handler import MyHandler
-from .registration import authenticate_reg_token
 
 
 #: user mgmt name : keycloak name
@@ -87,7 +86,6 @@ class Username(MyHandler):
                 return False  # username is available
         return True
 
-    @authenticate_reg_token
     @catch_error
     async def post(self):
         """

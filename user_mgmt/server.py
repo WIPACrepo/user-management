@@ -21,7 +21,6 @@ from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
                     InstApprovalsActionApprove, InstApprovalsActionDeny)
 from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
                      GroupApprovalsActionApprove, GroupApprovalsActionDeny)
-from .registration import RegistrationToken, RegistrationTokenValid
 from .users import MultiUser, User, Username
 
 
@@ -111,9 +110,6 @@ def create_server():
     server.add_route('/api/group_approvals', GroupApprovals, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/approve', GroupApprovalsActionApprove, kwargs)
     server.add_route(r'/api/group_approvals/(?P<approval_id>\w+)/actions/deny', GroupApprovalsActionDeny, kwargs)
-
-    server.add_route('/api/reg_token', RegistrationToken, kwargs)
-    server.add_route(r'/api/reg_token/(?P<token>\w+)', RegistrationTokenValid, kwargs)
 
     server.add_route(r'/api/users', MultiUser, kwargs)
     server.add_route(r'/api/users/(?P<username>[\w\-]+)', User, kwargs)
