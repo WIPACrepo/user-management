@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.1 (2023-10-16)
+
+### Other
+
+* Fix new user docs ([#64](https://github.com/WIPACrepo/user-management/issues/64)) ([`a3f3f84`](https://github.com/WIPACrepo/user-management/commit/a3f3f84e41365dd7728e256238782ea4d3883c70))
+
 ## v1.3.0 (2023-10-16)
 
 
