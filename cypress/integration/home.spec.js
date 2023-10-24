@@ -66,7 +66,7 @@ context('Home Page', () => {
     
     cy.get('.profile [name="loginShell"]').should('exist').should('not.have.attr', 'disabled')
 
-    cy.get('.profile [name="orcid"]').should('exist').type('1234-1234-1234-1234')
+    cy.get('.profile [name="orcid"]').should('exist').type('1234-1234-1234-123X')
     cy.get('.profile button').click()
 
     cy.wait('@api-user-profile-put').should(({ request, response }) => {
@@ -80,7 +80,7 @@ context('Home Page', () => {
         'author_firstName': '',
         'author_lastName': '',
         'author_email': '',
-        'orcid': '1234-1234-1234-1234',
+        'orcid': '1234-1234-1234-123X',
         'phd_year': '',
         'github': '',
         'slack': '',

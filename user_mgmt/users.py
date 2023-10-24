@@ -23,6 +23,26 @@ KEYCLOAK_ATTRS = {
     'email': 'email',
 }
 
+
+def is_orcid(value):
+    """ORCID validation"""
+    logging.debug('testing orcid %r', value)
+    parts = value.split('-')
+    if len(parts) != 4:
+        return False
+    if any(len(x) != 4 or not x.isdigit() for x in parts[:3]):
+        return False
+    x = parts[3]
+    logging.debug('handle last part: %s', x)
+    if len(x) != 4 or not x[:3].isdigit():
+        return False
+    logging.debug('handle last char: %s', x[3])
+    # special handling for checksum X
+    if not (x[3].isdigit() or x[3] == 'X'):
+        return False
+    return True
+
+
 #: attr name and validation function
 EXTRA_ATTRS = {
     'mailing_list_email': lambda x: x == '' or '@' in x,
@@ -33,7 +53,7 @@ EXTRA_ATTRS = {
     'author_firstName': lambda x: True,
     'author_lastName': lambda x: True,
     'author_email': lambda x: x == '' or '@' in x,
-    'orcid': lambda x: x == '' or (len(x.split('-')) == 4 and all(len(y) == 4 and y.isdigit() for y in x.split('-'))),
+    'orcid': lambda x: x == '' or is_orcid(x),
     'phd_year': lambda x: x == '' or (len(x) == 4 and x.isdigit()),
     'loginShell': lambda x: x in ('', '/bin/bash', '/bin/zsh', '/bin/tcsh', '/sbin/nologin'),
 }
