@@ -18,6 +18,20 @@ def test_invalid_usernames():
     assert not user_mgmt.users.Username._username_valid('foo-bār')
 
 
+def test_invalid_orcid():
+    assert user_mgmt.users.is_orcid('0001-0002-0003-0004')
+    assert user_mgmt.users.is_orcid('0000-0001-8945-6722')
+    assert user_mgmt.users.is_orcid('0001-0002-0003-000X')
+    with pytest.raises(Exception):
+        assert user_mgmt.users.is_orcid('0001-0002-0003-000Y')
+    with pytest.raises(Exception):
+        assert user_mgmt.users.is_orcid('0001-0002-0003-00XX')
+    with pytest.raises(Exception):
+        assert user_mgmt.users.is_orcid('1-2-3-4')
+    with pytest.raises(Exception):
+        assert user_mgmt.users.is_orcid('foo')
+
+
 @pytest.mark.asyncio
 async def test_user(server):
     rest, krs_client, *_ = server

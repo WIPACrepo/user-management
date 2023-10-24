@@ -26,14 +26,17 @@ KEYCLOAK_ATTRS = {
 
 def is_orcid(value):
     """ORCID validation"""
+    logging.debug('testing orcid %r', value)
     parts = value.split('-')
     if len(parts) != 4:
         return False
     if any(len(x) != 4 or not x.isdigit() for x in parts[:3]):
         return False
     x = parts[3]
-    if len(x) != 4 or not x[:4].isdigit():
+    logging.debug('handle last part: %s', x)
+    if len(x) != 4 or not x[:3].isdigit():
         return False
+    logging.debug('handle last char: %s', x[3])
     # special handling for checksum X
     if not (x[3].isdigit() or x[3] == 'X'):
         return False
