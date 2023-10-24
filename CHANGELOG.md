@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.2 (2023-10-24)
+
+### Other
+
+* Fix orcid checksum char ([#65](https://github.com/WIPACrepo/user-management/issues/65)) ([`9c861b4`](https://github.com/WIPACrepo/user-management/commit/9c861b40094034633bda108d11a31adcad4c8999))
+
 ## v1.3.1 (2023-10-16)
 
 ### Other
