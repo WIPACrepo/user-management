@@ -29,7 +29,7 @@ def is_orcid(value):
     parts = value.split('-')
     if len(parts) != 4:
         return False
-    if any(len(x) != 4 or !x.isdigit() for x in parts[:3]):
+    if any(len(x) != 4 or not x.isdigit() for x in parts[:3]):
         return False
     x = parts[3]
     if len(x) != 4 or not x[:4].isdigit():
