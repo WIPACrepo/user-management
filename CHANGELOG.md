@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.3 (2023-10-31)
+
+### Other
+
+* Add docs link on the main menu ([#68](https://github.com/WIPACrepo/user-management/issues/68)) ([`6d0e7c1`](https://github.com/WIPACrepo/user-management/commit/6d0e7c19408941953f9ad95a567a903fcfed22ea))
+
 ## v1.3.2 (2023-10-24)
 
 ### Other
