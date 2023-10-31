@@ -64,11 +64,14 @@ context('Home Page', () => {
     cy.get('.account').should('exist')
 
     cy.get('.profile').should('exist')
-    
+
     cy.get('.profile [name="loginShell"]').should('exist').should('not.have.attr', 'disabled')
 
     cy.get('.profile [name="orcid"]').should('exist').type('1234-1234-1234-123X')
+
+    cy.get('.profile [data-test="submit-success"]').should('not.exist')
     cy.get('.profile button').click()
+    cy.get('.profile [data-test="submit-success"]').should('exist')
 
     cy.wait('@api-user-profile-put').should(({ request, response }) => {
       expect(request.url).to.include('user')
@@ -89,6 +92,9 @@ context('Home Page', () => {
         'loginShell': ''
       })
     })
+
+    cy.wait(10000)
+    cy.get('.profile [data-test="submit-success"]').should('not.exist')
   })
 
   it('user profile disabled', () => {

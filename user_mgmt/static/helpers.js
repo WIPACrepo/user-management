@@ -196,6 +196,7 @@ export var profileMixin = {
     return {
       keycloak: null,
       error: null,
+      success: false,
       form_fields: {},
       field_names: {
         'firstName': 'First Name',
@@ -271,6 +272,8 @@ export var profileMixin = {
           headers: {'Authorization': 'bearer '+token}
         })
         this.error = null
+        this.success = true
+        setInterval(() => { this.success = false }, 10000)
       } catch(error) {
         console.log(error.toJSON())
         if ('error' in error.response.data) {
@@ -298,6 +301,7 @@ export var profileMixin = {
   <div class="field">
     <label for="submit"></label>
     <button @click="update" data-test="submit">Update</button>
+    <div data-test="submit-success" v-if="success">✅</div>
   </div>
   <div class="error" v-if="error">{{ error }}</div>
 </div>`
