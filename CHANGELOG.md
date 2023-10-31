@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.4 (2023-10-31)
+
+### Other
+
+* Add confirmation to profile submit ([`7bab0b3`](https://github.com/WIPACrepo/user-management/commit/7bab0b3c40ee9054d7fc680b0bc2daec20fcb131))
+
 ## v1.3.3 (2023-10-31)
 
 ### Other
