@@ -8,6 +8,7 @@ context('Home Page', () => {
 
     cy.get('#nav .active').contains('home', {matchCase: false})
     cy.get('#nav li').contains('institutions', {matchCase: false}).should('not.exist')
+    cy.get('#nav li').contains('docs', {matchCase: false})
 
     cy.get('.account .login-link').should('contain', 'Sign in')
 

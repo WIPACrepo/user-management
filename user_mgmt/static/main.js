@@ -58,7 +58,11 @@ Vue.component('navpage', {
     this.current = to.params.route
     next()
   },
-  template: '<li :class="classObj"><router-link :to="path">{{ name }}</router-link></li>'
+  template: `
+<li :class="classObj">
+  <a v-if="path.startsWith('http')" :href="path">{{ name }}</a>
+  <router-link v-else :to="path">{{ name }}</router-link>
+</li>`
 });
 
 Vue.component('account', {
@@ -208,6 +212,7 @@ export default async function vue_startup(keycloak){
     { path: '/groups', name: 'Groups', component: Groups,
       props: {keycloak: keycloak}, meta: { requiresAuth: true, requiresGroupAdmin: true }
     },
+    { path: 'https://docs.icecube.aq/Madison-account/user-workflow/', name: 'Docs' },
     { path: '*', name: '404', component: Error404, props: true }
   ];
 
