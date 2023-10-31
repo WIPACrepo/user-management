@@ -10,7 +10,7 @@ context('Institutions Page', () => {
     })
 
     cy.get('#nav .active').contains('institutions', {matchCase: false})
-    cy.get('#nav li').should('have.length', 2)
+    cy.get('#nav li').should('have.length', 3)
 
     cy.get('.approvals [data-test="userC"]').should('exist')
     cy.get('.approvals [data-test="approve"]').should('exist').click()
