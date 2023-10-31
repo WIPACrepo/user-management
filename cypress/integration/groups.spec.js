@@ -11,7 +11,7 @@ context('Groups Page', () => {
     })
 
     cy.get('#nav .active').contains('groups', {matchCase: false})
-    cy.get('#nav li').should('have.length', 2)
+    cy.get('#nav li').should('have.length', 3)
 
     cy.get('[data-test="administered-groups"]').contains('groupA', {matchCase: false})
     cy.get('[data-test="administered-groups"]').within(() => {
