@@ -67,7 +67,7 @@ class MyHandler(RestHandler):
         associate_group = f'/experiments/{experiment}/assocaites'
         self.group_cache.invalidate(associate_group)
         associates = await self.group_cache.get_members(associate_group)
-        return username in assocaites
+        return username in associates
 
     def is_super_admin(self):
         """Is the current user a super admin?"""

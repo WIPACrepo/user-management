@@ -345,7 +345,7 @@ class AssociateUsers(UserBase):
         associates = await self.group_cache.get_members(associate_group)
 
         ret = []
-        for username in assocates:
+        for username in associates:
             if usernames and username not in usernames:
                 continue
 
