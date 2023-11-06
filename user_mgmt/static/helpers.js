@@ -236,6 +236,36 @@ export var profileMixin = {
   created: function() {
     this.download()
   },
+  asyncComputed: {
+    associate: {
+      get: async function() {
+        let ret = []
+        try {
+          const token = await this.keycloak.get_token();
+          const experiments = await get_my_experiments(this.keycloak);
+          for (const exp of experiments) {
+            let params = new URLSearchParams()
+            params.append('username', this.username)
+            const ret = await axios.get('/api/experiments/'+exp+'/assocates', {
+              headers: {'Authorization': 'bearer '+token},
+              params: params
+            })
+            for (const username of ret.data) {
+              if (this.username == username) {
+                ret.append(exp)
+              }
+            }
+          }
+          return ret
+        } catch (error) {
+          console.log('error getting associate status', error)
+          this.error = "Error getting associate status: "+error['message']
+          return []
+        }
+      },
+      default: []
+    }
+  },
   methods: {
     download: async function(){
       if (!this.keycloak.authenticated())
@@ -291,6 +321,9 @@ export var profileMixin = {
   },
   template: `
 <div class="profile indent">
+  <div v-if="associate != []">
+    <span class="associate-badge">Associate</span> for <span v-for="exp in associate">{{ exp }} </span>
+  </div>
   <div class="field" v-for="val, key in field_names">
     <label for="key">{{ val }}</label>
     <div>

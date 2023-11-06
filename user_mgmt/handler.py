@@ -63,6 +63,12 @@ class MyHandler(RestHandler):
             raise HTTPError(400, f'invalid fields: {extra_fields}', reason='extra invalid fields in request')
         return data
 
+    async def is_associate(self, experiment, username):
+        associate_group = f'/experiments/{experiment}/assocaites'
+        self.group_cache.invalidate(associate_group)
+        associates = await self.group_cache.get_members(associate_group)
+        return username in assocaites
+
     def is_super_admin(self):
         """Is the current user a super admin?"""
         return '/admin' in self.auth_data['groups']

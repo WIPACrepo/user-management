@@ -120,6 +120,14 @@ Vue.component('inst', {
             Object.assign(entry.members[username], ret2.data[username])
           }
           console.log('members', entry)
+
+          const ret3 = await axios.get('/api/experiments/'+this.experiment+'/associates', {
+            headers: {'Authorization': 'bearer '+token},
+            params: params
+          })
+          for (const username of ret3.data) {
+            entry.members[username].associate = true
+          }
           return entry
         } catch (error) {
           console.log('error getting inst members', error)
@@ -330,13 +338,20 @@ Vue.component('instmember', {
       } else {
         return this.username
       }
+    },
+    associate: function() {
+      if ('associate' in this.memberdata && this.memberdata.assocate) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   template: `
 <tr :data-test="username">
-  <td><span class="username">{{ name }}</span> <span class="delete material-icons" @click="remove(username)">delete_forever</span></td>
-  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" /></td>
-  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed">Update</button></td>
+  <td><span class="username">{{ name }}</span> <span v-if="associate" class="associate-badge">Associate</span><span v-else class="delete material-icons" @click="remove(username)">delete_forever</span></td>
+  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" :disabled="assocaite" /></td>
+  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed && !associate">Update</button></td>
 </tr>`
 })
 
