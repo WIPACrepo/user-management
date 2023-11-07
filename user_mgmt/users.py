@@ -340,7 +340,7 @@ class AssociateUsers(UserBase):
         usernames = self.get_arguments('username')
         logging.info('get users %s', usernames)
 
-        associate_group = f'/experiments/{experiment}/assocaites'
+        associate_group = f'/experiments/{experiment}/associates'
         self.group_cache.invalidate(associate_group)
         associates = await self.group_cache.get_members(associate_group)
 

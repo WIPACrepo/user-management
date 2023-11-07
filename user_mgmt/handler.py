@@ -64,7 +64,7 @@ class MyHandler(RestHandler):
         return data
 
     async def is_associate(self, experiment, username):
-        associate_group = f'/experiments/{experiment}/assocaites'
+        associate_group = f'/experiments/{experiment}/associates'
         self.group_cache.invalidate(associate_group)
         associates = await self.group_cache.get_members(associate_group)
         return username in associates
