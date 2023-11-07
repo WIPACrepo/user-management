@@ -236,3 +236,14 @@ article.institutions .invite {
 article.institutions #register-invite {
     widtH: 80%;
 }
+
+span.associate-badge {
+    text-transform: uppercase;
+    font-size: .7em;
+    border-radius: 1px;
+    border: 1px solid red;
+    background: yellow;
+    padding: 0.1em 0.2em;
+    letter-spacing: -.02em;
+    font-family: sans-serif;
+}

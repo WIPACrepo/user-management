@@ -8,9 +8,11 @@ export default (params) => {
     insts: [],              // insts user belongs to
     admin_insts: {},        // insts user is admin of = {instname: {users, authorlist, ...}}
     inst_approvals: {},     // inst approvals = {instname: [users]}
+    inst_associates: [],    // insts that are associates
     groups: [],             // groups user belongs to
     admin_groups: {},       // groups user is admin for = {groupname: [users]}
-    group_approvals: {},    // group approvals = {groupname: [users]}
+    group_approvals: {},    // group approvals = {groupname: [users]},
+    user_associates: [],    // associate usernames for experiment
     authenticated: true,    // is user logged in?
     token_raw: 'thetoken',  // raw token string
     username: 'user',
@@ -347,6 +349,16 @@ export default (params) => {
       body: {username: ret},
     })
   }).as('api-username-post')
+
+  cy.intercept({
+    method: 'GET',
+    url: '/api/experiments/*/associates?*',
+  }, (req) => {
+    req.reply({
+      statusCode: 200,
+      body: params.user_associates,
+    })
+  }).as('api-experiments-associates')
 
   const obj = {
     authenticated: () => params.authenticated,

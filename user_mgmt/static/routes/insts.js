@@ -320,6 +320,8 @@ Vue.component('instmember', {
   props: ['username', 'memberdata', 'group_names', 'remove', 'update', 'profile'],
   created: function() {
     this.user_groups = Object.assign({}, this.memberdata.groups)
+    console.log('username:', this.username)
+    console.log('memberdata:', this.memberdata)
     console.log('user_groups:', this.user_groups)
   },
   computed: {
@@ -349,9 +351,9 @@ Vue.component('instmember', {
   },
   template: `
 <tr :data-test="username">
-  <td><span class="username">{{ name }}</span> <span v-if="associate" class="associate-badge">Associate</span><span v-else class="delete material-icons" @click="remove(username)">delete_forever</span></td>
-  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" :disabled="assocaite" /></td>
-  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed && !associate">Update</button></td>
+  <td><span class="username">{{ name }}</span> <span v-if="memberdata.associate" class="associate-badge" title="Email help@icecube.wisc.edu to modify this user">Associate</span><span v-else class="delete material-icons" @click="remove(username)">delete_forever</span></td>
+  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" :disabled="memberdata.associate" /></td>
+  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed && !memberdata.associate">Update</button></td>
 </tr>`
 })
 
