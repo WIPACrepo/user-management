@@ -88,7 +88,7 @@ async def test_institution_associate(server):
     await krs.groups.create_group('/institutions/IceCube/UW-Madison/authorlist', rest_client=krs_client)
 
     ret = await client.request('GET', '/api/experiments/IceCube/institutions/UW-Madison')
-    assert ret['attrs'] == {'associate': 'true'}
+    assert ret['attributes'] == {'associate': 'true'}
 
 @pytest.mark.asyncio
 async def test_all_experiments(server):
