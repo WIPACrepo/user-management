@@ -43,6 +43,13 @@ Vue.component('inst', {
   },
   props: ['keycloak', 'group_path'],
   computed: {
+    associate: function() {
+      if ('associate' in this.inst_info.attributes) {
+        return this.inst_info.attributes.associate
+      } else {
+        return false
+      }
+    },
     experiment: function() {
       const parts = this.group_path.split('/')
       return parts[2]
@@ -73,6 +80,22 @@ Vue.component('inst', {
       default: [],
       watch: ['refresh']
     },
+    inst_info: {
+      get: async function() {
+        try {
+          const token = await this.keycloak.get_token();
+          const ret = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution, {
+            headers: {'Authorization': 'bearer '+token}
+          })
+          return ret.data
+        } catch (error) {
+          console.log('error getting inst info', error)
+          this.error = "Error getting inst info: "+error['message']
+          return {'attributes': {}}
+        }
+      },
+      default: {'attributes': {}}
+    },    
     members: {
       get: async function() {
         try {
@@ -255,8 +278,8 @@ Vue.component('inst', {
     }
   },
   template: `
-<div class="inst">
-  <h3>{{ experiment }} - {{ institution }}</h3>
+<div class="inst" :data-test="experiment + '/' + institution">
+  <h3>{{ experiment }} - {{ institution }}<span v-if="associate" class="associate-badge indent">Associate</span></h3>
   <div class="error_box red" v-if="error">{{ error }}</div>
   <div class="indent" v-if="ready">
     <h4>Users needing approval:</h4>

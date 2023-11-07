@@ -78,7 +78,13 @@ export default (params) => {
         subs.push(k)
       }
     }
-    api_all_exps[params.exp][i] = {'subgroups': subs}
+    let attrs = {}
+    for (const k of params.inst_associates) {
+      if (i == k) {
+        attrs['associate'] = true
+      }
+    }
+    api_all_exps[params.exp][i] = {'subgroups': subs, 'attributes': attrs}
   }
 
   let inst_approvals = []
@@ -140,11 +146,14 @@ export default (params) => {
     url: '/api/experiments/*/institutions/*',
   }, (req) => {
     const parts = req.url.split('/')
+    const exp = parts[parts.length-3]
+    console.log('exp:' + exp)
+    const exp_data = api_all_exps[exp]
     const instname = parts[parts.length-1]
-    if (instname in api_all_exps) {
+    if (instname in exp_data) {
       req.reply({
         statusCode: 200,
-        body: api_all_exps[instname],
+        body: exp_data[instname],
       })
     } else {
       req.reply({statusCode: 404, body: {}})

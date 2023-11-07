@@ -70,7 +70,8 @@ class Institution(MyHandler):
             raise HTTPError(404, reason='institution does not exist')
 
         ret = {
-            'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')]
+            'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')],
+            'attributes': group_info.get('attributes', {})
         }
         self.write(ret)
 

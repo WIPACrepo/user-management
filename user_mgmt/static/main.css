@@ -97,10 +97,10 @@ span.login-link {
     text-decoration: underline;
     color: blue;
 }
-div.indent {
+.indent {
     margin-left: 1em;
 }
-div.double_indent {
+.double_indent {
     margin-left: 2em;
 }
 
