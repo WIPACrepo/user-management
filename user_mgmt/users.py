@@ -342,7 +342,10 @@ class AssociateUsers(UserBase):
 
         associate_group = f'/experiments/{experiment}/associates'
         self.group_cache.invalidate(associate_group)
-        associates = await self.group_cache.get_members(associate_group)
+        try:
+            associates = await self.group_cache.get_members(associate_group)
+        except krs.groups.GroupDoesNotExist:
+            associates = []
 
         ret = []
         for username in associates:
