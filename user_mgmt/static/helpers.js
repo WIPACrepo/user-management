@@ -244,18 +244,20 @@ export var profileMixin = {
           const token = await this.keycloak.get_token();
           const experiments = await get_my_experiments(this.keycloak);
           for (const exp of experiments) {
+            console.log('checking associates for exp '+exp)
             let params = new URLSearchParams()
             params.append('username', this.username)
-            const ret = await axios.get('/api/experiments/'+exp+'/assocates', {
+            const ret2 = await axios.get('/api/experiments/'+exp+'/associates', {
               headers: {'Authorization': 'bearer '+token},
               params: params
             })
-            for (const username of ret.data) {
+            for (const username of ret2.data) {
               if (this.username == username) {
-                ret.append(exp)
+                ret.push(exp)
               }
             }
           }
+          console.log('associate:', ret)
           return ret
         } catch (error) {
           console.log('error getting associate status', error)
@@ -321,8 +323,8 @@ export var profileMixin = {
   },
   template: `
 <div class="profile indent">
-  <div v-if="associate != []">
-    <span class="associate-badge">Associate</span> for <span v-for="exp in associate">{{ exp }} </span>
+  <div v-if="associate.length != 0" class="associate indent">
+    <span class="associate-badge">Associate</span> in <span v-for="exp in associate">{{ exp }} </span>
   </div>
   <div class="field" v-for="val, key in field_names">
     <label for="key">{{ val }}</label>

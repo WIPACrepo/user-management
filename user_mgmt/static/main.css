@@ -247,3 +247,8 @@ span.associate-badge {
     letter-spacing: -.02em;
     font-family: sans-serif;
 }
+article.home .profile .associate,
+article.userprofile .profile .associate {
+    margin-bottom: 1.5em;
+    font-size: 1.1em;
+}

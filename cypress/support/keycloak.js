@@ -361,7 +361,7 @@ export default (params) => {
 
   cy.intercept({
     method: 'GET',
-    url: '/api/experiments/*/associates?*',
+    url: '/api/experiments/*/associates*',
   }, (req) => {
     req.reply({
       statusCode: 200,
