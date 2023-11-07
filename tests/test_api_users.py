@@ -225,7 +225,7 @@ async def test_username_invalid(server, reg_token_client, monkeypatch):
 async def test_associates_single_user(server, reg_token_client):
     rest, krs_client, *_ = server
     client = await rest('test')
-    client = await rest('test2')
+    await rest('test2')
 
     await krs.groups.create_group('/experiments', rest_client=krs_client)
     await krs.groups.create_group('/experiments/Test', rest_client=krs_client)
