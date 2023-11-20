@@ -62,7 +62,7 @@ async def test_institution_subgroups_empty(server):
     await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
 
     ret = await client.request('GET', '/api/experiments/IceCube/institutions/UW-Madison')
-    assert ret == {'subgroups':[]}
+    assert ret['subgroups'] == []
 
 @pytest.mark.asyncio
 async def test_institution_subgroups(server):
@@ -75,7 +75,20 @@ async def test_institution_subgroups(server):
     await krs.groups.create_group('/institutions/IceCube/UW-Madison/authorlist', rest_client=krs_client)
 
     ret = await client.request('GET', '/api/experiments/IceCube/institutions/UW-Madison')
-    assert ret == {'subgroups':['authorlist']}
+    assert ret['subgroups'] == ['authorlist']
+
+@pytest.mark.asyncio
+async def test_institution_associate(server):
+    rest, krs_client, *_ = server
+    client = await rest('test')
+
+    await krs.groups.create_group('/institutions', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube/UW-Madison', attrs={'associate': True}, rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube/UW-Madison/authorlist', rest_client=krs_client)
+
+    ret = await client.request('GET', '/api/experiments/IceCube/institutions/UW-Madison')
+    assert ret['attributes'] == {'associate': 'true'}
 
 @pytest.mark.asyncio
 async def test_all_experiments(server):

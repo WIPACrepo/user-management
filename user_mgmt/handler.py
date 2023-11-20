@@ -6,6 +6,7 @@ from tornado.escape import json_decode, json_encode
 from rest_tools.server import RestHandler
 
 import krs.email
+import krs.groups
 
 
 class MyHandler(RestHandler):
@@ -62,6 +63,15 @@ class MyHandler(RestHandler):
         if extra_fields:
             raise HTTPError(400, f'invalid fields: {extra_fields}', reason='extra invalid fields in request')
         return data
+
+    async def is_associate(self, experiment, username):
+        associate_group = f'/experiments/{experiment}/associates'
+        self.group_cache.invalidate(associate_group)
+        try:
+            associates = await self.group_cache.get_members(associate_group)
+        except krs.groups.GroupDoesNotExist:
+            return False
+        return username in associates
 
     def is_super_admin(self):
         """Is the current user a super admin?"""

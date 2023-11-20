@@ -43,6 +43,13 @@ Vue.component('inst', {
   },
   props: ['keycloak', 'group_path'],
   computed: {
+    associate: function() {
+      if ('associate' in this.inst_info.attributes) {
+        return this.inst_info.attributes.associate
+      } else {
+        return false
+      }
+    },
     experiment: function() {
       const parts = this.group_path.split('/')
       return parts[2]
@@ -73,6 +80,22 @@ Vue.component('inst', {
       default: [],
       watch: ['refresh']
     },
+    inst_info: {
+      get: async function() {
+        try {
+          const token = await this.keycloak.get_token();
+          const ret = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution, {
+            headers: {'Authorization': 'bearer '+token}
+          })
+          return ret.data
+        } catch (error) {
+          console.log('error getting inst info', error)
+          this.error = "Error getting inst info: "+error['message']
+          return {'attributes': {}}
+        }
+      },
+      default: {'attributes': {}}
+    },    
     members: {
       get: async function() {
         try {
@@ -120,6 +143,14 @@ Vue.component('inst', {
             Object.assign(entry.members[username], ret2.data[username])
           }
           console.log('members', entry)
+
+          const ret3 = await axios.get('/api/experiments/'+this.experiment+'/associates', {
+            headers: {'Authorization': 'bearer '+token},
+            params: params
+          })
+          for (const username of ret3.data) {
+            entry.members[username].associate = true
+          }
           return entry
         } catch (error) {
           console.log('error getting inst members', error)
@@ -247,8 +278,8 @@ Vue.component('inst', {
     }
   },
   template: `
-<div class="inst">
-  <h3>{{ experiment }} - {{ institution }}</h3>
+<div class="inst" :data-test="experiment + '/' + institution">
+  <h3>{{ experiment }} - {{ institution }}<span v-if="associate" class="associate-badge indent">Associate</span></h3>
   <div class="error_box red" v-if="error">{{ error }}</div>
   <div class="indent" v-if="ready">
     <h4>Users needing approval:</h4>
@@ -312,6 +343,8 @@ Vue.component('instmember', {
   props: ['username', 'memberdata', 'group_names', 'remove', 'update', 'profile'],
   created: function() {
     this.user_groups = Object.assign({}, this.memberdata.groups)
+    console.log('username:', this.username)
+    console.log('memberdata:', this.memberdata)
     console.log('user_groups:', this.user_groups)
   },
   computed: {
@@ -330,13 +363,20 @@ Vue.component('instmember', {
       } else {
         return this.username
       }
+    },
+    associate: function() {
+      if ('associate' in this.memberdata && this.memberdata.assocate) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   template: `
 <tr :data-test="username">
-  <td><span class="username">{{ name }}</span> <span class="delete material-icons" @click="remove(username)">delete_forever</span></td>
-  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" /></td>
-  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed">Update</button></td>
+  <td><span class="username">{{ name }}</span> <span v-if="memberdata.associate" class="associate-badge" title="Email help@icecube.wisc.edu to modify this user">Associate</span><span v-else class="delete material-icons" @click="remove(username)">delete_forever</span></td>
+  <td v-for="(title, name) in group_names"><input :name="name" type="checkbox" v-model="user_groups[name]" :disabled="memberdata.associate" /></td>
+  <td class="actions"><button class="profile" @click="profile(username)">Edit Profile</button> <button class="update" @click="update(username, user_groups)" v-if="changed && !memberdata.associate">Update</button></td>
 </tr>`
 })
 

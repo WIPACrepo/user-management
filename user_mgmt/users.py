@@ -211,6 +211,8 @@ class MultiUser(UserBase):
         """
         Get user profiles.
 
+        `username` argument can be repeated multiple times.
+
         Returns:
             dict: dict of username: profile
         """
@@ -317,3 +319,51 @@ class User(UserBase):
             self.user_cache.invalidate([username])
 
         self.write({})
+
+
+class AssociateUsers(UserBase):
+    @authenticated
+    @catch_error
+    async def get(self, experiment):
+        """
+        Get list of associate users.
+
+        `username` argument can be repeated multiple times. If empty, lists
+        all assocates visible to user.
+
+        Args:
+            experiment (str): the experiment the users are an associate on
+
+        Returns:
+            list: usernames that are assocates
+        """
+        usernames = self.get_arguments('username')
+        logging.info('get users %s', usernames)
+
+        associate_group = f'/experiments/{experiment}/associates'
+        self.group_cache.invalidate(associate_group)
+        try:
+            associates = await self.group_cache.get_members(associate_group)
+        except krs.groups.GroupDoesNotExist:
+            associates = []
+
+        ret = []
+        for username in associates:
+            if usernames and username not in usernames:
+                continue
+
+            try:
+                await self.user_cache.get_user(username)
+            except Exception:
+                logging.debug('invalid username %s', username)
+                continue
+
+            try:
+                await self.check_auth_read_only(username)
+            except HTTPError:
+                logging.debug('bad auth for username %s', username)
+                continue
+
+            ret.append(username)
+
+        self.write(sorted(ret))

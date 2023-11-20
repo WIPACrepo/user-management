@@ -8,9 +8,11 @@ export default (params) => {
     insts: [],              // insts user belongs to
     admin_insts: {},        // insts user is admin of = {instname: {users, authorlist, ...}}
     inst_approvals: {},     // inst approvals = {instname: [users]}
+    inst_associates: [],    // insts that are associates
     groups: [],             // groups user belongs to
     admin_groups: {},       // groups user is admin for = {groupname: [users]}
-    group_approvals: {},    // group approvals = {groupname: [users]}
+    group_approvals: {},    // group approvals = {groupname: [users]},
+    user_associates: [],    // associate usernames for experiment
     authenticated: true,    // is user logged in?
     token_raw: 'thetoken',  // raw token string
     username: 'user',
@@ -76,7 +78,13 @@ export default (params) => {
         subs.push(k)
       }
     }
-    api_all_exps[params.exp][i] = {'subgroups': subs}
+    let attrs = {}
+    for (const k of params.inst_associates) {
+      if (i == k) {
+        attrs['associate'] = true
+      }
+    }
+    api_all_exps[params.exp][i] = {'subgroups': subs, 'attributes': attrs}
   }
 
   let inst_approvals = []
@@ -138,11 +146,14 @@ export default (params) => {
     url: '/api/experiments/*/institutions/*',
   }, (req) => {
     const parts = req.url.split('/')
+    const exp = parts[parts.length-3]
+    console.log('exp:' + exp)
+    const exp_data = api_all_exps[exp]
     const instname = parts[parts.length-1]
-    if (instname in api_all_exps) {
+    if (instname in exp_data) {
       req.reply({
         statusCode: 200,
-        body: api_all_exps[instname],
+        body: exp_data[instname],
       })
     } else {
       req.reply({statusCode: 404, body: {}})
@@ -347,6 +358,16 @@ export default (params) => {
       body: {username: ret},
     })
   }).as('api-username-post')
+
+  cy.intercept({
+    method: 'GET',
+    url: '/api/experiments/*/associates*',
+  }, (req) => {
+    req.reply({
+      statusCode: 200,
+      body: params.user_associates,
+    })
+  }).as('api-experiments-associates')
 
   const obj = {
     authenticated: () => params.authenticated,

@@ -70,7 +70,8 @@ class Institution(MyHandler):
             raise HTTPError(404, reason='institution does not exist')
 
         ret = {
-            'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')]
+            'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')],
+            'attributes': group_info.get('attributes', {})
         }
         self.write(ret)
 
@@ -161,6 +162,10 @@ class InstitutionUser(MyHandler):
         except Exception:
             raise HTTPError(400, reason='invalid username')
 
+        # check assocates
+        if await self.is_associate(experiment, username):
+            raise HTTPError(400, reason='cannot modify associate members. contact help@icecube.wisc.edu')
+
         inst_group = f'/institutions/{experiment}/{institution}'
 
         # get child groups
@@ -206,6 +211,10 @@ class InstitutionUser(MyHandler):
         except Exception:
             raise HTTPError(400, reason='invalid username')
 
+        # check assocates
+        if await self.is_associate(experiment, username):
+            raise HTTPError(400, reason='cannot modify associate members. contact help@icecube.wisc.edu')
+
         # get child groups
         try:
             group_info = await krs.groups.group_info(inst_group, rest_client=self.krs_client)
@@ -239,6 +248,10 @@ class InstApprovals(MyHandler):
             }
             approval_data = self.json_filter(req_fields, opt_fields)
             approval_data['username'] = user
+
+            # check assocates
+            if await self.is_associate(approval_data['experiment'], user):
+                raise HTTPError(400, reason='cannot modify associate members. contact help@icecube.wisc.edu')
 
         else:
             logging.info('new user registration')

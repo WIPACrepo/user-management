@@ -221,3 +221,40 @@ async def test_username_invalid(server, reg_token_client, monkeypatch):
     }
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
+
+async def test_associates_single_user(server, reg_token_client):
+    rest, krs_client, *_ = server
+    client = await rest('test')
+    await rest('test2')
+
+    await krs.groups.create_group('/experiments', rest_client=krs_client)
+    await krs.groups.create_group('/experiments/Test', rest_client=krs_client)
+    await krs.groups.create_group('/experiments/Test/associates', rest_client=krs_client)
+
+    ret = await client.request('GET', '/api/experiments/Test/associates', {'username': 'test'})
+    assert ret == []
+
+    ret = await client.request('GET', '/api/experiments/Test/associates')
+    assert ret == []
+
+    # add user as an associate
+    await krs.groups.add_user_group('/experiments/Test/associates', 'test', rest_client=krs_client)
+
+    ret = await client.request('GET', '/api/experiments/Test/associates', {'username': 'test'})
+    assert ret == ['test']
+
+    ret = await client.request('GET', '/api/experiments/Test/associates')
+    assert ret == ['test']
+
+    # add a second user to the group, and make sure not to get them
+    await krs.groups.add_user_group('/experiments/Test/associates', 'test2', rest_client=krs_client)
+
+    ret = await client.request('GET', '/api/experiments/Test/associates', {'username': 'test'})
+    assert ret == ['test']
+
+    ret = await client.request('GET', '/api/experiments/Test/associates')
+    assert ret == ['test']
+
+    # get a non-answer for a different user
+    ret = await client.request('GET', '/api/experiments/Test/associates', {'username': 'test2'})
+    assert ret == []

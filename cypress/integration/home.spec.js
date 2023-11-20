@@ -59,7 +59,10 @@ context('Home Page', () => {
 
   it('user profile', () => {
     cy.visit('/')
-    keycloak({user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar'}})
+    keycloak({
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar'}
+    })
 
     cy.get('.account').should('exist')
 
@@ -72,6 +75,8 @@ context('Home Page', () => {
     cy.get('.profile [data-test="submit-success"]').should('not.exist')
     cy.get('.profile button').click()
     cy.get('.profile [data-test="submit-success"]').should('exist')
+
+    cy.get('.profile .associate-badge').should('not.exist')
 
     cy.wait('@api-user-profile-put').should(({ request, response }) => {
       expect(request.url).to.include('user')
@@ -99,12 +104,31 @@ context('Home Page', () => {
 
   it('user profile disabled', () => {
     cy.visit('/')
-    keycloak({user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar', loginShell: '/sbin/nologin'}})
+    keycloak({
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar', loginShell: '/sbin/nologin'}
+    })
 
     cy.get('.account').should('exist')
 
     cy.get('.profile').should('exist')
 
     cy.get('.profile [name="loginShell"]').should('exist').should('have.attr', 'disabled')
+  })
+
+  it('user profile associate', () => {
+    cy.visit('/')
+    keycloak({
+      user_associates: ['user'],
+      insts: ['instA'],
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar', author_name: 'F. Bar'}
+    })
+
+    cy.get('.account').should('exist')
+
+    cy.get('.profile').should('exist')
+
+    cy.get('.profile .associate-badge').should('exist')
   })
 })

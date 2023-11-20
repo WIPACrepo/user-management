@@ -27,6 +27,11 @@ context('Institutions Page', () => {
       username: 'user',
       user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'}
     })
+    cy.wait('@api-experiments-associates').should(({ request, response }) => {
+      expect(request.url).to.include('userA')
+      expect(request.url).to.include('userB')
+      expect(response.body).to.deep.eq([])
+    })
 
     cy.get('[data-test="userA"]').within(() => {
       cy.get('.username').contains('userA', {matchCase: false})
@@ -41,6 +46,91 @@ context('Institutions Page', () => {
           "authorlist-astro": true
         })
       })
+    })
+    cy.get('[data-test="user"]').within(() => {
+      cy.get('.username').contains('Foo Bar')
+    })
+  })
+
+  it('inst table associate user', () => {
+    cy.visit('/institutions')
+    keycloak({
+      admin_insts: {instA:{users:['userA', 'userB', 'user'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
+      user_associates: ['userB'],
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'}
+    })
+    cy.wait('@api-experiments-associates').should(({ request, response }) => {
+      expect(request.url).to.include('userA')
+      expect(request.url).to.include('userB')
+      expect(response.body).to.deep.eq(['userB'])
+    })
+
+    cy.get('[data-test="userA"]').within(() => {
+      cy.get('.username').contains('userA', {matchCase: false})
+      cy.get('button.update').should('not.exist')
+      cy.get('input[name=authorlist-physics]').should('be.checked')
+      cy.get('input[name=authorlist-astro]').should('not.be.checked').check()
+      cy.get('button.update').should('exist').click()
+      cy.wait('@api-institution-users-update').should(({ request, response }) => {
+        expect(request.url).to.include('userA')
+        expect(request.body).to.deep.eq({
+          "authorlist-physics": true,
+          "authorlist-astro": true
+        })
+      })
+    })
+    cy.get('[data-test="userB"]').within(() => {
+      cy.get('span.associate-badge').should('exist')
+      cy.get('.username').contains('userB', {matchCase: false})
+      cy.get('button.update').should('not.exist')
+      cy.get('input[name=authorlist-physics]').should('be.disabled')
+      cy.get('input[name=authorlist-astro]').should('be.disabled')
+    })
+    cy.get('[data-test="user"]').within(() => {
+      cy.get('.username').contains('Foo Bar')
+    })
+  })
+
+  it('inst table associate inst', () => {
+    cy.visit('/institutions')
+    keycloak({
+      exp: "test-exp",
+      admin_insts: {instA:{users:['userA', 'userB', 'user'], "authorlist-physics":['userA'], "authorlist-astro":[]}},
+      inst_associates: ['instA'],
+      user_associates: ['userB'],
+      username: 'user',
+      user_profile: {firstName: 'Foo', lastName: 'Bar', email: 'foo@bar'}
+    })
+    cy.wait('@api-experiments-associates').should(({ request, response }) => {
+      expect(request.url).to.include('userA')
+      expect(request.url).to.include('userB')
+      expect(response.body).to.deep.eq(['userB'])
+    })
+
+    cy.get('[data-test="test-exp/instA"]').should('exist')
+    cy.get('[data-test="test-exp/instA"]>h3>.associate-badge').should('exist')
+
+    cy.get('[data-test="userA"]').within(() => {
+      cy.get('.username').contains('userA', {matchCase: false})
+      cy.get('button.update').should('not.exist')
+      cy.get('input[name=authorlist-physics]').should('be.checked')
+      cy.get('input[name=authorlist-astro]').should('not.be.checked').check()
+      cy.get('button.update').should('exist').click()
+      cy.wait('@api-institution-users-update').should(({ request, response }) => {
+        expect(request.url).to.include('userA')
+        expect(request.body).to.deep.eq({
+          "authorlist-physics": true,
+          "authorlist-astro": true
+        })
+      })
+    })
+    cy.get('[data-test="userB"]').within(() => {
+      cy.get('span.associate-badge').should('exist')
+      cy.get('.username').contains('userB', {matchCase: false})
+      cy.get('button.update').should('not.exist')
+      cy.get('input[name=authorlist-physics]').should('be.disabled')
+      cy.get('input[name=authorlist-astro]').should('be.disabled')
     })
     cy.get('[data-test="user"]').within(() => {
       cy.get('.username').contains('Foo Bar')
