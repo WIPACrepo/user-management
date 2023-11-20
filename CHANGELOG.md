@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.5 (2023-11-20)
+
+### Other
+
+* <bot> update dependencies*.log files(s) ([`81b188c`](https://github.com/WIPACrepo/user-management/commit/81b188c39da741de2e9dcdcee3e7b792d08528e0))
+* Add assocate user support ([#70](https://github.com/WIPACrepo/user-management/issues/70)) ([`d712ec9`](https://github.com/WIPACrepo/user-management/commit/d712ec99f8578fc5f8a47ada8173ff42f8836d68))
+
 ## v1.3.4 (2023-10-31)
 
 ### Other
