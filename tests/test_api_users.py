@@ -187,48 +187,38 @@ async def test_username_select(server, reg_token_client):
     ret = await client.request('POST', '/api/username', args)
     assert ret['username'] == 'f-bar.bar_'
 
+invalid_usernames = [
+    ('foo',),  # too short
+    ('fooooooooooooooooooooooooo',),  # too long
+    ('foò',),  # unicode
+    ('fo=o',),  # invalid char
+]
+
+@pytest.mark.parametrize('username', invalid_usernames)
 @pytest.mark.asyncio
-async def test_username_invalid(server, reg_token_client, monkeypatch):
+async def test_user_put(username, server):
+    rest, krs_client, *_ = server
+    client = await rest(username)
+
+    with pytest.raises(Exception):
+        await client.request('PUT', f'/api/users/{username}', {'author_name': 'F. Bar', 'author_email': 'foo@bar'})
+
+@pytest.mark.parametrize('username', invalid_usernames)
+@pytest.mark.asyncio
+async def test_username_invalid(username, server, reg_token_client, monkeypatch):
     rest, krs_client, *_ = server
     client = await reg_token_client()
 
-    # short
     args = {
         'first_name': 'Foo',
         'last_name': 'Bar',
-        'username': 'foo'
+        'username': username
     }
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
-    # long
-    args = {
-        'first_name': 'Foo',
-        'last_name': 'Bar',
-        'username': 'fooooooooooooooooooooooooo'
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/username', args)
-
-    # non-ascii
-    args = {
-        'first_name': 'Foo',
-        'last_name': 'Bar',
-        'username': 'foò'
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/username', args)
-
-    # unexpected chars
-    args = {
-        'first_name': 'Foo',
-        'last_name': 'Bar',
-        'username': 'fo=o'
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/username', args)
-
-    # bad word
+@pytest.mark.asyncio
+async def test_username_invalid_bad_word(server, reg_token_client, monkeypatch):
     monkeypatch.setattr(user_mgmt.users, 'BAD_WORDS', ['bad'])
 
     args = {

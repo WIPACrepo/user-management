@@ -2,6 +2,7 @@
 Handle user profile updates.
 """
 import itertools
+import re
 import os
 import logging
 
@@ -88,6 +89,8 @@ class Username(MyHandler):
         ascii_username = unidecode.unidecode(username).replace("'", '').replace(' ', '').lower()
         if ascii_username != username:
             return False
+        #if not re.fullmatch('[\w\-\._]+', username):
+        #    return False
         if len(username) < 5:
             return False
         if len(username) > 16:
