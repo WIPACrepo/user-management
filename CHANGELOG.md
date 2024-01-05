@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.6 (2024-01-05)
+
+### Other
+
+* Fix username valid / invalid filtering ([#71](https://github.com/WIPACrepo/user-management/issues/71)) ([`e6e6f5c`](https://github.com/WIPACrepo/user-management/commit/e6e6f5c25696d34cd81455e57ff7967a61f04843))
+
 ## v1.3.5 (2023-11-20)
 
 ### Other
