@@ -194,9 +194,19 @@ invalid_usernames = [
     'fo=o',  # invalid char
     'fo o',  # space
     'f\'oo',  # quote
+    'f-oo',  # dash
+    'f.oo',  # dot
+    'f_oo',  # underscore
+    'Foo',  # uppercase
+    'foO',  # uppercase
 ]
-# put is fine with lengths, so ignore those errors
-invalid_usernames_put = invalid_usernames[2:]
+# put is less strict
+invalid_usernames_put = [
+    'foò',  # unicode
+    'fo=o',  # invalid char
+    'fo o',  # space
+    'f\'oo',  # quote
+]
 
 @pytest.mark.parametrize('username', invalid_usernames_put)
 @pytest.mark.asyncio
