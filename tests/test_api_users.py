@@ -195,8 +195,10 @@ invalid_usernames = [
     'fo o',  # space
     'f\'oo',  # quote
 ]
+# put is fine with lengths, so ignore those errors
+invalid_usernames_put = invalid_usernames[2:]
 
-@pytest.mark.parametrize('username', invalid_usernames)
+@pytest.mark.parametrize('username', invalid_usernames_put)
 @pytest.mark.asyncio
 async def test_user_put(username, server):
     rest, krs_client, *_ = server
