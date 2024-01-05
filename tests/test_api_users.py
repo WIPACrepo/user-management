@@ -13,10 +13,6 @@ from .util import port, server, mongo_client, reg_token_client, email_patch
 import user_mgmt.users
 
 
-def test_invalid_usernames():
-    assert user_mgmt.users.Username._username_valid('foo-bar')
-    assert not user_mgmt.users.Username._username_valid('foo-bār')
-
 
 def test_invalid_orcid():
     assert user_mgmt.users.is_orcid('0001-0002-0003-0004')
@@ -179,39 +175,77 @@ async def test_username_select(server, reg_token_client):
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
+
+invalid_usernames = [
+    'foo',  # too short
+    'fooooooooooooooooooooooooo',  # too long
+    'foò',  # unicode
+    'fo=o',  # invalid char
+    'fo o',  # space
+    'f\'oo',  # quote
+    'f-oo',  # dash
+    'f.oo',  # dot
+    'f_oo',  # underscore
+    'Foo',  # uppercase
+    'foO',  # uppercase
+]
+# put is less strict
+valid_usernames_put = [
+    'foo',  # too short
+    'fooooooooooooooooooooooooo',  # too long
+    'f-oo',  # dash
+    'f.oo',  # dot
+    'f_oo',  # underscore
+# can't test these last two without experimental Keycloak support
+#    'Foo',  # uppercase
+#    'foO',  # uppercase
+]
+invalid_usernames_put = [
+    'foò',  # unicode
+    'fo=o',  # invalid char
+    'fo o',  # space
+    'f\'oo',  # quote
+]
+
+@pytest.mark.parametrize('username', valid_usernames_put)
 @pytest.mark.asyncio
-async def test_username_invalid(server, reg_token_client, monkeypatch):
+async def test_user_put_valid(username, server):
+    rest, krs_client, *_ = server
+    client = await rest(username)
+
+    await client.request('PUT', f'/api/users/{username}', {'author_name': 'F. Bar', 'author_email': 'foo@bar'})
+
+
+@pytest.mark.parametrize('username', invalid_usernames_put)
+@pytest.mark.asyncio
+async def test_user_put_invalid(username, server):
+    rest, krs_client, *_ = server
+    client = await rest(username)
+
+    with pytest.raises(Exception):
+        await client.request('PUT', f'/api/users/{username}', {'author_name': 'F. Bar', 'author_email': 'foo@bar'})
+
+
+@pytest.mark.parametrize('username', invalid_usernames)
+def test_invalid_usernames(username):
+    assert not user_mgmt.users.Username._username_valid(username)
+
+@pytest.mark.parametrize('username', invalid_usernames)
+@pytest.mark.asyncio
+async def test_username_invalid(username, server, reg_token_client, monkeypatch):
     rest, krs_client, *_ = server
     client = await reg_token_client()
 
-    # short
     args = {
         'first_name': 'Foo',
         'last_name': 'Bar',
-        'username': 'foo'
+        'username': username
     }
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
-    # long
-    args = {
-        'first_name': 'Foo',
-        'last_name': 'Bar',
-        'username': 'fooooooooooooooooooooooooo'
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/username', args)
-
-    # non-ascii
-    args = {
-        'first_name': 'Foo',
-        'last_name': 'Bar',
-        'username': 'foò'
-    }
-    with pytest.raises(Exception):
-        await client.request('POST', '/api/username', args)
-
-    # bad word
+@pytest.mark.asyncio
+async def test_username_invalid_bad_word(server, reg_token_client, monkeypatch):
     monkeypatch.setattr(user_mgmt.users, 'BAD_WORDS', ['bad'])
 
     args = {

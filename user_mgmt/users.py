@@ -2,8 +2,9 @@
 Handle user profile updates.
 """
 import itertools
-import os
 import logging
+import os
+import string
 
 from tornado.web import HTTPError
 from rest_tools.server import catch_error, authenticated
@@ -73,7 +74,7 @@ class Username(MyHandler):
     @staticmethod
     def _gen_username(first_name, last_name, number):
         """Make ascii username from first and last name."""
-        ret = unidecode.unidecode(first_name[0] + last_name).replace("'", '').replace(' ', '').lower()
+        ret = unidecode.unidecode(first_name[0] + last_name).replace("'", '').replace(' ', '').replace('.','').lower()
         if len(ret) < 5:
             ret = f'{ret:0<5s}'
         if len(ret) > 8:
@@ -84,9 +85,21 @@ class Username(MyHandler):
 
     @staticmethod
     def _username_valid(username):
-        """Check if a username is valid - length, bad words."""
-        ascii_username = unidecode.unidecode(username).replace("'", '').replace(' ', '').lower()
-        if ascii_username != username:
+        """
+        Check if a username is valid.
+
+        Valid:
+        * ascii string between 5-15 chars
+        * lowercase letters, numbers
+
+        Invalid:
+        * unicode
+        * punctuation
+        * special chars
+        * BAD_WORDS filter
+        """
+        valid_chars = string.ascii_lowercase + string.digits
+        if any(c not in valid_chars for c in username):
             return False
         if len(username) < 5:
             return False
@@ -172,7 +185,7 @@ class UserBase(MyHandler):
                     members = await self.group_cache.get_members(group_path)
                     if username in members:
                         return
-            logging.warning('failed inst admin check for admin %r and username %r', self.current_user, username)
+            logging.warning('failed inst admin check for admin %r and username %r', self.auth_data['username'], username)
             raise HTTPError(403, reason='invalid authorization')
 
     async def check_auth_read_only(self, username):
@@ -200,7 +213,7 @@ class UserBase(MyHandler):
                 members = await self.group_cache.get_members(group_path)
                 if username in members:
                     return
-            logging.warning('failed group or inst admin check for admin %r and username %r', self.current_user, username)
+            logging.warning('failed group or inst admin check for admin %r and username %r', self.auth_data['username'], username)
             raise HTTPError(403, reason='invalid authorization')
 
 
