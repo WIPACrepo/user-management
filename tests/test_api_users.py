@@ -188,10 +188,12 @@ async def test_username_select(server, reg_token_client):
     assert ret['username'] == 'f-bar.bar_'
 
 invalid_usernames = [
-    ('foo',),  # too short
-    ('fooooooooooooooooooooooooo',),  # too long
-    ('foò',),  # unicode
-    ('fo=o',),  # invalid char
+    'foo',  # too short
+    'fooooooooooooooooooooooooo',  # too long
+    'foò',  # unicode
+    'fo=o',  # invalid char
+    'fo o',  # space
+    'f\'oo',  # quote
 ]
 
 @pytest.mark.parametrize('username', invalid_usernames)
