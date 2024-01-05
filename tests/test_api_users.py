@@ -179,6 +179,14 @@ async def test_username_select(server, reg_token_client):
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
 
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'f-bar.bar_'
+    }
+    ret = await client.request('POST', '/api/username', args)
+    assert ret['username'] == 'f-bar.bar_'
+
 @pytest.mark.asyncio
 async def test_username_invalid(server, reg_token_client, monkeypatch):
     rest, krs_client, *_ = server
@@ -207,6 +215,15 @@ async def test_username_invalid(server, reg_token_client, monkeypatch):
         'first_name': 'Foo',
         'last_name': 'Bar',
         'username': 'foò'
+    }
+    with pytest.raises(Exception):
+        await client.request('POST', '/api/username', args)
+
+    # unexpected chars
+    args = {
+        'first_name': 'Foo',
+        'last_name': 'Bar',
+        'username': 'fo=o'
     }
     with pytest.raises(Exception):
         await client.request('POST', '/api/username', args)
