@@ -196,8 +196,9 @@ valid_usernames_put = [
     'f-oo',  # dash
     'f.oo',  # dot
     'f_oo',  # underscore
-    'Foo',  # uppercase
-    'foO',  # uppercase
+# can't test these last two without experimental Keycloak support
+#    'Foo',  # uppercase
+#    'foO',  # uppercase
 ]
 invalid_usernames_put = [
     'foò',  # unicode
