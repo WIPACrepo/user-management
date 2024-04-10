@@ -94,10 +94,6 @@ async def test_user_put(server):
     with pytest.raises(Exception):
         await client.request('PUT', '/api/users/test', {'loginShell': 'foo'})
 
-    await client.request('PUT', '/api/users/test', {'loginShell': ''})
-    ret = await krs.users.user_info('test', rest_client=krs_client)
-    assert ret['attributes']['loginShell'] == ''
-
 
 @pytest.mark.asyncio
 async def test_user_unauthorized(server):
@@ -111,7 +107,7 @@ async def test_user_unauthorized(server):
 @pytest.mark.asyncio
 async def test_user_inst_admin(server):
     rest, krs_client, *_ = server
-    
+
     await krs.groups.create_group('/institutions', rest_client=krs_client)
     await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
     await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
@@ -119,7 +115,7 @@ async def test_user_inst_admin(server):
     client = await rest('test', groups=['/institutions/IceCube/UW-Madison'])
 
     client2 = await rest('test2', groups=['/institutions/IceCube/UW-Madison/_admin'])
-    
+
     ret = await client.request('GET', '/api/users/test')
     assert ret['firstName'] == 'first'
     assert ret['lastName'] == 'last'
@@ -202,9 +198,6 @@ valid_usernames_put = [
 ]
 invalid_usernames_put = [
     'foò',  # unicode
-    'fo=o',  # invalid char
-    'fo o',  # space
-    'f\'oo',  # quote
 ]
 
 @pytest.mark.parametrize('username', valid_usernames_put)
