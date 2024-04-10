@@ -68,7 +68,7 @@ to a Keycloak client specifically created for this and the REST API.
 
 ## Running Tests
 
-The tests run automatically in CircleCI, but for those that want to run them
+The tests run automatically in github, but for those that want to run them
 locally, there is a way.
 
 First, build and load the local python environment:
