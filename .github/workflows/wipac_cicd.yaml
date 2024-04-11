@@ -84,7 +84,7 @@ jobs:
           pip install .[tests]
       - name: Run Tests
         run: |
-          python -m pytest tests --tb=short --log-level=INFO
+          python -m pytest tests --tb=short --log-level=INFO -v
 
   web-tests:
     needs: [py-versions]
