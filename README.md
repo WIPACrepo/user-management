@@ -84,6 +84,7 @@ Keycloak may take a minute to start. If it does not, check your network settings
 as it does not play well with VPNs and other more exotic network situations.
 
 Start an instance of mongodb in another terminal:
+
     docker run --rm -it -p 27017:27017 -d mongo:latest
 
 Finally, run the tests:
