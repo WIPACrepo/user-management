@@ -130,7 +130,7 @@ class MyHandler(RestHandler):
                 val = group.split('/')
                 insts[val[2]].append(val[3])
         else:
-            admin_groups = [g[:-7] for g in self.auth_data.get('groups', []) if g.endswith('/_admin')]
+            admin_groups = [g[:-7] for g in self.auth_data['groups'] if g.endswith('/_admin')]
             insts = defaultdict(list)
             for group in admin_groups:
                 val = group.strip('/').split('/')
