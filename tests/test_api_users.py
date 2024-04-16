@@ -95,7 +95,7 @@ async def test_user_put(server):
         await client.request('PUT', '/api/users/test', {'loginShell': 'foo'})
 
     # Sometime after version 15, Keycloak started to delete empty attributes
-    # (not sure if this applies to user profile attributes)
+    # (not sure if this still applies if user profiles are enabled)
     await client.request('PUT', '/api/users/test', {'loginShell': ''})
     ret = await krs.users.user_info('test', rest_client=krs_client)
     assert 'loginShell' not in ret['attributes']
