@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.8 (2024-04-16)
+
+### Other
+
+* Clarify meaning of mailing_list_email ([`366281b`](https://github.com/WIPACrepo/user-management/commit/366281beeb80088b2d21a1d1a2d790819cca616c))
+
 ## v1.3.7 (2024-04-16)
 
 ### Other
