@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.7 (2024-04-16)
+
+### Other
+
+* Use new version of keycloak server with unit tests ([#74](https://github.com/WIPACrepo/user-management/issues/74)) ([`dd7860d`](https://github.com/WIPACrepo/user-management/commit/dd7860d07feee0de3f6c0050f2a3adda6b584110))
+* Update README.md ([`958560e`](https://github.com/WIPACrepo/user-management/commit/958560ea5e87d928d33a30e205e810a6ec7a10cc))
+* Update README.md ([`77a9a87`](https://github.com/WIPACrepo/user-management/commit/77a9a874c9a53fada0d11bd98c4199a8d4b7c1e3))
+* Update README.md ([`8857564`](https://github.com/WIPACrepo/user-management/commit/8857564a3914aef942a3433cc6820b34c9bfcfed))
+* Update README.md ([`cd916c9`](https://github.com/WIPACrepo/user-management/commit/cd916c96b004d9f5580f3c3ae7a56771301f06a5))
+* Update README.md ([`4078b6e`](https://github.com/WIPACrepo/user-management/commit/4078b6e5abd3d0bbc050f7fa73024a2be9f1bd1b))
+
 ## v1.3.6 (2024-01-05)
 
 ### Other
