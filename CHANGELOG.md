@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.9 (2024-04-16)
+
+### Other
+
+* Trivial change to trigger tests workflow against new keycloak version ([`a41de37`](https://github.com/WIPACrepo/user-management/commit/a41de370601e9c8f8d991601b57c5146e9b4e855))
+
 ## v1.3.8 (2024-04-16)
 
 ### Other
