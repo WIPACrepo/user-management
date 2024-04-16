@@ -75,7 +75,7 @@ class MyHandler(RestHandler):
 
     def is_super_admin(self):
         """Is the current user a super admin?"""
-        return '/admin' in self.auth_data['groups']
+        return '/admin' in self.auth_data.get('groups', [])
 
     async def get_admins(self, group_path):
         ret = await self.group_cache.get_members(group_path+'/_admin')
@@ -110,7 +110,7 @@ class MyHandler(RestHandler):
         if self.is_super_admin():  # super admin - all groups
             admin_groups = await self.group_cache.list_groups()
         else:
-            admin_groups = [g[:-7] for g in self.auth_data['groups'] if g.endswith('/_admin')]
+            admin_groups = [g[:-7] for g in self.auth_data.get('groups', []) if g.endswith('/_admin')]
         groups = set()
         for group in admin_groups:
             val = group.strip('/').split('/')
@@ -130,7 +130,7 @@ class MyHandler(RestHandler):
                 val = group.split('/')
                 insts[val[2]].append(val[3])
         else:
-            admin_groups = [g[:-7] for g in self.auth_data['groups'] if g.endswith('/_admin')]
+            admin_groups = [g[:-7] for g in self.auth_data.get('groups', []) if g.endswith('/_admin')]
             insts = defaultdict(list)
             for group in admin_groups:
                 val = group.strip('/').split('/')
