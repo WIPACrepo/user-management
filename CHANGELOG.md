@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.10 (2024-05-01)
+
+### Other
+
+* Update screenshots in docs to match new version of keycloak ([`2d73d8c`](https://github.com/WIPACrepo/user-management/commit/2d73d8c728a680e99643e3c2b24daa0564b80b03))
+
 ## v1.3.9 (2024-04-16)
 
 ### Other
