@@ -98,3 +98,4 @@ under the coverage tool:
 
     keycloak_url=http://localhost:8080 username=admin password=admin coverage run -m pytest
     coverage html --include='krs*'
+
