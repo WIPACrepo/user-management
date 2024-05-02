@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.11 (2024-05-02)
+
+### Other
+
+* Trivial change to start using latest krs in image ([`abdcc21`](https://github.com/WIPACrepo/user-management/commit/abdcc21c6f12e36fde58d6210f73e53f118e42e8))
+
 ## v1.3.10 (2024-05-01)
 
 ### Other
