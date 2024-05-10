@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.12 (2024-05-10)
+
+### Other
+
+* Update password reset documentation ([`9ab0c66`](https://github.com/WIPACrepo/user-management/commit/9ab0c66fa68ed9788d7716237f6f7d9ed98ebdcd))
+
 ## v1.3.11 (2024-05-02)
 
 ### Other
