@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.14 (2024-05-20)
+
+### Other
+
+* Link updates in email text and docs ([`5de0358`](https://github.com/WIPACrepo/user-management/commit/5de0358bfb0c4681cb1263d44306c07d9f6a070a))
+
 ## v1.3.13 (2024-05-10)
 
 ### Other
