@@ -11,7 +11,7 @@ You should experience something like
 
 ![login_link](images/login_link.png)
 
-From there, you should be redirected to page with a URL like _https://keycloak.icecube.wisc.edu/auth/realms/IceCube/_, where you are prompted to input your username and password
+From there, you should be redirected to page with a URL like _https://keycloak.icecube.wisc.edu/auth/realms/IceCube/account/_, where you are prompted to input your username and password
 
 ![redirect_login](images/redirect_login.png)
 
