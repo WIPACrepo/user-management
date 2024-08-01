@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.15 (2024-08-01)
+
+### Other
+
+* Trivial change to get KRS 1.4.108 into the docker image ([`9a90f8a`](https://github.com/WIPACrepo/user-management/commit/9a90f8a6bd04097daa4ff5d20c4b0f5627c4f7cd))
+
 ## v1.3.14 (2024-05-20)
 
 ### Other
