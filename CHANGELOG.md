@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.16 (2024-08-02)
+
+### Other
+
+* Trivial README.md change ([#75](https://github.com/WIPACrepo/user-management/issues/75)) ([`aeb3973`](https://github.com/WIPACrepo/user-management/commit/aeb397349bdbbac85b5f446bbd6ff9c624db64af))
+
 ## v1.3.15 (2024-08-01)
 
 ### Other
