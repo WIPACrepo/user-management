@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.17 (2024-11-21)
+
+### Other
+
+* Keycloak 26 compatibility ([#76](https://github.com/WIPACrepo/user-management/issues/76)) ([`3e8706d`](https://github.com/WIPACrepo/user-management/commit/3e8706d962eb65e0a3bed8bb9867f44b6d419f56))
+
 ## v1.3.16 (2024-08-02)
 
 ### Other
