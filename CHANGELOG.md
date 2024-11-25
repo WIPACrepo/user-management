@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.18 (2024-11-25)
+
+### Other
+
+* Change to keycloak 26.0.6 ([#77](https://github.com/WIPACrepo/user-management/issues/77)) ([`963ee2a`](https://github.com/WIPACrepo/user-management/commit/963ee2afa50834bd3b11218e750086edaf84d79f))
+
 ## v1.3.17 (2024-11-21)
 
 ### Other
