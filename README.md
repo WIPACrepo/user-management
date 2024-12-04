@@ -78,7 +78,7 @@ First, build and load the local python environment:
 
 Then, start an instance of Keycloak in another terminal:
 
-    docker run --rm -it -p 8080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin -e KC_HTTP_ENABLED=true -e KC_HTTP_RELATIVE_PATH=/auth quay.io/keycloak/keycloak:26.0.6 start-dev
+    docker run --rm -it -p 8080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin -e KC_HTTP_ENABLED=true -e KC_HTTP_RELATIVE_PATH=/auth quay.io/keycloak/keycloak:26.0.7 start-dev
 
 Keycloak may take a minute to start. If it does not, check your network settings,
 as it does not play well with VPNs and other more exotic network situations.
