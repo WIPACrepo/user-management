@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.19 (2024-12-04)
+
+### Other
+
+* Trigger tests against keycloak 26.0.7 ([`ce46b2c`](https://github.com/WIPACrepo/user-management/commit/ce46b2c734025851c86061386051d63b5f45a6ee))
+
 ## v1.3.18 (2024-11-25)
 
 ### Other
