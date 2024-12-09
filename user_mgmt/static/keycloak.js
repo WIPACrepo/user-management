@@ -15,7 +15,7 @@ export default function(keycloak_url, keycloak_realm){
   return {
     init: async function() {
       try {
-        await insertScript(keycloak_url+'/auth/js/keycloak.js')
+        await insertScript('/static/keycloak_js_adapter.js')
         _keycloak = new Keycloak({
           url: keycloak_url+'/auth',
           realm: keycloak_realm,
