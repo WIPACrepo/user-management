@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.20 (2024-12-09)
+
+### Other
+
+* Add local copy of keycloak js adapter ([#78](https://github.com/WIPACrepo/user-management/issues/78)) ([`b2d7096`](https://github.com/WIPACrepo/user-management/commit/b2d70960017349177666e25cbbfa49dcf2c7e198))
+
 ## v1.3.19 (2024-12-04)
 
 ### Other
