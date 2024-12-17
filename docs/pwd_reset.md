@@ -18,7 +18,7 @@ that is valid for a few minutes, so you should click on that link quickly.
 
 If you know your existing password but want to change it, go to the
 [Keycloak account security page](https://keycloak.icecube.wisc.edu/auth/realms/IceCube/account/#/account-security/signing-in).
-It looks like the following:
+It looks like the following (you may need to click on the hamburger icon in the top right to display the navigation menu):
 ![account security](images/keycloak_account_security.png)
 
 Click on the "Update" button. You will see the password change form:
