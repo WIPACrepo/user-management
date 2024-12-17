@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.21 (2024-12-17)
+
+### Other
+
+* Documentation update for keycloak v26 ([#79](https://github.com/WIPACrepo/user-management/issues/79)) ([`6d15ed9`](https://github.com/WIPACrepo/user-management/commit/6d15ed9edb62b70c938c9004a82cdef5eeb99f30))
+
 ## v1.3.20 (2024-12-09)
 
 ### Other
