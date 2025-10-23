@@ -19,7 +19,7 @@ export default function(keycloak_url, keycloak_realm){
         _keycloak = new Keycloak({
           url: keycloak_url+'/auth',
           realm: keycloak_realm,
-          clientId: 'user_mgmt_testing'
+          clientId: 'user_mgmt'
         })
         await _keycloak.init({
           onLoad: 'check-sso',
