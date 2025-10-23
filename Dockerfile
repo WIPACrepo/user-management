@@ -7,11 +7,12 @@ RUN mkdir /app && chown keycloak:keycloak /app
 WORKDIR /app
 USER keycloak
 
-COPY . .
+COPY pyproject.toml /app/
+COPY user_mgmt /app/
 
 USER root
 
-RUN pip install -e .
+RUN --mount=type=bind,source=.git,target=.git,ro pip install --no-cache .
 
 USER keycloak
 

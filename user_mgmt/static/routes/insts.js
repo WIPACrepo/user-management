@@ -123,14 +123,25 @@ Vue.component('inst', {
               }
             }
           }
-          let params = new URLSearchParams()
+          let user_list = []
           for (const username in entry.members) {
-            params.append('username', username)
+            user_list.push(username)
           }
-          let fut = axios.get('/api/users', {
-            headers: {'Authorization': 'bearer '+token},
-            params: params
+          let futures = []
+          while (user_list.length != 0) {
+            let params = new URLSearchParams()
+            for (const username of user_list.splice(0, 25)) {
+              params.append('username', username)
+            }
+            futures.push(axios.get('/api/users', {
+              headers: {'Authorization': 'bearer '+token},
+              params: params
+            }))
+          }
+          let fut = axios.get('/api/experiments/'+this.experiment+'/associates', {
+            headers: {'Authorization': 'bearer '+token}
           })
+
           for (let username in entry.members) {
             for (const name in entry.groups) {
               if (!(name in entry.members[username].groups)) {
@@ -138,18 +149,19 @@ Vue.component('inst', {
               }
             }
           }
-          const ret2 = await fut
-          for (const username in ret2.data) {
-            Object.assign(entry.members[username], ret2.data[username])
+          const results = await Promise.all(futures)
+          for (const ret2 of results) {
+            for (const username in ret2.data) {
+              Object.assign(entry.members[username], ret2.data[username])
+            }
           }
           console.log('members', entry)
 
-          const ret3 = await axios.get('/api/experiments/'+this.experiment+'/associates', {
-            headers: {'Authorization': 'bearer '+token},
-            params: params
-          })
+          const ret3 = await fut
           for (const username of ret3.data) {
-            entry.members[username].associate = true
+            if (username in entry.members) {
+              entry.members[username].associate = true
+            }
           }
           return entry
         } catch (error) {

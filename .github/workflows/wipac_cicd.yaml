@@ -7,24 +7,40 @@ on:
     tags-ignore:
       - '**'
 
+env:
+  py_version: '3.12'
+
 jobs:
 
   flake8:
     needs: []
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-      - uses: WIPACrepo/wipac-dev-flake8-action@v1.0
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.py_version }}
+      - uses: WIPACrepo/wipac-dev-flake8-action@v1.3
+        with:
+          max-complexity: 20
 
   py-setup:
+    if: ${{ github.actor != 'dependabot[bot]' }} # dependabot cannot access PAT
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      - uses: WIPACrepo/wipac-dev-py-setup-action@v3.1
+          ref: ${{ github.ref }}  # dont lock to sha (action needs to push)
+      - uses: WIPACrepo/wipac-dev-py-setup-action@v5.7
+        with:
+          mode: PACKAGING
+          python_min: 3.9
+          python_max: 3.13
+          auto_mypy_option: False
 
   py-versions:
     needs: [py-setup]
@@ -32,9 +48,11 @@ jobs:
     outputs:
       matrix: ${{ steps.versions.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
       - id: versions
-        uses: WIPACrepo/wipac-dev-py-versions-action@v2.1
+        uses: WIPACrepo/wipac-dev-py-versions-action@v2.7
 
   pip-install:
     needs: [py-versions]
@@ -45,8 +63,11 @@ jobs:
       matrix:
         versions: ${{ fromJSON(needs.py-versions.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # setuptools-scm needs to access git tags
+          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.versions }}
       - run: |
@@ -66,7 +87,7 @@ jobs:
         ports:
         - 8080:8080
       mongo:
-        image: mongo:4.0
+        image: mongo:8.0
         ports:
         - 27017:27017
     env:
@@ -74,8 +95,11 @@ jobs:
       USERNAME: admin
       PASSWORD: admin
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # setuptools-scm needs to access git tags
+          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ fromJSON(needs.py-versions.outputs.matrix)[0] }}
       - name: Setup Dependencies
@@ -90,8 +114,11 @@ jobs:
     needs: [py-versions]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # setuptools-scm needs to access git tags
+          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ fromJSON(needs.py-versions.outputs.matrix)[0] }}
       - name: Setup Dependencies
@@ -103,53 +130,57 @@ jobs:
           python -m user_mgmt.test_server &
           docker run --network=host -v $PWD:/e2e -w /e2e cypress/included:9.5.4
 
-  release:
-    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
-    needs: [pip-install, py-tests, web-tests]
-    runs-on: ubuntu-latest
-    concurrency: release
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-    - name: Python Semantic Release
-      uses: relekang/python-semantic-release@v7.34.6
-      with:
-        github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        # DOES NOT GO TO PYPI
-        #repository_username: __token__
-        #repository_password: ${{ secrets.PYPI_TOKEN }}
 
-  docker:
-    name: "Docker Image"
+  ############################################################################
+  # TAG + RELEASE
+  #############################################################################
+
+  release-version:
+    if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref
     needs: [pip-install, py-tests, web-tests]
     runs-on: ubuntu-latest
+    outputs:
+      next-version: ${{ steps.next-version.outputs.version }}
     steps:
-    - name: Checkout Project
-      uses: actions/checkout@v3
-    - name: Docker meta
-      id: docker_meta
-      uses: docker/metadata-action@v4
-      with:
-        images: |
-          ghcr.io/WIPACRepo/user-management
-        tags: |
-            type=ref,event=branch
-            type=semver,pattern={{major}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}.{{minor}}.{{patch}}
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      if: ${{ github.event_name != 'pull_request' }}
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Push Docker Image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.docker_meta.outputs.tags }}
-        labels: ${{ steps.docker_meta.outputs.labels }}
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
+      # copied from tag-and-release
+      - name: Determine next version
+        uses: WIPACrepo/wipac-dev-next-version-action@v1.3
+        id: next-version
+        with:
+          force-patch-if-no-commit-token: true
+          ignore-paths: |
+            **/README.md
+            .github/**
+            .gitignore
+
+  tag-and-release:
+    # only run on main/default
+    if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref && needs.release-version.outputs.next-version != ''
+    needs: [pip-install, py-tests, web-tests, release-version]
+    uses: WIPACrepo/wipac-dev-workflows/.github/workflows/tag-and-release.yml@v1.16
+    permissions: # for GITHUB_TOKEN
+      contents: write
+    with:
+      project-type: python
+      python-version: "${{ fromJSON(needs.py-versions.outputs.matrix)[0] }}"
+      publish-to-pypi: false
+
+  image-publish:
+    if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref && needs.release-version.outputs.next-version != ''
+    needs: [
+      tag-and-release,
+      release-version,
+    ]
+    uses: WIPACrepo/wipac-dev-workflows/.github/workflows/image-publish.yml@v1.11
+    permissions: # for GITHUB_TOKEN
+      packages: write
+    with:
+      image_namespace: wipacrepo
+      image_name: user-management
+      mode: BUILD
+      build_args: |
+        SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.release-version.outputs.next-version }}
+      extra_build_tag: ${{ needs.release-version.outputs.next-version }}
