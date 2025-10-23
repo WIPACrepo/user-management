@@ -56,7 +56,7 @@ skip_empty = true
 [tool.coverage.html]
 directory = "htmlcov"
 
-[tool.pytest]
+[tool.pytest.ini_options]
 asyncio_mode = "auto"
 
 [tool.setuptools]
