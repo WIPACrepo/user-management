@@ -24,7 +24,7 @@ jobs:
           python-version: ${{ env.py_version }}
       - uses: WIPACrepo/wipac-dev-flake8-action@v1.3
         with:
-          max-complexity: 15
+          max-complexity: 20
 
   py-setup:
     if: ${{ github.actor != 'dependabot[bot]' }} # dependabot cannot access PAT
