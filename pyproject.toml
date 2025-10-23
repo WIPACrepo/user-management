@@ -1,0 +1,22 @@
+# pyproject.toml
+
+[project]
+dependencies = [
+    "cachetools",
+    "motor",
+    "tornado",
+    "unidecode",
+    "wipac-dev-tools",
+    "wipac-keycloak-rest-services",
+    "wipac-rest-tools",
+] # (can remove comment) originally migrated from 'setup.cfg' by 'WIPACrepo/wipac-dev-py-setup-action' github action package
+
+[project.optional-dependencies] # (can remove comment) originally migrated from 'setup.cfg' by 'WIPACrepo/wipac-dev-py-setup-action' github action package
+tests = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "coverage",
+    "flake8",
+]
