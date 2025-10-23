@@ -127,20 +127,23 @@ Vue.component('inst', {
           for (const username in entry.members) {
             user_list.append(username)
           }
-          let futures = []
+          let params_list = []
           while (user_list.length != 0) {
             let params = new URLSearchParams()
             for (const username of user_list.splice(0, 100)) {
               params.append('username', username)
             }
+            params_list.append(params)
+          }
+          let futures = []
+          for (const params of params_list) {
             futures.append(axios.get('/api/users', {
               headers: {'Authorization': 'bearer '+token},
               params: params
             }))
           }
           let fut = axios.get('/api/experiments/'+this.experiment+'/associates', {
-            headers: {'Authorization': 'bearer '+token},
-            params: params
+            headers: {'Authorization': 'bearer '+token}
           })
 
           for (let username in entry.members) {
@@ -160,7 +163,9 @@ Vue.component('inst', {
 
           const ret3 = await fut
           for (const username of ret3.data) {
-            entry.members[username].associate = true
+            if (username in entry.members) {
+              entry.members[username].associate = true
+            }
           }
           return entry
         } catch (error) {
