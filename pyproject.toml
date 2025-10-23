@@ -9,9 +9,9 @@ dependencies = [
     "wipac-dev-tools",
     "wipac-keycloak-rest-services",
     "wipac-rest-tools",
-] # (can remove comment) originally migrated from 'setup.cfg' by 'WIPACrepo/wipac-dev-py-setup-action' github action package
+]
 
-[project.optional-dependencies] # (can remove comment) originally migrated from 'setup.cfg' by 'WIPACrepo/wipac-dev-py-setup-action' github action package
+[project.optional-dependencies]
 tests = [
     "pytest",
     "pytest-asyncio",
@@ -20,3 +20,34 @@ tests = [
     "coverage",
     "flake8",
 ]
+
+[tool.coverage.run]
+branch = true
+source = "user_mgmt"
+
+[tool.coverage.report]
+# regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    ]
+ignore_errors = true
+skip_empty = true
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.pytest]
+asyncio_mode = "auto"
