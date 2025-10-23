@@ -130,7 +130,7 @@ Vue.component('inst', {
           let futures = []
           while (user_list.length != 0) {
             let params = new URLSearchParams()
-            for (const username in user_list.splice(0, 100)) {
+            for (const username of user_list.splice(0, 100)) {
               params.append('username', username)
             }
             futures.append(axios.get('/api/users', {
