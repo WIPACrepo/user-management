@@ -150,7 +150,7 @@ Vue.component('inst', {
             }
           }
           const results = await Promise.all(futures)
-          for (const ret2 in results) {
+          for (const ret2 of results) {
             for (const username in ret2.data) {
               Object.assign(entry.members[username], ret2.data[username])
             }
