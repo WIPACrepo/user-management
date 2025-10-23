@@ -7,8 +7,8 @@ RUN mkdir /app && chown keycloak:keycloak /app
 WORKDIR /app
 USER keycloak
 
-COPY pyproject.toml /app/
-COPY user_mgmt /app/
+COPY pyproject.toml /app/pyproject.toml
+COPY user_mgmt /app/user_mgmt
 
 USER root
 
