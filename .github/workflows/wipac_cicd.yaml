@@ -39,7 +39,7 @@ jobs:
         with:
           mode: PACKAGING
           python_min: 3.9
-          python_max: 3.14
+          python_max: 3.13
           auto_mypy_option: False
 
   py-versions:
