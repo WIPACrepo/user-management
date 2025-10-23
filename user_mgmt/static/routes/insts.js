@@ -125,21 +125,17 @@ Vue.component('inst', {
           }
           let user_list = []
           for (const username in entry.members) {
-            user_list.append(username)
+            user_list.push(username)
           }
-          let params_list = []
-          //while (user_list.length != 0) {
+          let futures = []
+          while (user_list.length != 0) {
             let params = new URLSearchParams()
-            for (const username of user_list.splice(0, 100)) {
+            for (const username of user_list.splice(0, 25)) {
               params.append('username', username)
             }
-            params_list.append(params)
-          //}
-          let futures = []
-          for (const params2 of params_list) {
-            futures.append(axios.get('/api/users', {
+            futures.push(axios.get('/api/users', {
               headers: {'Authorization': 'bearer '+token},
-              params: params2
+              params: params
             }))
           }
           let fut = axios.get('/api/experiments/'+this.experiment+'/associates', {
