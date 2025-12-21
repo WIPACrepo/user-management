@@ -86,7 +86,7 @@ class MyHandler(RestHandler):
         logging.info(f'get_admins: {users}')
         return users
 
-    async def send_admin_email(self, group_path, body):
+    async def send_admin_email(self, group_path, body, supervisors=None):
         subject = 'IceCube Account '
         if group_path.startswith('/institutions'):
             subject += 'Institution'
@@ -96,7 +96,9 @@ class MyHandler(RestHandler):
 
         try:
             admin_users = await self.get_admins(group_path)
-            for user in admin_users.values():
+            for username, user in admin_users.items():
+                if supervisors and username not in supervisors:
+                    continue
                 krs.email.send_email(
                     recipient={'name': f'{user["firstName"]} {user["lastName"]}', 'email': user['email']},
                     subject=subject,

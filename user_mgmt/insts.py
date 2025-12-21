@@ -73,6 +73,8 @@ class Institution(MyHandler):
             'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')],
             'attributes': group_info.get('attributes', {})
         }
+        admins = await self.get_admins(inst_group)
+        ret['admins'] = [{'firstName': u['firstName'], 'lastName': u['lastName'], 'username': k} for k, u in admins.items()]
         self.write(ret)
 
 
@@ -245,6 +247,7 @@ class InstApprovals(MyHandler):
             opt_fields = {
                 'authorlist': bool,
                 'remove_institution': str,
+                'supervisor': str,
             }
             approval_data = self.json_filter(req_fields, opt_fields)
             approval_data['username'] = user
@@ -266,6 +269,7 @@ class InstApprovals(MyHandler):
             opt_fields = {
                 'authorlist': bool,
                 'author_name': str,
+                'supervisor': str,
             }
             data = self.json_filter(req_fields, opt_fields)
 
@@ -304,12 +308,15 @@ class InstApprovals(MyHandler):
             }
             if 'authorlist' in data:
                 approval_data['authorlist'] = data['authorlist']
+            if 'supervisor' in data:
+                approval_data['supervisor'] = data['supervisor']
 
         approval_data['id'] = uuid.uuid1().hex
         await self.db.inst_approvals.insert_one(approval_data)
 
         # send email to admins
         inst_group = f'/institutions/{approval_data["experiment"]}/{approval_data["institution"]}'
+        supervisors = [approval_data['supervisor']] if 'supervisor' in approval_data else None
         await self.send_admin_email(inst_group, f'''IceCube Institution Request
 
 A request for membership to {approval_data["experiment"]}/{approval_data["institution"]}
