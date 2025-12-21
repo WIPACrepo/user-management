@@ -327,7 +327,7 @@ Please approve or deny this request by going to:
 
 Documentation is located at:
   https://docs.icecube.aq/Madison-account/user-workflow/admin_insts/
-''')
+''', supervisors=supervisors)
 
         self.set_status(201)
         self.write({'id': approval_data['id']})
