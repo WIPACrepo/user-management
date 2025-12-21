@@ -240,6 +240,9 @@ class InstApprovals(MyHandler):
             logging.info('existing user with new institution')
             user = self.auth_data['username']
 
+            user_info = await self.user_cache.get_user(user)
+            name = f"{user_info['firstName']} {user_info['lastName']}"
+
             req_fields = {
                 'experiment': str,
                 'institution': str,
@@ -298,6 +301,7 @@ class InstApprovals(MyHandler):
                 'external_email': data['email'],
                 'author_name': data['author_name'] if 'author_name' in data else '',
             }
+            name = f"{data['first_name']} {data['last_name']}"
             await self.db.user_registrations.insert_one(user_data)
 
             approval_data = {
@@ -320,7 +324,7 @@ class InstApprovals(MyHandler):
         await self.send_admin_email(inst_group, f'''IceCube Institution Request
 
 A request for membership to {approval_data["experiment"]}/{approval_data["institution"]}
-has been made by user {approval_data["username"]}.
+has been made by user {name} ({approval_data["username"]}).
 
 Please approve or deny this request by going to:
   https://user-management.icecube.aq/institutions
