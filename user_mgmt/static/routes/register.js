@@ -63,6 +63,21 @@ export default {
         return false
       }
     },
+    admins: {
+      get: async function() {
+        if (this.validInstitution) {
+          try {
+            const resp = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution);
+            if ('admins' in resp.data) {
+              return resp.data['admins']
+            }
+          } catch(e) { console.log(e) }
+        }
+        return []
+      },
+      default: [],
+      watch: ['institution']
+    },
     validUsername: async function() {
       if (!(this.validFirstName && this.validLastName)) {
         return true
@@ -116,19 +131,11 @@ export default {
     email: debounce(function(newVal) {
       this.debouncedEmail = newVal
     }, 250),
-    institution: async function(newVal) {
-      this.admins = []
-      this.supervisor = ''
-      if (this.validInstitution) {
-        try {
-          const resp = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution);
-          if ('admins' in resp.data) {
-            this.admins = resp.data['admins']
-            if (this.admins.length === 1) {
-              this.supervisor = this.admins[0].username
-            }
-          }
-        } catch(e) { console.log(e) }
+    admins: function(newVal) {
+      if (newVal.length === 1) {
+        this.supervisor = newVal[0].username
+      } else {
+        this.supervisor = ''
       }
     }
   },
@@ -153,7 +160,7 @@ export default {
             username: this.username,
             email: this.email
           }
-          if (this.supervisor) {
+          if (this.supervisor == '') {
             args.supervisor = this.supervisor
           }
           const resp = await axios.post('/api/inst_approvals', args, {});
