@@ -36,7 +36,8 @@ context('Registration Page', () => {
         'first_name': 'foo',
         'last_name': 'bar',
         'username': 'fbar',
-        'email': 'foo@bar'
+        'email': 'foo@bar',
+        'supervisor': 'adminfoobar'
       })
     })
   })
