@@ -2,7 +2,7 @@
 import keycloak from '../support/keycloak'
 
 context('Registration Page', () => {
-  it.only('register', () => {
+  it('register', () => {
     cy.visit('/register')
     keycloak({
       insts: ['instA'],
