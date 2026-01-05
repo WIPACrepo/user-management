@@ -214,7 +214,7 @@ export default {
       </div>
       <div class="entry" v-if="admins.length > 0">
         <p>Select your supervisor: <span class="red">*</span></p>
-        <select v-model="supervisor">
+        <select v-model="supervisor" data-test="supervisor">
           <option disabled value="">Please select one</option>
           <option v-for="admin in admins" :value="admin.username">{{ admin.firstName }} {{ admin.lastName }}</option>
         </select>

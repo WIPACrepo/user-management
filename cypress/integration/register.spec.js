@@ -6,6 +6,7 @@ context('Registration Page', () => {
     cy.visit('/register')
     keycloak({
       insts: ['instA'],
+      inst_admins: ['myadmin1', 'myadmin2'],
       new_username: 'fbar'
     })
 
@@ -27,6 +28,9 @@ context('Registration Page', () => {
     cy.get('[name="username"]').should('have.value', 'fbar')
 
     cy.get('[name="email"]').type('foo@bar')
+
+    cy.get('[data-test="supervisor"]').should('exist').select('myadmin2')
+
     cy.get('[data-test="submit"]').click()
 
     cy.wait('@api-inst-approvals-post').should(({ request, response }) => {
@@ -37,7 +41,7 @@ context('Registration Page', () => {
         'last_name': 'bar',
         'username': 'fbar',
         'email': 'foo@bar',
-        'supervisor': 'adminfoobar'
+        'supervisor': 'myadmin2'
       })
     })
   })
