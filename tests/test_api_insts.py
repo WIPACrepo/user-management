@@ -270,6 +270,45 @@ async def test_inst_approvals_register_with_admins(server, mongo_client, reg_tok
     assert ret[0]['institution'] == data['institution']
 
 @pytest.mark.asyncio
+async def test_inst_approvals_register_with_supervisors(server, mongo_client, reg_token_client, email_patch):
+    rest, krs_client, address, *_ = server
+    client = await reg_token_client()
+
+    await krs.groups.create_group('/institutions', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube', rest_client=krs_client)
+    await krs.groups.create_group('/institutions/IceCube/UW-Madison', rest_client=krs_client)
+
+    client2 = await rest('test2', groups=['/institutions/IceCube/UW-Madison/_admin'])
+    client3 = await rest('test3', groups=['/institutions/IceCube/UW-Madison/_admin'])
+
+    data = {
+        'experiment': 'IceCube',
+        'institution': 'UW-Madison',
+        'first_name': 'First',
+        'last_name': 'Last',
+        'username': 'flast',
+        'email': 'test@test',
+        'supervisor': 'test2',
+    }
+    ret = await client.request('POST', '/api/inst_approvals', data)
+    approval_id = ret['id']
+
+    assert email_patch.call_count == 1
+    assert email_patch.call_args.kwargs['recipient'] == {'name': 'first last', 'email': 'test2@test'}
+
+    ret = await mongo_client.user_registrations.find().to_list(10)
+    assert len(ret) == 1
+    assert ret[0]['first_name'] == data['first_name']
+    assert ret[0]['username'] == 'flast'
+
+    ret = await mongo_client.inst_approvals.find().to_list(10)
+    assert len(ret) == 1
+    assert ret[0]['id'] == approval_id
+    assert ret[0]['experiment'] == data['experiment']
+    assert ret[0]['institution'] == data['institution']
+    assert ret[0]['supervisor'] == 'test2'
+
+@pytest.mark.asyncio
 async def test_inst_approvals_second(server, mongo_client, email_patch):
     rest, krs_client, *_ = server
 
