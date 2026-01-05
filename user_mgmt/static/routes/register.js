@@ -16,7 +16,6 @@ export default {
       email: '',
       debouncedEmail: '',
       supervisor: '',
-      admins: [],
       valid: true,
       errMessage: '',
       submitted: false

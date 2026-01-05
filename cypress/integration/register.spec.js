@@ -13,6 +13,7 @@ context('Registration Page', () => {
     cy.get('#nav .active').contains('register', {matchCase: false})
 
     cy.get('[data-test="institution"]').should('exist').should('be.disabled')
+    cy.get('[data-test="supervisor"]').should('not.exist')
 
     cy.get('[data-test="experiment"]').should('exist').select('test-exp')
     cy.get('[data-test="institution"]').select('instA')
