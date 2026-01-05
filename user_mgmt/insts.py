@@ -73,6 +73,12 @@ class Institution(MyHandler):
             'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')],
             'attributes': group_info.get('attributes', {})
         }
+        try:
+            admins = await self.get_admins(inst_group)
+        except krs.groups.GroupDoesNotExist:
+            ret['admins'] = []
+        else:
+            ret['admins'] = [{'firstName': u['firstName'], 'lastName': u['lastName'], 'username': k} for k, u in admins.items()]
         self.write(ret)
 
 
@@ -238,6 +244,9 @@ class InstApprovals(MyHandler):
             logging.info('existing user with new institution')
             user = self.auth_data['username']
 
+            user_info = await self.user_cache.get_user(user)
+            name = f"{user_info['firstName']} {user_info['lastName']}"
+
             req_fields = {
                 'experiment': str,
                 'institution': str,
@@ -245,6 +254,7 @@ class InstApprovals(MyHandler):
             opt_fields = {
                 'authorlist': bool,
                 'remove_institution': str,
+                'supervisor': str,
             }
             approval_data = self.json_filter(req_fields, opt_fields)
             approval_data['username'] = user
@@ -266,6 +276,7 @@ class InstApprovals(MyHandler):
             opt_fields = {
                 'authorlist': bool,
                 'author_name': str,
+                'supervisor': str,
             }
             data = self.json_filter(req_fields, opt_fields)
 
@@ -294,6 +305,7 @@ class InstApprovals(MyHandler):
                 'external_email': data['email'],
                 'author_name': data['author_name'] if 'author_name' in data else '',
             }
+            name = f"{data['first_name']} {data['last_name']}"
             await self.db.user_registrations.insert_one(user_data)
 
             approval_data = {
@@ -304,23 +316,26 @@ class InstApprovals(MyHandler):
             }
             if 'authorlist' in data:
                 approval_data['authorlist'] = data['authorlist']
+            if 'supervisor' in data:
+                approval_data['supervisor'] = data['supervisor']
 
         approval_data['id'] = uuid.uuid1().hex
         await self.db.inst_approvals.insert_one(approval_data)
 
         # send email to admins
         inst_group = f'/institutions/{approval_data["experiment"]}/{approval_data["institution"]}'
+        supervisors = [approval_data['supervisor']] if 'supervisor' in approval_data else None
         await self.send_admin_email(inst_group, f'''IceCube Institution Request
 
 A request for membership to {approval_data["experiment"]}/{approval_data["institution"]}
-has been made by user {approval_data["username"]}.
+has been made by user {name} ({approval_data["username"]}).
 
 Please approve or deny this request by going to:
   https://user-management.icecube.aq/institutions
 
 Documentation is located at:
   https://docs.icecube.aq/Madison-account/user-workflow/admin_insts/
-''')
+''', supervisors=supervisors)
 
         self.set_status(201)
         self.write({'id': approval_data['id']})

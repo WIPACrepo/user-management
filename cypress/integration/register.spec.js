@@ -2,16 +2,18 @@
 import keycloak from '../support/keycloak'
 
 context('Registration Page', () => {
-  it('register', () => {
+  it.only('register', () => {
     cy.visit('/register')
     keycloak({
       insts: ['instA'],
+      inst_admins: {'instA':['myadmin1', 'myadmin2']},
       new_username: 'fbar'
     })
 
     cy.get('#nav .active').contains('register', {matchCase: false})
 
     cy.get('[data-test="institution"]').should('exist').should('be.disabled')
+    cy.get('[data-test="supervisor"]').should('not.exist')
 
     cy.get('[data-test="experiment"]').should('exist').select('test-exp')
     cy.get('[data-test="institution"]').select('instA')
@@ -27,6 +29,9 @@ context('Registration Page', () => {
     cy.get('[name="username"]').should('have.value', 'fbar')
 
     cy.get('[name="email"]').type('foo@bar')
+
+    cy.get('[data-test="supervisor"]').should('exist').select('myadmin2')
+
     cy.get('[data-test="submit"]').click()
 
     cy.wait('@api-inst-approvals-post').should(({ request, response }) => {
@@ -36,7 +41,8 @@ context('Registration Page', () => {
         'first_name': 'foo',
         'last_name': 'bar',
         'username': 'fbar',
-        'email': 'foo@bar'
+        'email': 'foo@bar',
+        'supervisor': 'myadmin2'
       })
     })
   })

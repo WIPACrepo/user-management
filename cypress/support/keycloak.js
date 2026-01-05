@@ -9,6 +9,7 @@ export default (params) => {
     admin_insts: {},        // insts user is admin of = {instname: {users, authorlist, ...}}
     inst_approvals: {},     // inst approvals = {instname: [users]}
     inst_associates: [],    // insts that are associates
+    inst_admins: {},        // inst admin users = {instname: [admin_users]}
     groups: [],             // groups user belongs to
     admin_groups: {},       // groups user is admin for = {groupname: [users]}
     group_approvals: {},    // group approvals = {groupname: [users]},
@@ -84,7 +85,15 @@ export default (params) => {
         attrs['associate'] = true
       }
     }
-    api_all_exps[params.exp][i] = {'subgroups': subs, 'attributes': attrs}
+    let admins = []
+    for (const k in params.inst_admins) {
+      if (i == k) {
+        for (const u of params.inst_admins[k]) {
+          admins.push({firstName:"first",lastName:"last",username:u})
+        }
+      }
+    }
+    api_all_exps[params.exp][i] = {'subgroups': subs, 'attributes': attrs, 'admins': admins}
   }
 
   let inst_approvals = []

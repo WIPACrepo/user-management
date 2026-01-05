@@ -15,6 +15,7 @@ export default {
       debouncedUsername: '',
       email: '',
       debouncedEmail: '',
+      supervisor: '',
       valid: true,
       errMessage: '',
       submitted: false
@@ -30,6 +31,9 @@ export default {
     },
     validEmail: function() {
       return this.debouncedEmail.indexOf('@',1) > 0
+    },
+    validSupervisor: function() {
+      return this.admins.length === 0 || this.supervisor !== ''
     },
     institutions: function() {
       try {
@@ -57,6 +61,21 @@ export default {
       } catch(error) {
         return false
       }
+    },
+    admins: {
+      get: async function() {
+        if (this.validInstitution) {
+          try {
+            const resp = await axios.get('/api/experiments/'+this.experiment+'/institutions/'+this.institution);
+            if ('admins' in resp.data) {
+              return resp.data['admins']
+            }
+          } catch(e) { console.log(e) }
+        }
+        return []
+      },
+      default: [],
+      watch: ['institution']
     },
     validUsername: async function() {
       if (!(this.validFirstName && this.validLastName)) {
@@ -110,7 +129,14 @@ export default {
     }, 250),
     email: debounce(function(newVal) {
       this.debouncedEmail = newVal
-    }, 250)
+    }, 250),
+    admins: function(newVal) {
+      if (newVal.length === 1) {
+        this.supervisor = newVal[0].username
+      } else {
+        this.supervisor = ''
+      }
+    }
   },
   methods: {
     submit: async function(e) {
@@ -119,20 +145,24 @@ export default {
 
       // validate
       this.valid = (this.validExperiment && this.validInstitution && this.validFirstName
-                    && this.validLastName && this.validUsername && this.validEmail)
+                    && this.validLastName && this.validUsername && this.validEmail && this.validSupervisor)
 
       // now submit
       if (this.valid) {
         this.errMessage = 'Submission processing';
         try {
-          const resp = await axios.post('/api/inst_approvals', {
+          let args = {
             experiment: this.experiment,
             institution: this.institution,
             first_name: this.firstName,
             last_name: this.lastName,
             username: this.username,
             email: this.email
-          }, {});
+          }
+          if (this.supervisor != '') {
+            args.supervisor = this.supervisor
+          }
+          const resp = await axios.post('/api/inst_approvals', args, {});
           console.log('Response:')
           console.log(resp)
           this.errMessage = 'Submission successful'
@@ -180,6 +210,14 @@ export default {
         </select>
         <span class="red" v-if="!valid && !validInstitution">invalid entry</span>
         <div class="help">Note: You cannot select your institution until you've selected your experiment</div>
+      </div>
+      <div class="entry" v-if="admins.length > 0">
+        <p>Select your supervisor: <span class="red">*</span></p>
+        <select v-model="supervisor" data-test="supervisor">
+          <option disabled value="">Please select one</option>
+          <option v-for="admin in admins" :value="admin.username">{{ admin.firstName }} {{ admin.lastName }}</option>
+        </select>
+        <span class="red" v-if="!valid && !validSupervisor">invalid entry</span>
       </div>
       <textinput name="First Name" inputName="first_name" v-model.trim="firstName"
        required=true :valid="validFirstName" :allValid="valid"></textinput>

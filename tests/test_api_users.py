@@ -127,6 +127,10 @@ async def test_user_inst_admin(server):
     assert ret['lastName'] == 'last'
     assert ret['email'] == 'test@test'
 
+    ret = await client2.request('GET', '/api/users/test')
+    assert ret['firstName'] == 'first'
+    assert ret['lastName'] == 'last'
+    assert ret['email'] == 'test@test'
 
 @pytest.mark.asyncio
 async def test_username_autogen(server, reg_token_client):
