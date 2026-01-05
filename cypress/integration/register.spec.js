@@ -2,11 +2,11 @@
 import keycloak from '../support/keycloak'
 
 context('Registration Page', () => {
-  it('register', () => {
+  it.only('register', () => {
     cy.visit('/register')
     keycloak({
       insts: ['instA'],
-      inst_admins: ['myadmin1', 'myadmin2'],
+      inst_admins: {'instA':['myadmin1', 'myadmin2']},
       new_username: 'fbar'
     })
 

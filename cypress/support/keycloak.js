@@ -88,7 +88,9 @@ export default (params) => {
     let admins = []
     for (const k in params.inst_admins) {
       if (i == k) {
-        admins = params.inst_admins[k]
+        for (const u of params.inst_admins[k]) {
+          admins.push({firstName:"first",lastName:"last",username:u})
+        }
       }
     }
     api_all_exps[params.exp][i] = {'subgroups': subs, 'attributes': attrs, 'admins': admins}

@@ -159,7 +159,7 @@ export default {
             username: this.username,
             email: this.email
           }
-          if (this.supervisor == '') {
+          if (this.supervisor != '') {
             args.supervisor = this.supervisor
           }
           const resp = await axios.post('/api/inst_approvals', args, {});
