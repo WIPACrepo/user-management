@@ -73,8 +73,12 @@ class Institution(MyHandler):
             'subgroups': [child['name'] for child in group_info['subGroups'] if not child['name'].startswith('_')],
             'attributes': group_info.get('attributes', {})
         }
-        admins = await self.get_admins(inst_group)
-        ret['admins'] = [{'firstName': u['firstName'], 'lastName': u['lastName'], 'username': k} for k, u in admins.items()]
+        try:
+            admins = await self.get_admins(inst_group)
+        except krs.groups.GroupDoesNotExist:
+            ret['admins'] = []
+        else:
+            ret['admins'] = [{'firstName': u['firstName'], 'lastName': u['lastName'], 'username': k} for k, u in admins.items()]
         self.write(ret)
 
 
