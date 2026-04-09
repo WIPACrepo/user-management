@@ -3,7 +3,7 @@ Handle user institution-based actions.
 """
 import logging
 import uuid
-import random
+import secrets
 import string
 
 from tornado.web import HTTPError
@@ -17,6 +17,27 @@ from .handler import MyHandler
 from .users import Username
 
 audit_logger = logging.getLogger('audit')
+
+
+def gen_password(len: int = 16) -> str:
+    """
+    Generate a password given some requirements.
+    
+    Requires at laest one lowercase, one uppercase, and 3 numbers.
+    
+    Args:
+        len: length of password
+    """
+    if len < 8:
+        raise Exception('password length must be >= 8')
+    alphabet = string.ascii_letters + string.digits
+    while True:
+        password = ''.join(secrets.choice(alphabet) for i in range(len))
+        if (any(c.islower() for c in password)
+                and any(c.isupper() for c in password)
+                and sum(c.isdigit() for c in password) >= 3):
+            break
+    return password
 
 
 class Experiments(MyHandler):
@@ -422,7 +443,7 @@ class InstApprovalsActionApprove(MyHandler):
             if user_data.get('author_name', ''):
                 args['attribs']['author_name'] = user_data['author_name']
             await krs.users.create_user(rest_client=self.krs_client, **args)
-            password = ''.join(random.choices(string.ascii_letters+string.digits, k=16))
+            password = gen_password(16)
             await krs.users.set_user_password(args['username'], password, temporary=True, rest_client=self.krs_client)
 
             # posix by default
