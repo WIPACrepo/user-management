@@ -1,15 +1,14 @@
 import asyncio
 import logging
 
+import krs.email
+import krs.groups
+import krs.users
 import pytest
 from rest_tools.client import AsyncSession
 
-import krs.users
-import krs.groups
-import krs.email
-
 from .krs_util import keycloak_bootstrap
-from .util import port, server, mongo_client, reg_token_client, email_patch
+from .util import email_patch, mongo_client, port, reg_token_client, server
 
 
 @pytest.mark.asyncio
