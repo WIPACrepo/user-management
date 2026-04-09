@@ -563,13 +563,13 @@ You are now a member of {experiment}/{institution}.
             if newuser:
                 krs.email.send_email(
                     recipient={'name': f'{args["first_name"]} {args["last_name"]}', 'email': args['email']},
-                    subject=config[f'{exp}_WELCOME_SUBJECT'],
+                    subject=str(config[f'{exp}_WELCOME_SUBJECT']).format_map(email_args),
                     content=str(config[f'{exp}_WELCOME_CONTENT']).format_map(email_args)
                 )
             else:
                 krs.email.send_email(
                     recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
-                    subject=config[f'{exp}_CHANGE_SUBJECT'],
+                    subject=str(config[f'{exp}_CHANGE_SUBJECT']).format_map(email_args),
                     content=str(config[f'{exp}_CHANGE_CONTENT']).format_map(email_args)
                 )
         except Exception:
@@ -632,7 +632,7 @@ Your account request for {experiment}/{institution} is denied.
             email_args = SafeDict(**args)
             krs.email.send_email(
                 recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
-                subject=f'{exp}_DENY_SUBJECT',
+                subject=str(config[f'{exp}_DENY_SUBJECT']).format_map(email_args),
                 content=str(config[f'{exp}_DENY_CONTENT']).format_map(email_args)
             )
         except Exception:
