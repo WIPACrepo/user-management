@@ -2,16 +2,15 @@
 Handle user institution-based actions.
 """
 import logging
-import uuid
 import secrets
 import string
+import uuid
 
-from tornado.web import HTTPError
-from rest_tools.server import catch_error, authenticated
-
-import krs.users
-import krs.groups
 import krs.email
+import krs.groups
+import krs.users
+from rest_tools.server import authenticated, catch_error
+from tornado.web import HTTPError
 
 from .handler import MyHandler
 from .users import Username
