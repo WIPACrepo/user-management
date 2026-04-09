@@ -726,5 +726,5 @@ async def test_inst_approvals_email_customization(exp, server, mongo_client, reg
     email_patch.assert_called()
     logging.info('call_args: %r', email_patch.call_args)
     assert email_patch.call_args.kwargs['subject'] == 'Welcome First Last'
-    assert email_patch.call_args.kwargs['body'].startswith(f'Welcome to {exp}/UW-Madison. Your username is flast and password is')
+    assert email_patch.call_args.kwargs['content'].startswith(f'Welcome to {exp}/UW-Madison. Your username is flast and password is')
 
