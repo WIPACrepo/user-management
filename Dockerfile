@@ -12,6 +12,8 @@ COPY user_mgmt /app/user_mgmt
 
 USER root
 
+RUN git config --global --add safe.directory /app
+
 RUN --mount=type=bind,source=.git,target=.git,ro pip install --no-cache .
 
 USER keycloak
