@@ -1,14 +1,14 @@
 import asyncio
+import logging
 
+import krs.email
+import krs.groups
+import krs.users
 import pytest
 from rest_tools.client import AsyncSession
 
-import krs.users
-import krs.groups
-import krs.email
-
 from .krs_util import keycloak_bootstrap
-from .util import port, server, mongo_client, reg_token_client, email_patch
+from .util import email_patch, mongo_client, port, reg_token_client, server
 
 
 @pytest.mark.asyncio
@@ -676,3 +676,55 @@ async def test_inst_approvals_actions_deny(server, mongo_client, email_patch):
 
     ret = await krs.groups.get_group_membership('/institutions/IceCube/UW-Madison', rest_client=krs_client)
     assert 'test' not in ret
+
+
+@pytest.mark.parametrize('exp', ['IceCube', 'CTA'])
+@pytest.mark.asyncio
+async def test_inst_approvals_email_customization(exp, server, mongo_client, reg_token_client, email_patch, monkeypatch):
+    rest, krs_client, *_ = server
+
+    await krs.groups.create_group('/posix', rest_client=krs_client)
+    await krs.groups.create_group('/institutions', rest_client=krs_client)
+    await krs.groups.create_group(f'/institutions/{exp}', rest_client=krs_client)
+    await krs.groups.create_group(f'/institutions/{exp}/UW-Madison', rest_client=krs_client)
+
+    #client = await rest('test')
+    client2 = await rest('test2', groups=[f'/institutions/{exp}/UW-Madison/_admin'])
+
+    #data = {
+    #    'experiment': exp,
+    #    'institution': 'UW-Madison',
+    #}
+    #ret = await client.request('POST', '/api/inst_approvals', data)
+    #approval_id = ret['id']
+
+    client = await reg_token_client()
+    data = {
+        'experiment': exp,
+        'institution': 'UW-Madison',
+        'first_name': 'First',
+        'last_name': 'Last',
+        'username': 'flast',
+        'email': 'test@test',
+        'supervisor': 'test2',
+    }
+    ret = await client.request('POST', '/api/inst_approvals', data)
+    approval_id = ret['id']
+
+    email_patch.reset_mock()
+
+    # specify email customization
+    monkeypatch.setenv(f'{exp}_WELCOME_SUBJECT', 'Welcome {first_name} {last_name}')
+    monkeypatch.setenv(f'{exp}_WELCOME_CONTENT', 'Welcome to {experiment}/{institution}. Your username is {username} and password is {password}.')
+
+    # approve
+    await client2.request('POST', f'/api/inst_approvals/{approval_id}/actions/approve')
+
+    ret = await mongo_client.inst_approvals.find().to_list(10)
+    assert len(ret) == 0
+
+    email_patch.assert_called()
+    logging.info('call_args: %r', email_patch.call_args)
+    assert email_patch.call_args.kwargs['subject'] == 'Welcome First Last'
+    assert email_patch.call_args.kwargs['content'].startswith(f'Welcome to {exp}/UW-Madison. Your username is flast and password is')
+

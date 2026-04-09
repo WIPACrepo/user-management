@@ -9,6 +9,7 @@ A frontend for Keycloak user manangement for WIPAC/IceCube.
   + [Approval Actions](#approval-actions)
 * [REST API](#rest-api)
 * [Web App](#web-app)
+* [Env Variables](#env-variables)
 * [Running Tests](#running-tests)
   + [Getting Test Coverage](#getting-test-coverage)
 
@@ -65,6 +66,21 @@ Primary access to the user-facing service is via a web application.
 This is purely browser-based (JavaScript), and connects to the
 [REST API](#rest-api) for actions. Authentication comes from connecting
 to a Keycloak client specifically created for this and the REST API.
+
+## Env Variables
+
+Several things can be customized. Here is a selection of env variables that can be set:
+
+### Emails to users:
+
+* `<exp>_WELCOME_SUBJECT`
+* `<exp>_WELCOME_CONTENT`
+* `<exp>_CHANGE_SUBJECT`
+* `<exp>_CHANGE_CONTENT`
+* `<exp>_DENY_SUBJECT`
+* `<exp>_DENY_CONTENT`
+
+These also take format strings for select variables, like `first_name`, `username`, `password`.
 
 ## Running Tests
 
