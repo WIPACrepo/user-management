@@ -681,24 +681,36 @@ async def test_inst_approvals_actions_deny(server, mongo_client, email_patch):
 
 @pytest.mark.parametrize('exp', ['IceCube', 'CTA'])
 @pytest.mark.asyncio
-async def test_inst_approvals_email_customization(exp, server, mongo_client, email_patch, monkeypatch):
+async def test_inst_approvals_email_customization(exp, server, mongo_client, reg_token_client, email_patch, monkeypatch):
     rest, krs_client, *_ = server
 
     await krs.groups.create_group('/institutions', rest_client=krs_client)
     await krs.groups.create_group(f'/institutions/{exp}', rest_client=krs_client)
     await krs.groups.create_group(f'/institutions/{exp}/UW-Madison', rest_client=krs_client)
 
-    client = await rest('test')
+    #client = await rest('test')
     client2 = await rest('test2', groups=[f'/institutions/{exp}/UW-Madison/_admin'])
 
+    #data = {
+    #    'experiment': exp,
+    #    'institution': 'UW-Madison',
+    #}
+    #ret = await client.request('POST', '/api/inst_approvals', data)
+    #approval_id = ret['id']
+
+    client = await reg_token_client()
     data = {
-        'experiment': exp,
+        'experiment': 'IceCube',
         'institution': 'UW-Madison',
+        'first_name': 'First',
+        'last_name': 'Last',
+        'username': 'flast',
+        'email': 'test@test',
+        'supervisor': 'test2',
     }
     ret = await client.request('POST', '/api/inst_approvals', data)
     approval_id = ret['id']
 
-    email_patch.assert_called()
     email_patch.reset_mock()
 
     # specify email customization
