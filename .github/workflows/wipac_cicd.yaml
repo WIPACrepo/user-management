@@ -32,8 +32,8 @@ jobs:
       contents: read
     with:
       py-matrix-json: ${{ needs.py-versions.outputs.matrix }}
-      #max-complexity: 15
-      #max-statements: 100
+      max-complexity: 16
+      max-statements: 75
 
   ############################################################################
   # PACKAGING
