@@ -683,6 +683,7 @@ async def test_inst_approvals_actions_deny(server, mongo_client, email_patch):
 async def test_inst_approvals_email_customization(exp, server, mongo_client, reg_token_client, email_patch, monkeypatch):
     rest, krs_client, *_ = server
 
+    await krs.groups.create_group('/posix', rest_client=krs_client)
     await krs.groups.create_group('/institutions', rest_client=krs_client)
     await krs.groups.create_group(f'/institutions/{exp}', rest_client=krs_client)
     await krs.groups.create_group(f'/institutions/{exp}/UW-Madison', rest_client=krs_client)
