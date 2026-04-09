@@ -107,6 +107,9 @@ class MyHandler(RestHandler):
             logging.warning(f'failed to send email for approval to {group_path}', exc_info=True)
 
     async def get_admin_groups(self):
+        """
+        Get all admin groups of a user.
+        """
         if self._get_admin_groups_cache:
             return self._get_admin_groups_cache
         if self.is_super_admin():  # super admin - all groups
@@ -122,7 +125,10 @@ class MyHandler(RestHandler):
         self._get_admin_groups_cache = groups
         return groups
 
-    async def get_admin_institutions(self):
+    async def get_admin_institutions(self) -> dict[str, list[str]]:
+        """
+        Get all admin institutions of a user.
+        """
         if self._get_admin_institutions_cache:
             return self._get_admin_institutions_cache
         if self.is_super_admin():  # super admin - all institutions
@@ -142,3 +148,10 @@ class MyHandler(RestHandler):
         logging.info(f'get_admin_instutitons: {insts}')
         self._get_admin_institutions_cache = insts
         return insts
+
+    async def is_admin_of_inst(self, experiment: str, institution: str) -> bool:
+        """
+        Return whether the current user is an admin of a specific institution.
+        """
+        insts = await self.get_admin_institutions()
+        return experiment in insts and institution in insts[experiment]
