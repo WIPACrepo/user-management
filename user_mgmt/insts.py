@@ -2,21 +2,41 @@
 Handle user institution-based actions.
 """
 import logging
-import uuid
-import random
+import secrets
 import string
+import uuid
 
-from tornado.web import HTTPError
-from rest_tools.server import catch_error, authenticated
-
-import krs.users
-import krs.groups
 import krs.email
+import krs.groups
+import krs.users
+from rest_tools.server import authenticated, catch_error
+from tornado.web import HTTPError
 
 from .handler import MyHandler
 from .users import Username
 
 audit_logger = logging.getLogger('audit')
+
+
+def gen_password(len: int = 16) -> str:
+    """
+    Generate a password given some requirements.
+    
+    Requires at laest one lowercase, one uppercase, and 3 numbers.
+    
+    Args:
+        len: length of password
+    """
+    if len < 8:
+        raise Exception('password length must be >= 8')
+    alphabet = string.ascii_letters + string.digits
+    while True:
+        password = ''.join(secrets.choice(alphabet) for i in range(len))
+        if (any(c.islower() for c in password)
+                and any(c.isupper() for c in password)
+                and sum(c.isdigit() for c in password) >= 3):
+            break
+    return password
 
 
 class Experiments(MyHandler):
@@ -35,7 +55,7 @@ class Experiments(MyHandler):
 
 class MultiInstitutions(MyHandler):
     @catch_error
-    async def get(self, experiment):
+    async def get(self, experiment: str):
         """
         Get a list of institutions in the experiment.
 
@@ -53,7 +73,7 @@ class MultiInstitutions(MyHandler):
 
 class Institution(MyHandler):
     @catch_error
-    async def get(self, experiment, institution):
+    async def get(self, experiment: str, institution: str):
         """
         Get information about an institution.
 
@@ -110,7 +130,7 @@ class AllExperiments(MyHandler):
 class InstitutionMultiUsers(MyHandler):
     @authenticated
     @catch_error
-    async def get(self, experiment, institution):
+    async def get(self, experiment: str, institution: str):
         """
         Get users in institution.
 
@@ -118,8 +138,8 @@ class InstitutionMultiUsers(MyHandler):
             experiment (str): experiment name
             institution (str): institution name
         """
-        insts = await self.get_admin_institutions()
-        if experiment not in insts or institution not in insts[experiment]:
+        is_admin = await self.is_admin_of_inst(experiment, institution)
+        if not is_admin:
             raise HTTPError(403, reason='invalid authorization')
 
         inst_group = f'/institutions/{experiment}/{institution}'
@@ -145,7 +165,7 @@ class InstitutionMultiUsers(MyHandler):
 class InstitutionUser(MyHandler):
     @authenticated
     @catch_error
-    async def put(self, experiment, institution, username):
+    async def put(self, experiment: str, institution: str, username: str):
         """
         Add/update a user for an institution.
 
@@ -159,8 +179,8 @@ class InstitutionUser(MyHandler):
             institution (str): institution name
             username (str): username
         """
-        insts = await self.get_admin_institutions()
-        if experiment not in insts or institution not in insts[experiment]:
+        is_admin = await self.is_admin_of_inst(experiment, institution)
+        if not is_admin:
             raise HTTPError(403, reason='invalid authorization')
 
         try:
@@ -196,7 +216,7 @@ class InstitutionUser(MyHandler):
 
     @authenticated
     @catch_error
-    async def delete(self, experiment, institution, username):
+    async def delete(self, experiment: str, institution: str, username: str):
         """
         Delete user from institution.
 
@@ -208,8 +228,9 @@ class InstitutionUser(MyHandler):
             username (str): username
         """
         inst_group = f'/institutions/{experiment}/{institution}'
-        insts = await self.get_admin_institutions()
-        if (experiment not in insts or institution not in insts[experiment]) and inst_group not in self.auth_data['groups']:
+        is_admin = await self.is_admin_of_inst(experiment, institution)
+        is_inst_user = inst_group in self.auth_data['groups']
+        if not (is_admin or (is_inst_user and username == self.auth_data['username'])):
             raise HTTPError(403, reason='invalid authorization')
 
         try:
@@ -319,12 +340,19 @@ class InstApprovals(MyHandler):
             if 'supervisor' in data:
                 approval_data['supervisor'] = data['supervisor']
 
+        # check supervisors
+        inst_group = f'/institutions/{approval_data["experiment"]}/{approval_data["institution"]}'
+        supervisors = [approval_data['supervisor']] if 'supervisor' in approval_data else None
+        if supervisors:
+            admin_users = await self.get_admins(inst_group)
+            if not any(username in supervisors for username in admin_users):
+                raise HTTPError(400, reason='invalid supervisors')
+
+        # add to approvals db
         approval_data['id'] = uuid.uuid1().hex
         await self.db.inst_approvals.insert_one(approval_data)
 
         # send email to admins
-        inst_group = f'/institutions/{approval_data["experiment"]}/{approval_data["institution"]}'
-        supervisors = [approval_data['supervisor']] if 'supervisor' in approval_data else None
         await self.send_admin_email(inst_group, f'''IceCube Institution Request
 
 A request for membership to {approval_data["experiment"]}/{approval_data["institution"]}
@@ -371,8 +399,8 @@ class InstitutionMultiApprovals(MyHandler):
             experiment (str): experiment name
             institution (str): institution name
         """
-        insts = await self.get_admin_institutions()
-        if experiment not in insts or institution not in insts[experiment]:
+        is_admin = await self.is_admin_of_inst(experiment, institution)
+        if not is_admin:
             raise HTTPError(403, reason='invalid authorization')
 
         search = {'experiment': experiment, 'institution': institution}
@@ -397,11 +425,12 @@ class InstApprovalsActionApprove(MyHandler):
         Args:
             approval_id (str): id of inst approval request
         """
-        insts = await self.get_admin_institutions()
         ret = await self.db.inst_approvals.find_one({'id': approval_id})
         if not ret:
             raise HTTPError(404, reason='no record for approval_id')
-        if not any(ret['experiment'] == exp and ret['institution'] in insts[exp] for exp in insts):
+
+        is_admin = await self.is_admin_of_inst(ret['experiment'], ret['institution'])
+        if not is_admin:
             raise HTTPError(403, reason='invalid authorization')
 
         newuser = 'newuser' in ret and ret['newuser']
@@ -422,7 +451,7 @@ class InstApprovalsActionApprove(MyHandler):
             if user_data.get('author_name', ''):
                 args['attribs']['author_name'] = user_data['author_name']
             await krs.users.create_user(rest_client=self.krs_client, **args)
-            password = ''.join(random.choices(string.ascii_letters+string.digits, k=16))
+            password = gen_password(16)
             await krs.users.set_user_password(args['username'], password, temporary=True, rest_client=self.krs_client)
 
             # posix by default
@@ -533,11 +562,12 @@ class InstApprovalsActionDeny(MyHandler):
         Args:
             approval_id (str): id of inst approval request
         """
-        insts = await self.get_admin_institutions()
         ret = await self.db.inst_approvals.find_one({'id': approval_id})
         if not ret:
             raise HTTPError(404, reason='no record for approval_id')
-        if not any(ret['experiment'] == exp and ret['institution'] in insts[exp] for exp in insts):
+
+        is_admin = await self.is_admin_of_inst(ret['experiment'], ret['institution'])
+        if not is_admin:
             raise HTTPError(403, reason='invalid authorization')
 
         newuser = 'newuser' in ret and ret['newuser']

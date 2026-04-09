@@ -64,7 +64,7 @@ def create_server():
     kwargs = RestHandlerSetup(rest_config)
 
     logging.info(f'DB: {config["DB_URL"]}')
-    db_url, db_name = config['DB_URL'].rsplit('/', 1)
+    db_url, db_name = str(config['DB_URL']).rsplit('/', 1)
     db = motor.motor_asyncio.AsyncIOMotorClient(db_url)
     logging.info(f'DB name: {db_name}')
     kwargs['db'] = db[db_name]

@@ -10,7 +10,7 @@ import krs.groups
 
 
 class MyHandler(RestHandler):
-    def initialize(self, db=None, krs_client=None, group_cache=None, user_cache=None, **kwargs):
+    def initialize(self, *, db, krs_client, group_cache, user_cache, **kwargs):  # type: ignore
         super().initialize(**kwargs)
         self.db = db
         self.krs_client = krs_client
@@ -77,7 +77,7 @@ class MyHandler(RestHandler):
         """Is the current user a super admin?"""
         return '/admin' in self.auth_data.get('groups', [])
 
-    async def get_admins(self, group_path):
+    async def get_admins(self, group_path: str):
         ret = await self.group_cache.get_members(group_path+'/_admin')
         users = {}
         for username in ret:
@@ -86,7 +86,7 @@ class MyHandler(RestHandler):
         logging.info(f'get_admins: {users}')
         return users
 
-    async def send_admin_email(self, group_path, body, supervisors=None):
+    async def send_admin_email(self, group_path: str, body: str, supervisors: list[str] | None = None):
         subject = 'IceCube Account '
         if group_path.startswith('/institutions'):
             subject += 'Institution'
@@ -107,6 +107,9 @@ class MyHandler(RestHandler):
             logging.warning(f'failed to send email for approval to {group_path}', exc_info=True)
 
     async def get_admin_groups(self):
+        """
+        Get all admin groups of a user.
+        """
         if self._get_admin_groups_cache:
             return self._get_admin_groups_cache
         if self.is_super_admin():  # super admin - all groups
@@ -122,7 +125,10 @@ class MyHandler(RestHandler):
         self._get_admin_groups_cache = groups
         return groups
 
-    async def get_admin_institutions(self):
+    async def get_admin_institutions(self) -> dict[str, list[str]]:
+        """
+        Get all admin institutions of a user.
+        """
         if self._get_admin_institutions_cache:
             return self._get_admin_institutions_cache
         if self.is_super_admin():  # super admin - all institutions
@@ -142,3 +148,10 @@ class MyHandler(RestHandler):
         logging.info(f'get_admin_instutitons: {insts}')
         self._get_admin_institutions_cache = insts
         return insts
+
+    async def is_admin_of_inst(self, experiment: str, institution: str) -> bool:
+        """
+        Return whether the current user is an admin of a specific institution.
+        """
+        insts = await self.get_admin_institutions()
+        return experiment in insts and institution in insts[experiment]

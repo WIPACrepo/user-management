@@ -7,6 +7,7 @@ import uuid
 from tornado.web import HTTPError
 from rest_tools.server import catch_error, authenticated
 
+import krs.email
 import krs.groups
 
 from .handler import MyHandler

@@ -63,8 +63,8 @@ async def mongo_client():
        'DB_URL': 'mongodb://localhost/keycloak_user_mgmt',
     }
     config = from_environment(default_config)
-    db = motor.motor_asyncio.AsyncIOMotorClient(config['DB_URL'])
-    db_name = config['DB_URL'].split('/')[-1]
+    db = motor.motor_asyncio.AsyncIOMotorClient(str(config['DB_URL']))
+    db_name = str(config['DB_URL']).split('/')[-1]
     ret = db[db_name]
 
     await ret.user_registrations.drop()
