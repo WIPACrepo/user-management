@@ -15,6 +15,8 @@ jobs:
   flake8:
     needs: []
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -29,6 +31,8 @@ jobs:
   py-setup:
     if: ${{ github.actor != 'dependabot[bot]' }} # dependabot cannot access PAT
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v6
@@ -45,6 +49,8 @@ jobs:
   py-versions:
     needs: [py-setup]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.versions.outputs.matrix }}
     steps:
@@ -57,6 +63,8 @@ jobs:
   pip-install:
     needs: [py-versions]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       max-parallel: 4
       fail-fast: false
@@ -77,6 +85,8 @@ jobs:
   py-tests:
     needs: [py-versions]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     services:
       keycloak:
         image: ghcr.io/wipacrepo/keycloak-rest-services:test-keycloak-master
@@ -113,6 +123,8 @@ jobs:
   web-tests:
     needs: [py-versions]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -139,6 +151,8 @@ jobs:
     if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref
     needs: [pip-install, py-tests, web-tests]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       next-version: ${{ steps.next-version.outputs.version }}
     steps:
