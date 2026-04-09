@@ -11,6 +11,7 @@ import krs.groups
 import krs.users
 from rest_tools.server import authenticated, catch_error
 from tornado.web import HTTPError
+from wipac_dev_tools import from_environment
 
 from .handler import MyHandler
 from .users import Username
@@ -37,6 +38,12 @@ def gen_password(len: int = 16) -> str:
                 and sum(c.isdigit() for c in password) >= 3):
             break
     return password
+
+
+class SafeDict(dict):
+    # This method is called whenever a key is missing
+    def __missing__(self, key):
+        return f"{{{key}}}"  # Returns the key name in braces if missing
 
 
 class Experiments(MyHandler):
@@ -442,22 +449,30 @@ class InstApprovalsActionApprove(MyHandler):
             if not user_data:
                 raise HTTPError(400, reason='invalid new user')
             args = {
-                "username": user_data['username'],
-                "first_name": user_data['first_name'],
-                "last_name": user_data['last_name'],
-                "email": user_data['external_email'],
-                "attribs": {},
+                'username': user_data['username'],
+                'first_name': user_data['first_name'],
+                'last_name': user_data['last_name'],
+                'email': user_data['external_email'],
+                'attribs': {},
             }
             if user_data.get('author_name', ''):
                 args['attribs']['author_name'] = user_data['author_name']
             await krs.users.create_user(rest_client=self.krs_client, **args)
             password = gen_password(16)
             await krs.users.set_user_password(args['username'], password, temporary=True, rest_client=self.krs_client)
+            args['password'] = password
 
             # posix by default
             await krs.groups.add_user_group('/posix', args['username'], rest_client=self.krs_client)
 
             await self.db.user_registrations.delete_one({'id': ret['newuser']})
+        
+        else:
+            # get existing user
+            try:
+                args = await self.user_cache.get_user(ret['username'])
+            except Exception:
+                raise HTTPError(400, reason='invalid username')
 
         # add user to institution
         inst_group = f'/institutions/{ret["experiment"]}/{ret["institution"]}'
@@ -495,17 +510,16 @@ class InstApprovalsActionApprove(MyHandler):
 
         # send email
         try:
-            if newuser:
-                krs.email.send_email(
-                    recipient={'name': f'{args["first_name"]} {args["last_name"]}', 'email': args['email']},
-                    subject='IceCube Account Approved',
-                    content=f'''Welcome to IceCube {args["first_name"]} {args["last_name"]}!
+            exp = ret['experiment']
+            default_config = {
+                f'{exp}_WELCOME_SUBJECT': 'IceCube Account Approved',
+                f'{exp}_WELCOME_CONTENT': '''Welcome to IceCube {first_name} {last_name}!
 
 You have a new account with the IceCube project at UW-Madison.
 
-Username:  {args["username"]}
+Username:  {username}
 Password:  {password}
-E-mail Address:  {args["username"]}@icecube.wisc.edu
+E-mail Address:  {username}@icecube.wisc.edu
 
 Please change your password immediately. Go to the password reset page to do so:
   https://keycloak.icecube.wisc.edu/auth/realms/IceCube/account/
@@ -532,20 +546,32 @@ By using this account, you agree to the IceCube IT Acceptable Use Policy.
 
 IceCube accounts are also subject to University of Wisconsin-Madison policies
 listed in the "Other Governing Agreements" section of the policy linked above.
-''')
-            else:
-                try:
-                    args = await self.user_cache.get_user(ret['username'])
-                except Exception:
-                    raise HTTPError(400, reason='invalid username')
-                krs.email.send_email(
-                    recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
-                    subject='IceCube Account Institution Changes',
-                    content=f'''IceCube Institution Change
+''',
+                f'{exp}_CHANGE_SUBJECT': 'IceCube Account Institution Changes',
+                f'{exp}_CHANGE_CONTENT': '''IceCube Institution Change
 
 Your account with the IceCube project at UW-Madison has been altered.
-You are now a member of {ret["experiment"]}/{ret["institution"]}.
-''')
+You are now a member of {experiment}/{institution}.
+''',
+            }
+            config = from_environment(default_config)
+
+            email_args = SafeDict(**args)
+            email_args['experiment'] = exp
+            email_args['institution'] = ret['institution']
+
+            if newuser:
+                krs.email.send_email(
+                    recipient={'name': f'{args["first_name"]} {args["last_name"]}', 'email': args['email']},
+                    subject=config[f'{exp}_WELCOME_SUBJECT'],
+                    content=str(config[f'{exp}_WELCOME_CONTENT']).format_map(email_args)
+                )
+            else:
+                krs.email.send_email(
+                    recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
+                    subject=config[f'{exp}_CHANGE_SUBJECT'],
+                    content=str(config[f'{exp}_CHANGE_CONTENT']).format_map(email_args)
+                )
         except Exception:
             logging.warning('failed to send email for inst approval', exc_info=True)
 
@@ -578,29 +604,37 @@ class InstApprovalsActionDeny(MyHandler):
             if not user_data:
                 raise HTTPError(400, reason='invalid new user')
             await self.db.user_registrations.delete_one({'id': ret['newuser']})
+            args = {
+                "username": user_data['username'],
+                "firstName": user_data['first_name'],
+                "lastName": user_data['last_name'],
+                "email": user_data['external_email'],
+            }
+        else:
+            try:
+                args = await self.user_cache.get_user(ret['username'])
+            except Exception:
+                raise HTTPError(400, reason='invalid username')
         await self.db.inst_approvals.delete_one({'id': approval_id})
 
         # send email
         try:
-            if newuser:
-                args = {
-                    "username": user_data['username'],
-                    "firstName": user_data['first_name'],
-                    "lastName": user_data['last_name'],
-                    "email": user_data['external_email'],
-                }
-            else:
-                try:
-                    args = await self.user_cache.get_user(ret['username'])
-                except Exception:
-                    raise HTTPError(400, reason='invalid username')
+            exp = ret['experiment']
+            default_config = {
+                f'{exp}_DENY_SUBJECT': 'IceCube Account Request Denied',
+                f'{exp}_DENY_CONTENT': '''IceCube Account Request Denied
+
+Your account request for {experiment}/{institution} is denied.
+'''
+            }
+            config = from_environment(default_config)
+
+            email_args = SafeDict(**args)
             krs.email.send_email(
                 recipient={'name': f'{args["firstName"]} {args["lastName"]}', 'email': args['email']},
-                subject='IceCube Account Request Denied',
-                content=f'''IceCube Account Request Denied
-
-Your account request for {ret["experiment"]}/{ret["institution"]} is denied.
-''')
+                subject=f'{exp}_DENY_SUBJECT',
+                content=str(config[f'{exp}_DENY_CONTENT']).format_map(email_args)
+            )
         except Exception:
             logging.warning('failed to send email for inst deny', exc_info=True)
 
