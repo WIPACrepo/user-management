@@ -338,13 +338,20 @@ class InstApprovals(MyHandler):
                 approval_data['authorlist'] = data['authorlist']
             if 'supervisor' in data:
                 approval_data['supervisor'] = data['supervisor']
+        
+        # check supervisors
+        inst_group = f'/institutions/{approval_data["experiment"]}/{approval_data["institution"]}'
+        supervisors = [approval_data['supervisor']] if 'supervisor' in approval_data else None
+        if supervisors:
+            admin_users = await self.get_admins(inst_group)
+            if not any(username in supervisors for username in admin_users):
+                raise HTTPError(400, reason='invalid supervisors')
 
+        # add to approvals db
         approval_data['id'] = uuid.uuid1().hex
         await self.db.inst_approvals.insert_one(approval_data)
 
         # send email to admins
-        inst_group = f'/institutions/{approval_data["experiment"]}/{approval_data["institution"]}'
-        supervisors = [approval_data['supervisor']] if 'supervisor' in approval_data else None
         await self.send_admin_email(inst_group, f'''IceCube Institution Request
 
 A request for membership to {approval_data["experiment"]}/{approval_data["institution"]}

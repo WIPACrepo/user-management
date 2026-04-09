@@ -77,7 +77,7 @@ class MyHandler(RestHandler):
         """Is the current user a super admin?"""
         return '/admin' in self.auth_data.get('groups', [])
 
-    async def get_admins(self, group_path):
+    async def get_admins(self, group_path: str):
         ret = await self.group_cache.get_members(group_path+'/_admin')
         users = {}
         for username in ret:
@@ -86,7 +86,7 @@ class MyHandler(RestHandler):
         logging.info(f'get_admins: {users}')
         return users
 
-    async def send_admin_email(self, group_path, body, supervisors=None):
+    async def send_admin_email(self, group_path: str, body: str, supervisors: list[str] | None = None):
         subject = 'IceCube Account '
         if group_path.startswith('/institutions'):
             subject += 'Institution'
