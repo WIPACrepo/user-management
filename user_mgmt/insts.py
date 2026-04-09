@@ -524,12 +524,6 @@ E-mail Address:  {username}@icecube.wisc.edu
 Please change your password immediately. Go to the password reset page to do so:
   https://keycloak.icecube.wisc.edu/auth/realms/IceCube/account/
 
-Many IceCube resources, including the IceCube wiki, are protected with a
-generic set of user credentials. If you see a window asking for security
-credentials, enter the generic IceCube credentials below.
-  Username:  icecube
-  Password:  skua
-
 More information about your account and resources available to you can be
 found in the wiki:
   https://wiki.icecube.wisc.edu/index.php/Newbies
