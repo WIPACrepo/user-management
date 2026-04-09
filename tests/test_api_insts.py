@@ -700,7 +700,7 @@ async def test_inst_approvals_email_customization(exp, server, mongo_client, reg
 
     client = await reg_token_client()
     data = {
-        'experiment': 'IceCube',
+        'experiment': exp,
         'institution': 'UW-Madison',
         'first_name': 'First',
         'last_name': 'Last',
@@ -725,6 +725,6 @@ async def test_inst_approvals_email_customization(exp, server, mongo_client, reg
 
     email_patch.assert_called()
     logging.info('call_args: %r', email_patch.call_args)
-    assert email_patch.call_args.kwargs['subject'] == 'Welcome test test'
-    assert email_patch.call_args.kwargs['body'].startswith(f'Welcome to {exp}/UW-Madison. Your username is test and password is')
+    assert email_patch.call_args.kwargs['subject'] == 'Welcome First Last'
+    assert email_patch.call_args.kwargs['body'].startswith(f'Welcome to {exp}/UW-Madison. Your username is flast and password is')
 
