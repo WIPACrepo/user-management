@@ -7,26 +7,37 @@ on:
     tags-ignore:
       - '**'
 
-env:
-  py_version: '3.12'
-
 jobs:
-
-  flake8:
-    needs: []
+  py-versions:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      matrix: ${{ steps.versions.outputs.matrix }}
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.py_version }}
-      - uses: WIPACrepo/wipac-dev-flake8-action@v1.3
-        with:
-          max-complexity: 20
+      - id: versions
+        uses: WIPACrepo/wipac-dev-py-versions-action@v2.8
+
+  ############################################################################
+  # LINTERS
+  #############################################################################
+
+  lint-python:
+    needs: [ py-versions ]
+    uses: WIPACrepo/wipac-dev-workflows/.github/workflows/lint-python.yml@v1.25
+    permissions:
+      contents: read
+    with:
+      py-matrix-json: ${{ needs.py-versions.outputs.matrix }}
+      #max-complexity: 15
+      #max-statements: 100
+
+  ############################################################################
+  # PACKAGING
+  #############################################################################
 
   py-setup:
     if: ${{ github.actor != 'dependabot[bot]' }} # dependabot cannot access PAT
@@ -46,21 +57,22 @@ jobs:
           python_max: 3.14
           auto_mypy_option: False
 
-  py-versions:
-    needs: [py-setup]
+  py-dependencies:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    outputs:
-      matrix: ${{ steps.versions.outputs.matrix }}
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0  # setuptools-scm needs to access git tags
           ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
-      - id: versions
-        uses: WIPACrepo/wipac-dev-py-versions-action@v2.8
+      - uses: WIPACrepo/wipac-dev-py-dependencies-action@v3.4
 
-  pip-install:
+  ############################################################################
+  # TESTS
+  #############################################################################
+
+  py-tests:
     needs: [py-versions]
     runs-on: ubuntu-latest
     permissions:
@@ -70,23 +82,6 @@ jobs:
       fail-fast: false
       matrix:
         versions: ${{ fromJSON(needs.py-versions.outputs.matrix) }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0  # setuptools-scm needs to access git tags
-          ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.versions }}
-      - run: |
-          pip install --upgrade pip wheel setuptools
-          pip install .
-
-  py-tests:
-    needs: [py-versions]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
     services:
       keycloak:
         image: ghcr.io/wipacrepo/keycloak-rest-services:test-keycloak-master
@@ -111,7 +106,7 @@ jobs:
           ref: ${{ github.sha }}  # lock to triggered commit (github.ref is dynamic)
       - uses: actions/setup-python@v6
         with:
-          python-version: ${{ fromJSON(needs.py-versions.outputs.matrix)[0] }}
+          python-version: ${{ matrix.versions }}
       - name: Setup Dependencies
         run: |
           pip install --upgrade pip wheel setuptools
@@ -142,6 +137,25 @@ jobs:
           python -m user_mgmt.test_server &
           docker run --network=host -v $PWD:/e2e -w /e2e cypress/included:11.2.0
 
+  docker-build:
+    name: "Docker Image"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Note: we need to checkout the repository at the workflow sha in case during the workflow
+      # the branch was updated. To keep PSR working with the configured release branches,
+      # we force a checkout of the desired release branch but at the workflow sha HEAD.
+      - name: Setup | Checkout Repository at workflow sha
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
 
   ############################################################################
   # TAG + RELEASE
@@ -149,7 +163,7 @@ jobs:
 
   release-version:
     if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref
-    needs: [pip-install, py-tests, web-tests]
+    needs: [py-tests, web-tests, docker-build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -174,7 +188,7 @@ jobs:
   tag-and-release:
     # only run on main/default
     if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref && needs.release-version.outputs.next-version != ''
-    needs: [py-versions, pip-install, py-tests, web-tests, release-version]
+    needs: [py-versions, release-version]
     uses: WIPACrepo/wipac-dev-workflows/.github/workflows/tag-and-release.yml@v1.23
     permissions: # for GITHUB_TOKEN
       contents: write

@@ -250,6 +250,7 @@ async def test_username_invalid(username, server, reg_token_client, monkeypatch)
 @pytest.mark.asyncio
 async def test_username_invalid_bad_word(server, reg_token_client, monkeypatch):
     monkeypatch.setattr(user_mgmt.users, 'BAD_WORDS', ['bad'])
+    client = await reg_token_client()
 
     args = {
         'first_name': 'Foo',

@@ -10,7 +10,7 @@ import krs.groups
 
 
 class MyHandler(RestHandler):
-    def initialize(self, db=None, krs_client=None, group_cache=None, user_cache=None, **kwargs):
+    def initialize(self, *, db, krs_client, group_cache, user_cache, **kwargs):  # type: ignore
         super().initialize(**kwargs)
         self.db = db
         self.krs_client = krs_client
