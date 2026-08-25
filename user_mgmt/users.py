@@ -37,9 +37,7 @@ def is_orcid(value):
         return False
     logging.debug('handle last char: %s', x[3])
     # special handling for checksum X
-    if not (x[3].isdigit() or x[3] == 'X'):
-        return False
-    return True
+    return x[3].isdigit() or x[3] == 'X'
 
 
 #: attr name and validation function
@@ -65,7 +63,7 @@ VALID_FIELDS = {k: str for k in itertools.chain(KEYCLOAK_ATTRS, EXTRA_ATTRS) if 
 BAD_WORDS = []
 if 'BAD_WORDS_FILE' in os.environ:
     with open(os.environ['BAD_WORDS_FILE']) as f:
-        BAD_WORDS = [x for x in map(lambda x: x.split('#', 1)[0].strip(), f.read().split('\n')) if x]
+        BAD_WORDS = [word for line in f.read().split('\n') if (word := line.split('#', 1)[0].strip())]
 
 
 class Username(MyHandler):
@@ -103,9 +101,7 @@ class Username(MyHandler):
             return False
         if len(username) > 16:
             return False
-        if any(word in username for word in BAD_WORDS):
-            return False
-        return True
+        return not any(word in username for word in BAD_WORDS)
 
     async def _username_in_use(self, username):
         """Test if the username is already in use"""
@@ -144,12 +140,10 @@ class Username(MyHandler):
         username = data.get('username', None)
         if not username:
             # make a new username
-            number = 0
-            for _ in range(100):
+            for number in range(100):
                 username = self._gen_username(data['first_name'], data['last_name'], number)
                 if not await self._username_in_use(username):
                     break
-                number += 1
             else:
                 raise HTTPError(500, reason='cannot generate unique username')
         else:

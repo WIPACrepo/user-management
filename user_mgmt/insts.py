@@ -331,7 +331,7 @@ class InstApprovals(MyHandler):
                 'first_name': data['first_name'],
                 'last_name': data['last_name'],
                 'external_email': data['email'],
-                'author_name': data['author_name'] if 'author_name' in data else '',
+                'author_name': data.get('author_name', ''),
             }
             name = f"{data['first_name']} {data['last_name']}"
             await self.db.user_registrations.insert_one(user_data)
