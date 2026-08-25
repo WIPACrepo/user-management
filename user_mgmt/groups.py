@@ -4,11 +4,10 @@ Handle group mamagement actions.
 import logging
 import uuid
 
-from tornado.web import HTTPError
-from rest_tools.server import catch_error, authenticated
-
 import krs.email
 import krs.groups
+from rest_tools.server import authenticated, catch_error
+from tornado.web import HTTPError
 
 from .handler import MyHandler
 

@@ -1,12 +1,11 @@
-from collections import defaultdict
 import logging
-
-from tornado.web import HTTPError
-from tornado.escape import json_decode, json_encode
-from rest_tools.server import RestHandler
+from collections import defaultdict
 
 import krs.email
 import krs.groups
+from rest_tools.server import RestHandler
+from tornado.escape import json_decode, json_encode
+from tornado.web import HTTPError
 
 
 class MyHandler(RestHandler):

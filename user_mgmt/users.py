@@ -6,15 +6,13 @@ import logging
 import os
 import string
 
-from tornado.web import HTTPError
-from rest_tools.server import catch_error, authenticated
-import unidecode
-
-import krs.users
 import krs.groups
+import krs.users
+import unidecode
+from rest_tools.server import authenticated, catch_error
+from tornado.web import HTTPError
 
 from .handler import MyHandler
-
 
 #: user mgmt name : keycloak name
 KEYCLOAK_ATTRS = {

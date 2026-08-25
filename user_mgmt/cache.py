@@ -1,11 +1,14 @@
 import logging
 
 from cachetools import TTLCache
-
-from krs.groups import list_groups, group_info, group_info_by_id, get_group_membership_by_id
-from krs.users import list_users, user_info
+from krs.groups import (
+    get_group_membership_by_id,
+    group_info,
+    group_info_by_id,
+    list_groups,
+)
 from krs.institutions import list_insts
-
+from krs.users import list_users, user_info
 
 logger = logging.getLogger('cache')
 
