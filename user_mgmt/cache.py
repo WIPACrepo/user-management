@@ -1,11 +1,14 @@
 import logging
 
 from cachetools import TTLCache
-
-from krs.groups import list_groups, group_info, group_info_by_id, get_group_membership_by_id
-from krs.users import list_users, user_info
+from krs.groups import (
+    get_group_membership_by_id,
+    group_info,
+    group_info_by_id,
+    list_groups,
+)
 from krs.institutions import list_insts
-
+from krs.users import list_users, user_info
 
 logger = logging.getLogger('cache')
 
@@ -21,10 +24,10 @@ class KeycloakGroupCache:
     def __init__(self, ttl=3600*24, krs_client=None):
         self._ttl = ttl
         self._krs_client = krs_client
-        self._group_ids = TTLCache(1000000, ttl*7)  # group ids (shouldn't change)
-        self._group_info = TTLCache(10000000, ttl*7)  # group info by id (shouldn't change)
-        self._group_list = TTLCache(10000000, ttl/24/10)  # group_path list for all groups
-        self._group_members = TTLCache(10000000, ttl)  # group memberships
+        self._group_ids = TTLCache[str, str](1000000, ttl*7)  # group ids (shouldn't change)
+        self._group_info = TTLCache[str, dict](10000000, ttl*7)  # group info by id (shouldn't change)
+        self._group_list = TTLCache[str, list](10000000, ttl/24/10)  # group_path list for all groups
+        self._group_members = TTLCache[str, list](10000000, ttl)  # group memberships
 
     async def list_groups(self):
         if 'groups' not in self._group_list:

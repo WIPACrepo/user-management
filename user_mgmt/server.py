@@ -2,26 +2,39 @@
 Server for user management
 """
 
-import os
 import logging
+import os
 from functools import partial
 
-from tornado.web import RequestHandler, HTTPError
-from rest_tools.client import RestClient
-from rest_tools.server import RestServer, RestHandlerSetup
-from wipac_dev_tools import from_environment
-import motor.motor_asyncio
-
 import krs.token
+import motor.motor_asyncio
+from rest_tools.client import RestClient
+from rest_tools.server import RestHandlerSetup, RestServer
+from tornado.web import HTTPError, RequestHandler
+from wipac_dev_tools import from_environment
 
 from .cache import KeycloakGroupCache, KeycloakUserCache
-from .insts import (AllExperiments, Experiments, MultiInstitutions, Institution,
-                    InstitutionMultiUsers, InstitutionUser,
-                    InstApprovals, InstitutionMultiApprovals,
-                    InstApprovalsActionApprove, InstApprovalsActionDeny)
-from .groups import (MultiGroups, Group, GroupUser, GroupApprovals,
-                     GroupApprovalsActionApprove, GroupApprovalsActionDeny)
-from .users import MultiUser, User, Username, AssociateUsers
+from .groups import (
+    Group,
+    GroupApprovals,
+    GroupApprovalsActionApprove,
+    GroupApprovalsActionDeny,
+    GroupUser,
+    MultiGroups,
+)
+from .insts import (
+    AllExperiments,
+    Experiments,
+    InstApprovals,
+    InstApprovalsActionApprove,
+    InstApprovalsActionDeny,
+    Institution,
+    InstitutionMultiApprovals,
+    InstitutionMultiUsers,
+    InstitutionUser,
+    MultiInstitutions,
+)
+from .users import AssociateUsers, MultiUser, User, Username
 
 
 class Error(RequestHandler):
@@ -34,7 +47,7 @@ class Main(RequestHandler):
         self.keycloak_url = keycloak_url
         self.keycloak_realm = keycloak_realm
 
-    def get(self, *args):
+    def get(self, *args, **kwargs):
         self.render('index.html', keycloak_url=self.keycloak_url,
                     keycloak_realm=self.keycloak_realm)
 

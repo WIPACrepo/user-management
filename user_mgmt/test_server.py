@@ -5,7 +5,7 @@ import os
 from rest_tools.server import RestServer
 from wipac_dev_tools import from_environment
 
-from .server import Main, Error
+from .server import Error, Main
 
 
 def test_server():
