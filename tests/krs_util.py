@@ -99,7 +99,7 @@ def rabbitmq_bootstrap():
         'RABBITMQ_ADMIN_USER': 'admin',
         'RABBITMQ_ADMIN_PASSWORD': 'admin',
     })
-    auth = (config['RABBITMQ_ADMIN_USER'], config['RABBITMQ_ADMIN_PASSWORD'])
+    auth = (str(config['RABBITMQ_ADMIN_USER']), str(config['RABBITMQ_ADMIN_PASSWORD']))
 
     for _ in range(100):
         r = requests.get(f'{config["RABBITMQ_MGMT_URL"]}/api/users', auth=auth)

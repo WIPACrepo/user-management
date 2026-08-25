@@ -47,7 +47,7 @@ class Main(RequestHandler):
         self.keycloak_url = keycloak_url
         self.keycloak_realm = keycloak_realm
 
-    def get(self, *args):
+    def get(self, *args, **kwargs):
         self.render('index.html', keycloak_url=self.keycloak_url,
                     keycloak_realm=self.keycloak_realm)
 
