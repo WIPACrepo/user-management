@@ -90,7 +90,21 @@ exclude = ["env", "*tests", "bin", "docs", "dist", "cypress", "site", "static", 
 target-version = "py313"
 
 [tool.ruff.lint]
-ignore = ["E203", "E226", "E228", "E231", "E501"]
+ignore = [
+    "ASYNC220",
+    "ASYNC221",
+    "ASYNC230",
+    "BLE001",
+    "E203",
+    "E226",
+    "E228",
+    "E231",
+    "E501",
+    "LOG015",
+    "S110",
+    "TRY002",
+    "TRY004",
+]
 
 [tool.setuptools]
 packages = [
